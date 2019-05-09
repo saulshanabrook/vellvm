@@ -14,13 +14,15 @@ LEMOCAMLLIB = lem/num_impl_zarith
 
 
 COQINCLUDES=$(foreach d, $(COQDIR), -R $(d) Vellvm) -R $(EXTRACTDIR) Extract -R $(COQLIBDIR)/CompCert compcert -R $(COQLIBDIR)/paco/src Paco -R $(COQLIBDIR)/InteractionTrees/theories ITree
+
 COQC="$(COQBIN)coqc" -q $(COQINCLUDES) $(COQCOPTS)
 COQDEP="$(COQBIN)coqdep" $(COQINCLUDES)
 COQEXEC="$(COQBIN)coqtop" -q -w none $(COQINCLUDES) -batch -load-vernac-source
 MENHIR=menhir
 CP=cp
 
-COQFILES := LLVMAst Classes Util Misc AstLib Dom CFG CFGProp MemoryAddress DynamicValues LLVMIO TypeUtil StepSemantics StepSemanticsProp Memory Renaming DeadInstr Transform LLVMAddr MemoryModel MemoryCerberus TopLevel
+COQFILES := Error LLVMAst Util Misc AstLib Dom CFG CFGProp MemoryAddress DynamicValues LLVMIO TypeUtil StepSemantics StepSemanticsProp Memory IntrinsicsDefinitions Intrinsics Renaming DeadInstr Transform LLVMAddr MemoryModel MemoryCerberus TopLevel Numeric/Archi Numeric/Coqlib Numeric/Fappli_IEEE_extra Numeric/Floats Numeric/Integers
+
 OLLVMFILES := 
 
 VFILES := $(COQFILES:%=coq/%.v)
@@ -34,12 +36,14 @@ all:
 
 coq: $(VOFILES)
 
-extracted: $(EXTRACTDIR)/STAMP
+.PHONY: extracted
+extracted: $(EXTRACTDIR)/STAMP $(VOFILES)
 
 $(EXTRACTDIR)/STAMP: $(VOFILES) $(EXTRACTDIR)/Extract.v
 	@echo "Extracting"
 	rm -f $(EXTRACTDIR)/*.ml $(EXTRACTDIR)/*.mli
 	$(COQEXEC) $(EXTRACTDIR)/Extract.v
+	patch -p0 < CRelationClasses.mli.patch
 	touch $(EXTRACTDIR)/STAMP
 
 
@@ -53,6 +57,7 @@ depend: $(VFILES)
 	@$(COQDEP) $^ > .depend
 
 
+.PHONY: clean test qc restore
 
 # Directories containing plain Caml code
 OCAMLDIRS= $(EXTRACTDIR) $(MLDIR) $(CERBERUS) $(CERBERUSGENERATED) $(LEMLIB) $(LEMOCAMLLIB)
@@ -75,16 +80,22 @@ OCAMLPKGS := unix,lem,cmdliner,pprint,yojson,${Z3}
 
 .PHONY: clean main.native test qc restore
 
-main.native: 
+
+# TODO dune
+# EXE=_build/default/ml/main.exe
+
+$(EXE): extracted ml/dune ml/extracted/dune
 	@echo "Compiling Vellvm"
 	ocamlbuild cerberus-private/src/cerberus_cstubs.o
 	ocamlbuild -tag debug -tag link_cstubs -j 4 -r -use-menhir -yaccflag --explain $(OCAMLINCLUDES) -use-ocamlfind -pkgs $(OCAMLPKGS) -libs $(OCAMLLIBS) main.native
+# TODO dune
+#	dune build ml/main.exe
 
-vellvm: main.native
-	cp main.native vellvm
+vellvm: $(EXE)
+	cp $(EXE) vellvm
 
 test: vellvm
-	./vellvm --test-pp-dir ../tests/ll
+	./vellvm --test
 
 print-includes:
 	@echo $(COQINCLUDES)
@@ -94,7 +105,7 @@ clean:
 	rm -f $(VOFILES)
 	rm -rf doc/html doc/*.glob
 	rm -f $(EXTRACTDIR)/STAMP $(EXTRACTDIR)/*.ml $(EXTRACTDIR)/*.mli
-	ocamlbuild -clean
+	dune clean
 	rm -rf output
 	rm -f vellvm
 	rm -f doc/coq2html.ml doc/coq2html doc/*.cm? doc/*.o

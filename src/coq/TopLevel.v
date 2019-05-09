@@ -7,18 +7,29 @@
  *   License as published by the Free Software Foundation, either version     *
  *   3 of the License, or (at your option) any later version.                 *
  ---------------------------------------------------------------------------- *)
-Require Import Coq.Strings.String String.
-Require Import Vellvm.Classes.
-Require Import Vellvm.LLVMIO.
-Require Import Vellvm.StepSemantics.
-Require Import Vellvm.MemoryCerberus.
-Require Import Vellvm.MemoryModel.
-Require Import LLVMAddr.
-Require Import ZArith.
+From Coq Require Import
+     List String.
 
-Module Memory := MemoryCerberus.
-Module IO := LLVMIO.Make(LLVMAddr.A).
-Module SS := StepSemantics(LLVMAddr.A)(IO).
+From ITree Require Import
+     ITree.
+
+From ExtLib Require Import 
+     Structures.Monads.
+
+From Vellvm Require Import 
+     LLVMIO
+     StepSemantics
+     Memory
+     Intrinsics.
+
+
+Import MonadNotation.
+Import ListNotations.
+
+Module IO := LLVMIO.Make(Memory.A).
+Module M := MemoryCerberus. (* Memory.Make(IO). *)
+Module SS := StepSemantics(Memory.A)(IO).
+Module INT := Intrinsics.Make(Memory.A)(IO).
 
 Import IO.
 Export IO.DV.
@@ -211,7 +222,7 @@ Module CMM <: Memory.
    Axiom integer_value_mval : AilIntegerType -> integer_value -> mem_value.
    Extract Constant integer_value_mval => "Concrete.integer_value_mval".
    Axiom floating_value_mval : AilFloatingType -> floating_value -> mem_value.
-   Extract Constant floating_value_mval => "Concrete.floating_value_mval".
+p   Extract Constant floating_value_mval => "Concrete.floating_value_mval".
    Axiom pointer_mval : ctype0 -> pointer_value -> mem_value.
    Extract Constant pointer_mval => "Concrete.pointer_mval".
    Axiom array_mval : list mem_value -> mem_value.
@@ -314,3 +325,18 @@ Definition run_with_memory prog : option (Trace DV.dvalue) :=
                           ('s <- SS.init_state mcfg "main";
                            SS.step_sem mcfg (SS.Step s))))
   end.
+
+(* From master *)
+(*
+Open Scope string_scope.
+
+Definition run_with_memory prog : option (LLVM (failureE +' debugE) (M.memory * DV.dvalue)) :=
+  let scfg := Vellvm.AstLib.modul_of_toplevel_entities prog in
+  mcfg <- CFG.mcfg_of_modul scfg ;;
+  let core_trace : LLVM (failureE +' debugE) dvalue :=
+      s <- SS.init_state mcfg "main" ;;
+        SS.step_sem mcfg (SS.Step s)
+  in
+  let after_intrinsics_trace := INT.evaluate_with_defined_intrinsics core_trace in
+  ret (M.memD M.empty after_intrinsics_trace).
+*)

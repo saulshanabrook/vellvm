@@ -22,7 +22,7 @@
 (* Adapted for use in Vellvm by Steve Zdancewic (c) 2017                      *)
 (*  ------------------------------------------------------------------------- *)
 
-Require Import compcert.lib.Floats.
+Require Import Floats.
 Require Import List String Ascii ZArith.
 Require Import Vellvm.Util.
 
@@ -32,6 +32,7 @@ Open Scope list_scope.
 
 Definition int := Z.
 Definition float := Floats.float.  (* 64-bit floating point value *)
+Definition float32 := Floats.float32.
 
 Inductive linkage : Set :=
 | LINKAGE_Private
@@ -191,17 +192,22 @@ Definition tident : Set := (typ * ident)%type.
 (* NOTES: 
   This datatype is more permissive than legal in LLVM:
      - it allows identifiers to appear nested inside of "constant expressions"
+       that is OK as long as we validate the syntax as "well-formed" before 
+       trying to give it semantics
 
   NOTES:
    - Integer expressions: llc parses large integer exps and converts them to some 
      internal form (based on integer size?)
    
    - Float constants: these are always parsed as 64-bit representable floats 
-     using ocamls float_of_string function.  If they are used in LLVM as 32-bit 
-     rather than 64-bit floats, they are converted when evaluated.
+     using ocamls float_of_string function. The parser converts float literals 
+     to 32-bit values using the type information available in the syntax.
+
+     -- TODO: 128-bit, 16-bit, other float formats?
 
    - Hex constants: these are always parsed as 0x<16-digit> 64-bit exps and
-     bit-converted to ocaml's 64-bit float representation.
+     bit-converted to ocaml's 64-bit float representation.  If they are
+     evaluated at 32-bit float types, they are converted during evaluation.
 
    - EXP_ prefix denotes syntax that LLVM calls a "value"
    - OP_  prefix denotes syntax that requires further evaluation
@@ -209,8 +215,9 @@ Definition tident : Set := (typ * ident)%type.
 Inductive exp : Set :=
 | EXP_Ident   (id:ident)  
 | EXP_Integer (x:int)
-| EXP_Float   (f:float)
-| EXP_Hex     (f:float)  (* See LLVM documentation about hex float constants. *)
+| EXP_Float   (f:float32)  (* 32-bit floating point values *)
+| EXP_Double  (f:float)    (* 64-bit floating point values *)
+| EXP_Hex     (f:float)    (* See LLVM documentation about hex float constants. *)
 | EXP_Bool    (b:bool)
 | EXP_Null
 | EXP_Zero_initializer
@@ -247,6 +254,7 @@ Inductive phi : Set :=
 .
        
 Inductive instr : Set :=
+| INSTR_Comment (msg:string)
 | INSTR_Op   (op:exp)                        (* INVARIANT: op must be of the form SV (OP_ ...) *)
 | INSTR_Call (fn:texp) (args:list texp)      (* CORNER CASE: return type is void treated specially *)
 | INSTR_Alloca (t:typ) (nb: option texp) (align:option int) 
@@ -322,6 +330,7 @@ Record block : Set :=
       blk_phis  : list (local_id * phi);
       blk_code  : code;
       blk_term  : instr_id * terminator;
+      blk_comments : option (list string)
     }.
 
 Record definition (FnBody:Set) :=
@@ -346,6 +355,7 @@ Inductive metadata : Set :=
 .
 
 Inductive toplevel_entity (FnBody:Set) : Set :=
+| TLE_Comment         (msg:string)
 | TLE_Target          (tgt:string)
 | TLE_Datalayout      (layout:string)
 | TLE_Declaration     (decl:declaration)

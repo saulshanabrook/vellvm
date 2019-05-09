@@ -8,16 +8,35 @@
  *   3 of the License, or (at your option) any later version.                 *
  ---------------------------------------------------------------------------- *)
 
-Require Import ZArith List String Omega.
-Require Import compcert.lib.Integers compcert.lib.Floats.
-Require Import Vellvm.Classes.
-Require Import Vellvm.LLVMAst.
-Require Import Vellvm.MemoryAddress.
+From Coq Require Import 
+     ZArith List String Omega.
+
+From ExtLib Require Import 
+     Core.RelDec
+     Programming.Eqv
+     Programming.Show
+     Structures.Monads
+     Data.Nat.
+
+From Vellvm Require Import
+     LLVMAst
+     AstLib
+     MemoryAddress
+     Error
+     Util.
+     
+Require Import Integers Floats.
+
+Import EqvNotation.
+Import MonadNotation.
+Import ListNotations.
 
 Set Implicit Arguments.
 Set Contextual Implicit.
 
 Open Scope Z_scope.
+
+Instance Eqv_nat : Eqv nat := (@eq nat).
 
 (* Set up representations for for i1, i32, and i64 *)
 Module Wordsize1.
@@ -73,6 +92,37 @@ Inductive dvalue : Set :=
 | DVALUE_Array         (elts: list dvalue)
 | DVALUE_Vector        (elts: list dvalue)
 .
+
+Section hiding_notation.
+  Import ShowNotation.
+  Local Open Scope show_scope.
+
+  Fixpoint show_dvalue' (dv:dvalue) : showM :=
+    match dv with 
+    | DVALUE_Addr a => "address" (* TODO: insist that memory models can print addresses? *)
+    | DVALUE_I1 x => "dvalue(i1)"
+    | DVALUE_I8 x => "dvalue(i8)"
+    | DVALUE_I32 x => "dvalue(i32)"
+    | DVALUE_I64 x => "dvalue(i64)"
+    | DVALUE_Double x => "dvalue(double)"
+    | DVALUE_Float x => "dvalue(float)"
+    | DVALUE_Undef => "undef"   
+    | DVALUE_Poison => "poison"
+    | DVALUE_None => "none"
+    | DVALUE_Struct fields
+      => ("{" << iter_show (List.map (fun x => (show_dvalue' x) << ",") fields) << "}")
+    | DVALUE_Packed_struct fields
+      => ("packed{" << iter_show (List.map (fun x => (show_dvalue' x) << ",") fields) << "}")
+    | DVALUE_Array elts
+      => ("[" << iter_show (List.map (fun x => (show_dvalue' x) << ",") elts) << "]")
+    | DVALUE_Vector elts
+      => ("<" << iter_show (List.map (fun x => (show_dvalue' x) << ",") elts) << ">")                  
+    end%string.
+  
+  Global Instance show_dvalue : Show dvalue := show_dvalue'.
+
+End hiding_notation.
+
 
 (* TODO: include Undefined values in this way? i.e. Undef is really a predicate on values
    Note: this isn't correct because it won't allow for undef fields of a struct or elts of an array
@@ -375,6 +425,9 @@ Class VInt I : Type :=
     repr := Int64.repr;
   }.
 
+  (* TODO: to_string_b10 (base 10 string conversion) no longer exists
+  (was in Classes.v) *)
+  (*
   Fixpoint dvalue_to_str (d : dvalue) : string :=
     match d with
     | DVALUE_Addr a => "Address..."
@@ -392,18 +445,20 @@ Class VInt I : Type :=
     | DVALUE_Array elts => concat " " (app ("[" :: (map dvalue_to_str elts)) ["]"])
     | DVALUE_Vector elts => concat " " (app ("<" :: (map dvalue_to_str elts)) [">"])
     end.
+*)
 
 
   (* Arithmetic Operations ---------------------------------------------------- *)
   Section ARITHMETIC.
-    
+
+
   (* Evaluate integer opererations to get a dvalue.
 
      These operations are between VInts, which are "vellvm"
      integers. This is a typeclass that wraps all of the integer
      operations that we use for integer types with different bitwidths.
    *)
-  Definition eval_int_op `{VInt Int} (iop:ibinop) (x y: Int) : dvalue:=
+  Definition eval_int_op {Int} `{VInt Int} (iop:ibinop) (x y: Int) : dvalue:=
     match iop with
     (* Following to cases are probably right since they use CompCert *)
     | Add nuw nsw =>
@@ -414,9 +469,10 @@ Class VInt I : Type :=
       if orb (andb nuw (eq (sub_borrow x y zero) one))
              (andb nsw (eq (sub_overflow x y zero) one))
       then DVALUE_Poison else to_dvalue (sub x y)
+
     | Mul nuw nsw =>
       (* I1 mul can't overflow, just based on the 4 possible multiplications. *)
-      if (bitwidth == 1)%nat then to_dvalue (mul x y)
+      if (bitwidth ~=? 1)%nat then to_dvalue (mul x y)
       else 
         let res := mul x y in
         let res_s' := (signed x) * (signed y) in
@@ -425,8 +481,9 @@ Class VInt I : Type :=
              (andb nsw (orb (min_signed >? res_s')
                             (res_s' >? max_signed)))
       then DVALUE_Poison else to_dvalue res
+  
     | Shl nuw nsw =>
-      if (bitwidth == 1)%nat
+      if (bitwidth ~=? 1)%nat
       then
         if (unsigned y) >=? 1 then undef_int else to_dvalue x
       else
@@ -451,7 +508,7 @@ Class VInt I : Type :=
       if andb ex (negb (((signed x) mod (signed y)) =? 0))
       then DVALUE_Poison else to_dvalue (divs x y)
     | LShr ex =>
-      if (bitwidth == 1)%nat
+      if (bitwidth ~=? 1)%nat
       then
         if (unsigned y) >=? 1 then undef_int else to_dvalue x
       else
@@ -461,7 +518,7 @@ Class VInt I : Type :=
                                  mod (Z.pow 2 (unsigned y)) =? 0))
              then DVALUE_Poison else to_dvalue (shru x y)
     | AShr ex =>
-      if (bitwidth == 1)%nat
+      if (bitwidth ~=? 1)%nat
       then
         if (unsigned y) >=? 1 then undef_int else to_dvalue x
       else
@@ -485,13 +542,15 @@ Class VInt I : Type :=
   Arguments eval_int_op _ _ _ : simpl nomatch.
 
 
+  
+
   (* Evaluate the given iop on the given arguments according to the bitsize *)
   Definition integer_op (bits:Z) (iop:ibinop) (x y:inttyp bits) : err dvalue :=
     match bits, x, y with
-    | 1, x, y => mret (eval_int_op iop x y)
-    | 8, x, y => mret (eval_int_op iop x y)
-    | 32, x, y => mret (eval_int_op iop x y)
-    | 64, x, y => mret (eval_int_op iop x y)
+    | 1, x, y => ret (eval_int_op iop x y)
+    | 8, x, y => ret (eval_int_op iop x y)
+    | 32, x, y => ret (eval_int_op iop x y)
+    | 64, x, y => ret (eval_int_op iop x y)
     | _, _, _ => failwith "unsupported bitsize"
     end.
   Arguments integer_op _ _ _ _ : simpl nomatch.
@@ -500,20 +559,20 @@ Class VInt I : Type :=
      Takes the integer modulo 2^bits. *)
   Definition coerce_integer_to_int (bits:Z) (i:Z) : err dvalue :=
     match bits with
-    | 1 => mret (DVALUE_I1 (repr i))
-    | 8 => mret (DVALUE_I8 (repr i))
-    | 32 => mret (DVALUE_I32 (repr i))
-    | 64 => mret (DVALUE_I64 (repr i))
+    | 1 => ret (DVALUE_I1 (repr i))
+    | 8 => ret (DVALUE_I8 (repr i))
+    | 32 => ret (DVALUE_I32 (repr i))
+    | 64 => ret (DVALUE_I64 (repr i))
     | _ => failwith "unsupported integer size"
     end.
   Arguments coerce_integer_to_int _ _ : simpl nomatch.
 
   (* Helper for looping 2 argument evaluation over vectors, producing a vector *)
-  Fixpoint vec_loop (f:dvalue -> dvalue -> err dvalue) (elts:list (dvalue * dvalue))
-    : err (list dvalue) :=
+
+  Fixpoint vec_loop (f:dvalue -> dvalue -> err dvalue) (elts:list (dvalue * dvalue)) : err (list dvalue) :=
     monad_fold_right (fun acc '(e1, e2) =>
-                         'val <- f e1 e2;
-                         mret (val :: acc)
+                         val <- f e1 e2 ;;
+                         ret (val :: acc)
                        ) elts [].
 
   (* Integer iop evaluation, called from eval_iop.
@@ -521,10 +580,10 @@ Class VInt I : Type :=
      in order to prevent eval_iop from being recursive. *)
   Definition eval_iop_integer_h iop v1 v2 : err dvalue :=
     match v1, v2 with
-    | DVALUE_I1 i1, DVALUE_I1 i2 => mret (eval_int_op iop i1 i2)
-    | DVALUE_I8 i1, DVALUE_I8 i2 => mret (eval_int_op iop i1 i2)
-    | DVALUE_I32 i1, DVALUE_I32 i2 => mret (eval_int_op iop i1 i2)
-    | DVALUE_I64 i1, DVALUE_I64 i2 => mret (eval_int_op iop i1 i2)
+    | DVALUE_I1 i1, DVALUE_I1 i2 => ret (eval_int_op iop i1 i2)
+    | DVALUE_I8 i1, DVALUE_I8 i2 => ret (eval_int_op iop i1 i2)
+    | DVALUE_I32 i1, DVALUE_I32 i2 => ret (eval_int_op iop i1 i2)
+    | DVALUE_I64 i1, DVALUE_I64 i2 => ret (eval_int_op iop i1 i2)
     | _, _ => failwith "ill_typed-iop"
     end.
   Arguments eval_iop_integer_h _ _ _ : simpl nomatch.
@@ -535,14 +594,14 @@ Class VInt I : Type :=
   Definition eval_iop iop v1 v2 : err dvalue :=
     match v1, v2 with
     | (DVALUE_Vector elts1), (DVALUE_Vector elts2) =>
-      'val <- vec_loop (eval_iop_integer_h iop) (List.combine elts1 elts2);
-      mret (DVALUE_Vector val)
+      val <- vec_loop (eval_iop_integer_h iop) (List.combine elts1 elts2) ;;
+      ret (DVALUE_Vector val)
     | _, _ => eval_iop_integer_h iop v1 v2
     end.
   Arguments eval_iop _ _ _ : simpl nomatch.
 
 
-  Definition eval_int_icmp `{VInt Int} icmp (x y : Int) : dvalue :=
+  Definition eval_int_icmp {Int} `{VInt Int} icmp (x y : Int) : dvalue :=
     if match icmp with
        | Eq => cmp Ceq x y
        | Ne => cmp Cne x y
@@ -560,10 +619,10 @@ Class VInt I : Type :=
 
   Definition eval_icmp icmp v1 v2 : err dvalue :=
     match v1, v2 with
-    | DVALUE_I1 i1, DVALUE_I1 i2 => mret (eval_int_icmp icmp i1 i2)
-    | DVALUE_I8 i1, DVALUE_I8 i2 => mret (eval_int_icmp icmp i1 i2)
-    | DVALUE_I32 i1, DVALUE_I32 i2 => mret (eval_int_icmp icmp i1 i2)
-    | DVALUE_I64 i1, DVALUE_I64 i2 => mret (eval_int_icmp icmp i1 i2)
+    | DVALUE_I1 i1, DVALUE_I1 i2 => ret (eval_int_icmp icmp i1 i2)
+    | DVALUE_I8 i1, DVALUE_I8 i2 => ret (eval_int_icmp icmp i1 i2)
+    | DVALUE_I32 i1, DVALUE_I32 i2 => ret (eval_int_icmp icmp i1 i2)
+    | DVALUE_I64 i1, DVALUE_I64 i2 => ret (eval_int_icmp icmp i1 i2)
     | _, _ => failwith "ill_typed-icmp"
     end.
   Arguments eval_icmp _ _ _ : simpl nomatch.
@@ -571,19 +630,19 @@ Class VInt I : Type :=
 
   Definition double_op (fop:fbinop) (v1:ll_double) (v2:ll_double) : err dvalue :=
     match fop with
-    | FAdd => mret (DVALUE_Double (Float.add v1 v2))
-    | FSub => mret (DVALUE_Double (Float.sub v1 v2))
-    | FMul => mret (DVALUE_Double (Float.mul v1 v2))
-    | FDiv => mret (DVALUE_Double (Float.div v1 v2))
+    | FAdd => ret (DVALUE_Double (Float.add v1 v2))
+    | FSub => ret (DVALUE_Double (Float.sub v1 v2))
+    | FMul => ret (DVALUE_Double (Float.mul v1 v2))
+    | FDiv => ret (DVALUE_Double (Float.div v1 v2))
     | FRem => failwith "unimplemented"
     end.
 
   Definition float_op (fop:fbinop) (v1:ll_float) (v2:ll_float) : err dvalue :=
     match fop with
-    | FAdd => mret (DVALUE_Float (Float32.add v1 v2))
-    | FSub => mret (DVALUE_Float (Float32.sub v1 v2))
-    | FMul => mret (DVALUE_Float (Float32.mul v1 v2))
-    | FDiv => mret (DVALUE_Float (Float32.div v1 v2))
+    | FAdd => ret (DVALUE_Float (Float32.add v1 v2))
+    | FSub => ret (DVALUE_Float (Float32.sub v1 v2))
+    | FMul => ret (DVALUE_Float (Float32.mul v1 v2))
+    | FDiv => ret (DVALUE_Float (Float32.div v1 v2))
     | FRem => failwith "unimplemented"
     end.
 
@@ -591,17 +650,17 @@ Class VInt I : Type :=
     match v1, v2 with
     | DVALUE_Float f1, DVALUE_Float f2 => float_op fop f1 f2
     | DVALUE_Double d1, DVALUE_Double d2 => double_op fop d1 d2
-    | _, _ => failwith "ill_typed-fop"
+    | _, _ => failwith ("ill_typed-fop: " ++ (to_string fop) ++ " " ++ (to_string v1) ++ " " ++ (to_string v2))
     end.
 
   Definition not_nan32 (f:ll_float) : bool :=
-    negb (compcert.flocq.Appli.Fappli_IEEE.is_nan _ _ f).
+    negb (Flocq.IEEE754.Binary.is_nan _ _ f).
 
   Definition ordered32 (f1 f2:ll_float) : bool :=
     andb (not_nan32 f1) (not_nan32 f2).
 
   Definition not_nan64 (f:ll_double) : bool :=
-    negb (compcert.flocq.Appli.Fappli_IEEE.is_nan _ _ f).
+    negb (Flocq.IEEE754.Binary.is_nan _ _ f).
 
   Definition ordered64 (f1 f2:ll_double) : bool :=
     andb (not_nan64 f1) (not_nan64 f2).
@@ -652,8 +711,8 @@ Class VInt I : Type :=
 
   Definition eval_fcmp (fcmp:fcmp) (v1:dvalue) (v2:dvalue) : err dvalue :=
     match v1, v2 with
-    | DVALUE_Float f1, DVALUE_Float f2 => mret (float_cmp fcmp f1 f2)
-    | DVALUE_Double f1, DVALUE_Double f2 => mret (double_cmp fcmp f1 f2)
+    | DVALUE_Float f1, DVALUE_Float f2 => ret (float_cmp fcmp f1 f2)
+    | DVALUE_Double f1, DVALUE_Double f2 => ret (double_cmp fcmp f1 f2)
     | _, _ => failwith "ill_typed-fcmp"
     end.
 
@@ -664,7 +723,7 @@ Class VInt I : Type :=
   Definition eval_select_h cnd v1 v2 : err dvalue :=
     match cnd with
     | DVALUE_I1 i =>
-      mret (if Int1.unsigned i =? 1 then v1 else v2)
+      ret (if Int1.unsigned i =? 1 then v1 else v2)
     | _ => failwith "ill_typed-select"
     end.
   Arguments eval_select_h _ _ _ : simpl nomatch.
@@ -677,14 +736,14 @@ Class VInt I : Type :=
          generalize vec_loop to cover this? (make v1,v2 generic?) *)
       let fix loop elts :=
           match elts with
-          | [] => mret []
+          | [] => ret []
           | (cnd,(v1,v2)) :: tl =>
-              'val <- eval_select_h cnd v1 v2;
-              'vec <- loop tl;
-              mret (val :: vec)
+              val <- eval_select_h cnd v1 v2 ;;
+              vec <- loop tl ;;
+              ret (val :: vec)
           end in
-      'val <- loop (List.combine es (List.combine es1 es2));
-      mret (DVALUE_Vector val)
+      val <- loop (List.combine es (List.combine es1 es2)) ;;
+      ret (DVALUE_Vector val)
     | _, _, _ => eval_select_h cnd v1 v2
     end.
   Arguments eval_select _ _ _ : simpl nomatch.
@@ -696,7 +755,7 @@ Class VInt I : Type :=
         match elts with
         | [] => failwith "index out of bounds"
         | h :: tl =>
-          if idx =? 0 then mret h else loop tl (i-1)
+          if idx =? 0 then ret h else loop tl (i-1)
         end in
     match v with
     | DVALUE_Struct f => loop f idx
@@ -711,17 +770,17 @@ Class VInt I : Type :=
         match elts with
         | [] => failwith "index out of bounds"
         | h :: tl =>
-          if idx =? 0 then mret (acc ++ (v :: tl))
+          if idx =? 0 then ret (acc ++ (v :: tl))
           else loop (acc ++ [h]) tl (i-1)
         end%list in
     match str with
     | DVALUE_Struct f =>
-      'v <- (loop [] f idx);
-      mret (DVALUE_Struct v)
+      v <- (loop [] f idx) ;;
+      ret (DVALUE_Struct v)
 
     | DVALUE_Array e =>
-      'v <- (loop [] e idx);
-      mret (DVALUE_Array v)
+      v <- (loop [] e idx) ;;
+      ret (DVALUE_Array v)
 
     | _ => failwith "invalid aggregate data"
     end.

@@ -1,13 +1,45 @@
-Require Import ZArith List String Omega.
-Require Import Vellvm.LLVMAst Vellvm.Classes Vellvm.Util.
-Require Import Vellvm.StepSemantics Vellvm.LLVMIO.
-Require Import Vellvm.MemoryAddress.
-Require Import Vellvm.LLVMIO.
-Require Import ITree.
-Require Import FSets.FMapAVL.
-Require Import compcert.lib.Integers compcert.lib.Coqlib.
-Require Coq.Structures.OrderedTypeEx.
-Require Import ZMicromega.
+(* -------------------------------------------------------------------------- *
+ *                     Vellvm - the Verified LLVM project                     *
+ *                                                                            *
+ *     Copyright (c) 2018 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *                                                                            *
+ *   This file is distributed under the terms of the GNU General Public       *
+ *   License as published by the Free Software Foundation, either version     *
+ *   3 of the License, or (at your option) any later version.                 *
+ ---------------------------------------------------------------------------- *)
+
+
+From Coq Require Import
+     ZArith List String Omega
+     FSets.FMapAVL
+     Structures.OrderedTypeEx
+     ZMicromega.
+
+From ITree Require Import
+     ITree
+     Basics.Basics
+     Events.Exception
+     Events.State.
+
+From ExtLib Require Import
+     Structures.Monads
+     Programming.Eqv
+     Data.String.
+
+
+From Vellvm Require Import 
+     LLVMAst
+     Util
+     StepSemantics 
+     MemoryAddress
+     LLVMIO
+     Error
+     Coqlib
+     Numeric.Integers
+     Numeric.Floats.
+
+Import MonadNotation.
+Import EqvNotation.
 Import ListNotations.
 
 Set Implicit Arguments.
@@ -20,8 +52,8 @@ Module A : MemoryAddress.ADDRESS with Definition addr := (Z * Z) % type.
   Lemma addr_dec : forall (a b : addr), {a = b} + {a <> b}.
   Proof.
     intros [a1 a2] [b1 b2].
-    destruct (a1 == b1); 
-      destruct (a2 == b2); subst.
+    destruct (a1 ~=? b1); 
+      destruct (a2 ~=? b2); unfold eqv in *; unfold AstLib.eqv_int in *; subst.
     - left; reflexivity.
     - right. intros H. inversion H; subst. apply n. reflexivity.
     - right. intros H. inversion H; subst. apply n. reflexivity.
@@ -60,7 +92,7 @@ Fixpoint add_all_index {a} vs (i:Z) (m:IntMap a) :=
 (* Give back a list of values from i to (i + sz) - 1 in m. *)
 (* Uses def as the default value if a lookup failed. *)
 Definition lookup_all_index {a} (i:Z) (sz:Z) (m:IntMap a) (def:a) : list a :=
-  map (fun x =>
+  List.map (fun x =>
          let x' := lookup (Z.of_nat x) m in
          match x' with
          | None => def
@@ -79,6 +111,10 @@ Inductive SByte :=
 | PtrFrag : SByte
 | SUndef : SByte.
 
+(* TODO SAZ: 
+    mem_block should keep track of its allocation size so that operations
+    can fail if they are out of range
+*)
 Definition mem_block := IntMap SByte.
 Definition memory := IntMap mem_block.
 Definition undef := DVALUE_Undef. (* TODO: should this be an empty block? *)
@@ -91,7 +127,7 @@ Fixpoint max_default (l:list Z) (x:Z) :=
   end.
 
 Definition oracle (m:memory) : Z :=
-  let keys := map fst (IM.elements m) in
+  let keys := List.map fst (IM.elements m) in
   let max := max_default keys 0 in
   let offset := 1 in (* TODO: This should be "random" *)
   max + offset.
@@ -104,6 +140,8 @@ Fixpoint sizeof_dtyp (ty:dtyp) : Z :=
   | DTYPE_Pointer => 8
   | DTYPE_Struct l => fold_left (fun x acc => x + sizeof_dtyp acc) l 0
   | DTYPE_Array sz ty' => sz * sizeof_dtyp ty'
+  | DTYPE_Float => 4
+  | DTYPE_Double => 8
   | _ => 0 (* TODO: add support for more types as necessary *)
   end.
 
@@ -169,6 +207,8 @@ Fixpoint serialize_dvalue (dval:dvalue) : list SByte :=
   | DVALUE_I8 i => Z_to_sbyte_list 8 (unsigned i)
   | DVALUE_I32 i => Z_to_sbyte_list 8 (unsigned i)
   | DVALUE_I64 i => Z_to_sbyte_list 8 (unsigned i)
+  | DVALUE_Float f => Z_to_sbyte_list 4 (unsigned (Float32.to_bits f))
+  | DVALUE_Double d => Z_to_sbyte_list 8 (unsigned (Float.to_bits d))
   | DVALUE_Struct fields | DVALUE_Array fields =>
       (* note the _right_ fold is necessary for byte ordering. *)
       fold_right (fun 'dv acc => ((serialize_dvalue dv) ++ acc) % list) [] fields
@@ -187,6 +227,9 @@ Fixpoint deserialize_sbytes (bytes:list SByte) (t:dtyp) : dvalue :=
     | 64 => DVALUE_I64 (repr des_int)
     | _ => DVALUE_None (* invalid size. *)
     end
+  | DTYPE_Float => DVALUE_Float (Float32.of_bits (repr (sbyte_list_to_Z bytes)))
+  | DTYPE_Double => DVALUE_Double (Float.of_bits (repr (sbyte_list_to_Z bytes)))
+      
   | DTYPE_Pointer =>
     match bytes with
     | Ptr addr :: tl => DVALUE_Addr addr
@@ -341,7 +384,7 @@ Fixpoint handle_gep_h (t:dtyp) (b:Z) (off:Z) (vs:list dvalue) (m:memory) : err (
       end
     | _ => raise "non-I32 index"
     end
-  | [] => mret (m, DVALUE_Addr (b, off))
+  | [] => ret (m, DVALUE_Addr (b, off))
   end.
 
 
@@ -370,84 +413,116 @@ Definition handle_gep (t:dtyp) (dv:dvalue) (vs:list dvalue) (m:memory) : err (me
   | _ => raise "non-I32 index"
   end.
 
-Definition mem_step `{Monad M} {X} (e:IO X) (m:memory) : err ((IO X) + (prod memory X)) :=
-  match e with
-  | Alloca t =>
-    let new_block := make_empty_block t in
-    mret (inr (add (size m) new_block m,
-               DVALUE_Addr (size m, 0)))
-         
-  | Load t dv => mret
-    match dv with
-    | DVALUE_Addr a =>
-      match a with
-      | (b, i) =>
-        match lookup b m with
-        | Some block =>
-          inr (m,
-               deserialize_sbytes (lookup_all_index i (sizeof_dtyp t) block SUndef) t)
-        | None => inl (Load t dv)
-        end
-      end
-    | _ => inl (Load t dv)
-    end 
+(* LLVM 5.0 memcpy 
+   According to the documentation: http://releases.llvm.org/5.0.0/docs/LangRef.html#llvm-memcpy-intrinsic
+   this operation can never fail?  It doesn't return any status code... 
+ *)
 
-  | Store t dv v => mret
-    match dv with
-    | DVALUE_Addr a =>
-      match a with
-      | (b, i) =>
-        match lookup b m with
-        | Some m' =>
-          inr (add b (add_all_index (serialize_dvalue v) i m') m, ()) 
-        | None => inl (Store t dv v)
-        end
-      end
-    | _ => inl (Store t dv v)
-    end
-      
-  | GEP t dv vs =>
-    match handle_gep t dv vs m with
-    | inl s => raise s
-    | inr r => mret (inr r)
-    end
-
-  | ItoP s t i =>
-    match i with
-    | DVALUE_I64 i => mret (inr (m, DVALUE_Addr (0, unsigned i)))
-    | DVALUE_I32 i => mret (inr (m, DVALUE_Addr (0, unsigned i)))
-    | DVALUE_I8 i => mret (inr (m, DVALUE_Addr (0, unsigned i)))
-    | DVALUE_I1 i => mret (inr (m, DVALUE_Addr (0, unsigned i)))
-    | _ => raise "Non integer passed to ItoP"
-    end
-    
-  | PtoI s t a =>
-    match a with
-    | DVALUE_Addr (b, i) =>
-      if Z.eqb b 0 then mret (inr (m, DVALUE_Addr(0, i)))
-      else let (k, m) := concretize_block b m in
-           mret (inr (m, DVALUE_Addr (0, (k + i))))
-    | _ => raise "Non pointer passed to PtoI"
-    end
-                       
-  | Call t f args  => mret (inl (Call t f args))
+Definition handle_memcpy (args : List.list dvalue) (m:memory) : err memory :=
+  match args with
+  | DVALUE_Addr (dst_b, dst_o) ::
+                DVALUE_Addr (src_b, src_o) ::
+                DVALUE_I32 len ::
+                DVALUE_I32 align :: (* alignment ignored *)
+                DVALUE_I1 volatile :: [] (* volatile ignored *)  =>
+    src_block <- trywith "memcpy src block not found" (lookup src_b m) ;;
+    dst_block <- trywith "memcpy dst block not found" (lookup dst_b m) ;;
+    let sdata := lookup_all_index src_o (unsigned len) src_block SUndef in
+    let dst_block' := add_all_index sdata dst_o dst_block in
+    let m' := add dst_b dst_block' m in
+    (ret m' : err memory)
+              
+  | _ => raise "memcpy got incorrect arguments"
   end.
 
-(*
- memory -> TraceLLVMIO () -> TraceX86IO () -> Prop
+
+(* TODO:
+   - we can use the handler combinators to make these more modular
+
+   - these operations are too defined: load and store should fail if the 
+     address isn't in range
 *)
 
-CoFixpoint memD {X} (m:memory) (d:Trace X) : Trace X :=
-  match d with
-  | Tau d' => Tau (memD m d')
-  | Vis _ io k =>
-    match mem_step io m with
-    | inr (inr (m', v)) => Tau (memD m' (k v))
-    | inr (inl e) => Vis io k
-    | inl s => raise s
-    end
-  | Ret x => d
-  end.
 
+Definition handle_mem {X} : (IO X) -> memory -> (LLVM (failureE +' debugE)) (memory * X)%type :=
+  fun e m =>
+    match e with
+    | Alloca t =>
+      let new_block := make_empty_block t in
+      ret (add (size m) new_block m,
+           DVALUE_Addr (size m, 0))
+          
+    | Load t dv =>
+        match dv with
+        | DVALUE_Addr (b, i) =>
+          ret match lookup b m with
+              | Some block =>
+                (m, deserialize_sbytes (lookup_all_index i (sizeof_dtyp t) block SUndef) t)
+              | None => (m, DVALUE_Undef)
+              end
+        | _ => raise "Load got non-address dvalue"
+        end
+
+    | Store dv v => 
+      match dv with
+      | DVALUE_Addr (b, i) =>
+        match lookup b m with
+        | Some m' =>
+          ret (add b (add_all_index (serialize_dvalue v) i m') m, tt) 
+        | None => raise "stored to unallocated address"
+        end
+      | _ => raise "Store got non-address dvalue"
+      end
+
+    | GEP t dv vs =>
+      match handle_gep t dv vs m with
+      | inl err => raise err
+      | inr v => ret v
+      end
+
+    | ItoP i =>
+      match i with
+      | DVALUE_I64 i => ret (m, DVALUE_Addr (0, unsigned i))
+      | DVALUE_I32 i => ret (m, DVALUE_Addr (0, unsigned i))
+      | DVALUE_I8 i => ret (m, DVALUE_Addr (0, unsigned i))
+      | DVALUE_I1 i => ret (m, DVALUE_Addr (0, unsigned i))
+      | _ => raise "Non integer passed to ItoP"
+      end
+  
+    | PtoI a =>
+      match a with
+      | DVALUE_Addr (b, i) =>
+        if Z.eqb b 0 then ret (m, DVALUE_Addr(0, i))
+        else let (k, m) := concretize_block b m in
+             ret (m, DVALUE_Addr (0, (k + i)))
+      | _ => raise "PtoI got non-address dvalue"
+      end
+
+    | Call t f args =>
+      if string_dec f "llvm.memcpy.p0i8.p0i8.i32" then  (* FIXME: use reldec typeclass? *)
+        match handle_memcpy args m with
+        | inl err => raise err
+        | inr m' => ret (m', DVALUE_None)
+        end
+      else            
+        vis (Call t f args) (fun x => ret (m, x))
+    end.
+             
+
+
+Definition handleMem {X} : (IO +' (failureE +' debugE)) X -> memory -> (LLVM (failureE +' debugE)) (memory * X)%type :=
+  fun e m => 
+    match e with
+    | inl1 io => handle_mem io m
+    | inr1 (inl1 (Throw s)) => raise s
+    | inr1 (inr1 d) =>
+      match d with
+      | Debug s => vis (Debug s) (fun _ => ret (m, tt)) (* SAZ: should be able to use lift *)
+      end
+    end.
+
+Definition memD {X} (m:memory) (d: LLVM (failureE +' debugE) X) : LLVM (failureE +' debugE) (memory * X)%type :=
+  interp_state (fun T => @handleMem T) d m.
+  
 End Make.
 

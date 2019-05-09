@@ -4,7 +4,6 @@
 
 open Format
 
-let str = Camlcoq.coqstring_of_camlstring
 let of_str = Camlcoq.camlstring_of_coqstring
 let to_int = Camlcoq.Z.to_int
 let float_of_coqfloat = Camlcoq.camlfloat_of_coqfloat               
@@ -267,8 +266,9 @@ and exp : Format.formatter -> LLVMAst.exp -> unit =
     match vv with
   | EXP_Ident i           -> ident ppf i
   | EXP_Integer i         -> pp_print_int ppf (to_int i)
-  | EXP_Float f           -> pp_print_float ppf (float_of_coqfloat f)
-  | EXP_Hex h             -> fprintf ppf "0x%Lx" (Int64.bits_of_float (float_of_coqfloat h))
+  | EXP_Float f           -> fprintf ppf "0x%lX" (Camlcoq.camlint_of_coqint(Floats.Float32.to_bits f))
+  | EXP_Double f          -> fprintf ppf "0x%LX" (Camlcoq.camlint64_of_coqint(Floats.Float.to_bits f))
+  | EXP_Hex h             -> fprintf ppf "0x%LX" (Camlcoq.camlint64_of_coqint(Floats.Float.to_bits h))
   | EXP_Bool b            -> pp_print_bool ppf b
   | EXP_Null              -> pp_print_string ppf "null"
   | EXP_Undef             -> pp_print_string ppf "undef"
@@ -371,6 +371,7 @@ and inst_exp : Format.formatter -> LLVMAst.exp -> unit =
   | EXP_Ident _ 
   | EXP_Integer _ 
   | EXP_Float _
+  | EXP_Double _      
   | EXP_Hex _         
   | EXP_Bool _    
   | EXP_Null      
@@ -476,6 +477,8 @@ and instr : Format.formatter -> LLVMAst.instr -> unit =
   fun ppf ->
   function
 
+  | INSTR_Comment msg ->  fprintf ppf "; %s" (of_str msg)
+
   | INSTR_Op v -> inst_exp ppf v
 
   | INSTR_Call (tv, tvl) ->
@@ -576,7 +579,6 @@ and instr_id : Format.formatter -> LLVMAst.instr_id -> unit =
     | IId id  -> fprintf ppf "%%%s = " (str_of_raw_id id)
     | IVoid n -> fprintf ppf "; void instr %d" (to_int n); pp_force_newline ppf ()
   
-
 and texp ppf (t, v) = fprintf ppf "%a %a" typ t exp v
 
 and tident ppf (t, v) = fprintf ppf "%a %a" typ t ident v
@@ -588,6 +590,7 @@ and toplevel_entities : Format.formatter -> (LLVMAst.block list) LLVMAst.topleve
 and toplevel_entity : Format.formatter -> (LLVMAst.block list) LLVMAst.toplevel_entity -> unit =
   fun ppf ->
   function
+  | TLE_Comment msg            -> fprintf ppf "; %s" (of_str msg)
   | TLE_Target s               -> fprintf ppf "target triple = \"%s\"" (of_str s)
   | TLE_Datalayout s           -> fprintf ppf "target datalayout = \"%s\"" (of_str s)
   | TLE_Source_filename s      -> fprintf ppf "source_filename = \"%s\"" (of_str s)
@@ -621,11 +624,10 @@ and global : Format.formatter -> LLVMAst.global -> unit =
     g_exp;
 
     g_linkage;
-    g_visibility = visibility;
-    g_dll_storage = gdll;
 
     g_section = s;
     g_align = a;
+    _;
   } -> fprintf ppf "@%s = "  (str_of_raw_id g_ident);
        (match g_linkage with None -> ()
                            | Some l -> linkage ppf l; pp_print_string ppf " "
@@ -646,10 +648,10 @@ and declaration : Format.formatter -> LLVMAst.declaration -> unit =
       ; dc_visibility
       ; dc_dll_storage
       ; dc_cconv
-      ; dc_attrs
       ; dc_section
       ; dc_align
       ; dc_gc
+      ; _
       } ->
     let (ret_t, args_t) = get_function_type dc_type in
     let typ_attr =
@@ -700,6 +702,7 @@ and definition : Format.formatter -> (LLVMAst.block list) LLVMAst.definition -> 
            ; dc_align
            ; dc_gc
            }
+       ; _
        } as df) ->
     let (ret_t, args_t) = get_function_type dc_type in
     let typ_attr_id =
@@ -748,7 +751,12 @@ and definition : Format.formatter -> (LLVMAst.block list) LLVMAst.definition -> 
     pp_print_char ppf '}' ;
 
 and block : Format.formatter -> LLVMAst.block -> unit =
-  fun ppf {blk_id=lbl; blk_phis=phis; blk_code=b; blk_term=(_,t)} ->
+  fun ppf {blk_id=lbl; blk_phis=phis; blk_code=b; blk_term=(_,t); blk_comments=c} ->
+    begin match c with
+    | None -> ()
+    | Some cs ->  pp_print_list ~pp_sep:pp_force_newline comment ppf cs ;
+                  pp_force_newline ppf ()
+    end;
     begin match lbl with
       | Anon i -> fprintf ppf "; <label> %d" (to_int i)
       | Name s -> (pp_print_string ppf (of_str s); pp_print_char ppf ':')
@@ -758,10 +766,13 @@ and block : Format.formatter -> LLVMAst.block -> unit =
     pp_print_string ppf "  ";
     pp_open_box ppf 0 ;
     pp_print_list ~pp_sep:pp_force_newline id_phi ppf phis ;
+    pp_force_newline ppf () ;
     pp_print_list ~pp_sep:pp_force_newline id_instr ppf b ;
     pp_force_newline ppf () ;
     terminator ppf t;
     pp_close_box ppf ()
+and comment : Format.formatter -> char list -> unit =
+  fun ppf s -> fprintf ppf "; %s" (of_str s)
 
 and modul : Format.formatter -> (LLVMAst.block list) LLVMAst.modul -> unit =
   fun ppf m ->

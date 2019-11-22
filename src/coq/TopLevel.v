@@ -101,13 +101,11 @@ Module TopLevelEnv <: Environment.
   Definition initialize_global (g:global dtyp) : itree exp_E unit :=
     let dt := (g_typ g) in
     a <- trigger (GlobalRead (g_ident g));;
-      uv <- match (g_exp g) with
-            | None => ret (UVALUE_Undef dt)
-            | Some e => D.denote_exp (Some dt) e
-            end ;;
-      (* CB TODO: Do we need pick here? *)
-      dv <- trigger (pick uv True) ;;
-      trigger (Store a dv).
+    uv <- match (g_exp g) with
+         | None => ret (UVALUE_Undef dt)
+         | Some e => D.denote_exp (Some dt) e
+         end ;;
+    trigger (Store (dvalue_to_uvalue a) uv).
 
   Definition initialize_globals (gs:list (global dtyp)): itree exp_E unit :=
     map_monad_ initialize_global gs.

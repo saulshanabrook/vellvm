@@ -113,191 +113,191 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
     Definition spec_raise {X} (s:string) : itree L0 X := raise s.
 
     (* YZ: Inferring the subevent instance takes a small but non-trivial amount of time,
-       and has to be done here hundreds and hundreds of times. Factoring the inferrence is crucial.
+       and has to be done here hundreds and hundreds of times. Factoring the inference is crucial.
      *)
-    Definition eval_conv_h conv (t1:dtyp) (x:dvalue) (t2:dtyp) : itree conv_E dvalue :=
-      let raise := @raise conv_E dvalue _
+    Definition eval_conv_h conv (t1:dtyp) (x:dvalue) (t2:dtyp) : itree conv_E uvalue :=
+      let raise := @raise conv_E uvalue _
       in
       match conv with
       | Trunc =>
         match t1, x, t2 with
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_I 1 =>
-          ret (DVALUE_I1 (repr (unsigned i1)))
+          ret (UVALUE_I1 (repr (unsigned i1)))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_I 1 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_I 1 =>
-          ret (DVALUE_I1 (repr (unsigned i1)))
+          ret (UVALUE_I1 (repr (unsigned i1)))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_I 1 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_I 8 =>
-          ret (DVALUE_I8 (repr (unsigned i1)))
+          ret (UVALUE_I8 (repr (unsigned i1)))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_I 8 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_I 1 =>
-          ret (DVALUE_I1 (repr (unsigned i1)))
+          ret (UVALUE_I1 (repr (unsigned i1)))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_I 1 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_I 8 =>
-          ret (DVALUE_I8 (repr (unsigned i1)))
+          ret (UVALUE_I8 (repr (unsigned i1)))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_I 8 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_I 32 =>
-          ret (DVALUE_I32 (repr (unsigned i1)))
+          ret (UVALUE_I32 (repr (unsigned i1)))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_I 32 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | _, _, _ => raise "ill typed-conv"
         end
       | Zext =>
         match t1, x, t2 with
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_I 8 =>
-          ret (DVALUE_I8 (repr (unsigned i1)))
+          ret (UVALUE_I8 (repr (unsigned i1)))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_I 8 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_I 32 =>
-          ret (DVALUE_I32 (repr (unsigned i1)))
+          ret (UVALUE_I32 (repr (unsigned i1)))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_I 32 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_I 64 =>
-          ret (DVALUE_I64 (repr (unsigned i1)))
+          ret (UVALUE_I64 (repr (unsigned i1)))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_I 64 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_I 32 =>
-          ret (DVALUE_I32 (repr (unsigned i1)))
+          ret (UVALUE_I32 (repr (unsigned i1)))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_I 32 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_I 64 =>
-          ret (DVALUE_I64 (repr (unsigned i1)))
+          ret (UVALUE_I64 (repr (unsigned i1)))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_I 64 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_I 64 =>
-          ret (DVALUE_I64 (repr (unsigned i1)))
+          ret (UVALUE_I64 (repr (unsigned i1)))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_I 64 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | _, _, _ => raise "ill typed-conv"
         end
       | Sext =>
         match t1, x, t2 with
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_I 8 =>
-          ret (DVALUE_I8 (repr (signed i1)))
+          ret (UVALUE_I8 (repr (signed i1)))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_I 8 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_I 32 =>
-          ret (DVALUE_I32 (repr (signed i1)))
+          ret (UVALUE_I32 (repr (signed i1)))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_I 32 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_I 64 =>
-          ret (DVALUE_I64 (repr (signed i1)))
+          ret (UVALUE_I64 (repr (signed i1)))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_I 64 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_I 32 =>
-          ret (DVALUE_I32 (repr (signed i1)))
+          ret (UVALUE_I32 (repr (signed i1)))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_I 32 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_I 64 =>
-          ret (DVALUE_I64 (repr (signed i1)))
+          ret (UVALUE_I64 (repr (signed i1)))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_I 64 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_I 64 =>
-          ret (DVALUE_I64 (repr (signed i1)))
+          ret (UVALUE_I64 (repr (signed i1)))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_I 64 =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | _, _, _ => raise "ill typed-conv"
         end
       | Bitcast =>
         match t1, x, t2 with
         | DTYPE_I bits1, x, DTYPE_I bits2 =>
-          if bits1 =? bits2 then ret x else raise "unequal bitsize in cast"
+          if bits1 =? bits2 then ret (dvalue_to_uvalue x) else raise "unequal bitsize in cast"
         | DTYPE_Pointer, DVALUE_Addr a, DTYPE_Pointer =>
-          ret (DVALUE_Addr a)
+          ret (UVALUE_Addr a)
         | DTYPE_Pointer, DVALUE_Poison, DTYPE_Pointer =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
         | _, _, _ => raise "ill-typed_conv"
         end
       | Uitofp =>
         match t1, x, t2 with
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (unsigned i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (unsigned i1))))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (unsigned i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (unsigned i1))))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (unsigned i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (unsigned i1))))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (unsigned i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (unsigned i1))))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (unsigned i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (unsigned i1))))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (unsigned i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (unsigned i1))))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (unsigned i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (unsigned i1))))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (unsigned i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (unsigned i1))))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | _, _, _ => raise "ill typed Uitofp"
         end
       | Sitofp =>
         match t1, x, t2 with
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (signed i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (signed i1))))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (signed i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (signed i1))))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (signed i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (signed i1))))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_Float =>
-          ret (DVALUE_Float (Float32.of_intu (repr (signed i1))))
+          ret (UVALUE_Float (Float32.of_intu (repr (signed i1))))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_Float =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 1, DVALUE_I1 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (signed i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (signed i1))))
         | DTYPE_I 1, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 8, DVALUE_I8 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (signed i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (signed i1))))
         | DTYPE_I 8, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 32, DVALUE_I32 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (signed i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (signed i1))))
         | DTYPE_I 32, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | DTYPE_I 64, DVALUE_I64 i1, DTYPE_Double =>
-          ret (DVALUE_Double (Float.of_longu (repr (signed i1))))
+          ret (UVALUE_Double (Float.of_longu (repr (signed i1))))
         | DTYPE_I 64, DVALUE_Poison, DTYPE_Double =>
-          ret DVALUE_Poison
+          ret UVALUE_Poison
 
         | _, _, _ => raise "ill typed Sitofp"
         end
@@ -307,18 +307,18 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
       | Fpext => raise "TODO: unimplemented numeric conversion"
       | Inttoptr =>
         match t1, t2 with
-        | DTYPE_I 64, DTYPE_Pointer => trigger (ItoP x)
+        | DTYPE_I 64, DTYPE_Pointer => trigger (ItoP (dvalue_to_uvalue x))
         | _, _ => raise "ERROR: Inttoptr got illegal arguments"
         end
       | Ptrtoint =>
         match t1, t2 with
-        | DTYPE_Pointer, DTYPE_I _ => trigger (PtoI t2 x)
+        | DTYPE_Pointer, DTYPE_I _ => trigger (PtoI t2 (dvalue_to_uvalue x))
         | _, _ => raise "ERROR: Ptrtoint got illegal arguments"
         end
       end.
     Arguments eval_conv_h _ _ _ _ : simpl nomatch.
 
-    Definition eval_conv conv (t1:dtyp) x (t2:dtyp) : itree conv_E dvalue :=
+    Definition eval_conv conv (t1:dtyp) x (t2:dtyp) : itree conv_E uvalue :=
       match t1, x with
       | DTYPE_Vector s t, (DVALUE_Vector elts) =>
         (* In the future, implement bitcast and etc with vectors *)
@@ -534,8 +534,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
           v <- denote_exp (Some dt1) op ;;
           uvalue_to_dvalue_uop
             (fun v => ret (UVALUE_Conversion conv v t2))
-            (fun v => translate conv_E_to_exp_E
-                             (fmap dvalue_to_uvalue (eval_conv conv dt1 v t2)))
+            (fun v => translate conv_E_to_exp_E (eval_conv conv dt1 v t2))
             v
 
         (* CB TODO: Do we actually need to pick here? GEP doesn't do any derefs. Does it make sense to leave it as a UVALUE? *)
@@ -586,20 +585,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | OP_GetElementPtr dt1 (dt2, ptrval) idxs =>
           vptr <- denote_exp (Some dt2) ptrval ;;
           vs <- map_monad (fun '(_, index) => denote_exp (Some (DTYPE_I 32)) index) idxs ;;
-
-          let maybe_dvs := dvptr <- uvalue_to_dvalue vptr ;;
-                           dvs <- map_monad uvalue_to_dvalue vs ;;
-                           ret (dvptr, dvs)
-          in
-
-          match maybe_dvs with
-          | inr (dvptr, dvs) => fmap dvalue_to_uvalue (trigger (GEP dt1 dvptr dvs))
-          | inl _ =>
-            (* Pick to get dvalues *)
-            dvptr <- trigger (pick vptr True) ;;
-            dvs <- map_monad (fun v => trigger (pick v True)) vs ;;
-            fmap dvalue_to_uvalue (trigger (GEP dt1 dvptr dvs))
-          end
+          trigger (GEP dt1 vptr vs)
 
         | OP_ExtractElement vecop idx =>
           (*  'vec <- monad_app_snd (denote_exp e) vecop;
@@ -681,24 +667,18 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | (IId id, INSTR_Load _ dt (du,ptr) _) =>
           (* debug ("Load: " ++ to_string dt);; *)
           ua <- translate exp_E_to_instr_E (denote_exp (Some du) ptr) ;;
-          da <- trigger (pick ua True) ;;
-          match da with
-          | DVALUE_Poison => raiseUB "Load from poisoned address."
-          | _ => dv <- trigger (Load dt da);;
-                (* debug ("Loading: " ++ to_string dv);; *)
-                trigger (LocalWrite id dv)
-          end
+          (* CB: Memory model needs to raiseUB if load from poison now? *)
+          uv <- trigger (Load dt ua);;
+          trigger (LocalWrite id uv)
 
         (* Store *)
         | (IVoid _, INSTR_Store _ (dt, val) (du, ptr) _) =>
           uv <- translate exp_E_to_instr_E (denote_exp (Some dt) val) ;;
-          dv <- trigger (pick uv True) ;;
           ua <- translate exp_E_to_instr_E (denote_exp (Some du) ptr) ;;
-          da <- trigger (pick ua (exists x, forall da, concretize ua da -> da = x)) ;;
-          match da with
-          | DVALUE_Poison => raiseUB "Store to poisoned address."
-          | _ => trigger (Store da dv)
-          end
+          (* CB TODO: Make sure this invariant is categorized in the memory model
+             now? Also stores to poison raiseUB *)
+          (* da <- trigger (pick ua (exists x, forall da, concretize ua da -> da = x)) ;; *)
+          trigger (Store ua uv)
 
         | (_, INSTR_Store _ _ _ _) => raise "ILL-FORMED itree ERROR: Store to non-void ID"
 

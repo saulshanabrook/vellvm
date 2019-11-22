@@ -25,6 +25,7 @@ Import Basics.Basics.Monads.
 
 From ExtLib Require Import
      Structures.Monads
+     Structures.Functor
      Programming.Eqv
      Data.String.
 
@@ -571,7 +572,7 @@ Admitted.
           ret (bid, cid-rid)
        end.
 
-  Definition handle_memory {E} `{FailureE -< E} `{UBE -< E}: MemoryE ~> stateT memory_stack (itree E) :=
+  Definition handle_memory {E} `{FailureE -< E} `{PickE -< E} `{UBE -< E}: MemoryE ~> stateT memory_stack (itree E) :=
     fun _ e '(m, s) =>
       match e with
       | MemPush => ret ((m, [] :: s), tt)
@@ -596,8 +597,9 @@ Admitted.
           ret ((new_mem, new_stack), DVALUE_Addr (key, 0))
         end
 
-      | Load t dv =>
-        match dv with
+      | Load t ua =>
+        da <- trigger (pick ua True) ;;
+        match da with
         | DVALUE_Addr (b, i) =>
           match lookup_logical b m with
           | Some (LBlock _ block _) =>
@@ -608,8 +610,12 @@ Admitted.
         | _ => raise "Load got non-address dvalue"
         end
 
-      | Store dv v =>
-        match dv with
+      (* CB TODO: Change this to not serialize / pick. Do this on load
+      instead to allow indeterminate values in memory. *)
+      | Store ua uv =>
+        da <- trigger (pick ua (exists x, forall da, concretize ua da -> da = x)) ;;
+        v  <- trigger (pick uv True) ;; (* TODO get rid of this pick *)
+        match da with
         | DVALUE_Addr (b, i) =>
           match lookup_logical b m with
           | Some (LBlock sz bytes cid) =>
@@ -618,46 +624,52 @@ Admitted.
             ret ((add_logical b block' m, s), tt)
           | None => raise "stored to unallocated address"
           end
-        | _ => raise ("Store got non-address dvalue: " ++ (to_string dv))
+        | _ => raise ("Store got non-address dvalue: " ++ (to_string da))
         end
 
-      | GEP t dv vs =>
-        match handle_gep t dv vs m with
+      | GEP t ua uvs =>
+        (* TODO: do we need these picks? *)
+        da <- trigger (pick ua True) ;;
+        dvs <- map_monad (fun v => trigger (pick v True)) uvs ;;
+        match handle_gep t da dvs m with
         | inl err => raise err
-        | inr (m, dv) => ret ((m, s), dv)
+        | inr (m, dv) => ret ((m, s), (dvalue_to_uvalue dv))
         end
 
-      | ItoP x =>
+      | ItoP ux =>
+        x <- trigger (pick ux True) ;; (* TODO: do we need this pick? *)
         match x with
         | DVALUE_I64 i =>
           match concrete_address_to_logical (unsigned i) m with
           | None => raise ("Invalid concrete address " ++ (to_string x))
-          | Some (b, o) => ret ((m, s), DVALUE_Addr (b, o))
+          | Some (b, o) => ret ((m, s), UVALUE_Addr (b, o))
           end
         | DVALUE_I32 i =>
           match concrete_address_to_logical (unsigned i) m with
           | None => raise "Invalid concrete address "
-          | Some (b, o) => ret ((m, s), DVALUE_Addr (b, o))
+          | Some (b, o) => ret ((m, s), UVALUE_Addr (b, o))
           end
         | DVALUE_I8 i  =>
           match concrete_address_to_logical (unsigned i) m with
           | None => raise "Invalid concrete address"
-          | Some (b, o) => ret ((m, s), DVALUE_Addr (b, o))
+          | Some (b, o) => ret ((m, s), UVALUE_Addr (b, o))
           end
         | DVALUE_I1 i  =>
           match concrete_address_to_logical (unsigned i) m with
           | None => raise "Invalid concrete address"
-          | Some (b, o) => ret ((m, s), DVALUE_Addr (b, o))
+          | Some (b, o) => ret ((m, s), UVALUE_Addr (b, o))
           end
         | _            => raise "Non integer passed to ItoP"
         end
 
       (* TODO take integer size into account *)
-      | PtoI t a =>
+      | PtoI t ua =>
+        (* TODO: do we need this pick? *)
+        a <- trigger (pick ua True) ;;
         match a, t with
         | DVALUE_Addr (b, i), DTYPE_I sz =>
           let (cid, m') := concretize_block b m in
-          'addr <- lift_undef_or_err ret (coerce_integer_to_int sz (cid+i)) ;;
+          'addr <- lift_undef_or_err ret (fmap dvalue_to_uvalue (coerce_integer_to_int sz (cid+i))) ;;
            ret ((m', s), addr)
         | _, _ => raise "PtoI type error."
         end

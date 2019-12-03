@@ -135,10 +135,13 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
   Inductive concrete_block :=
   | CBlock (size : Z) (block_id : Z) : concrete_block.
 
-  Inductive logical_block :=
-  | LBlock (size : Z) (bytes : IntMap SByte) (concrete_id : option Z) : logical_block.
+  (* Map of offset * uvalue pairs. *)
+  Definition mem_block := IntMap (Z * uvalue).
 
-  Definition mem_block       := IntMap SByte.
+  Inductive logical_block :=
+  | LBlock (size : Z)
+           (values : mem_block)
+           (concrete_id : option Z) : logical_block.
 
   Definition concrete_memory := IntMap concrete_block.
   Definition logical_memory  := IntMap logical_block.
@@ -256,52 +259,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
   Definition all_not_sundef (bytes : list SByte) : bool :=
     forallb is_some (map Sbyte_to_byte bytes).
 
-  (* Deserialize a list of SBytes into a uvalue, assuming that none of the bytes are undef *)
-  Fixpoint deserialize_sbytes_defined (bytes:list SByte) (t:dtyp) : uvalue :=
-    match t with
-    | DTYPE_I sz =>
-      let des_int := sbyte_list_to_Z bytes in
-      match sz with
-      | 1  => UVALUE_I1 (repr des_int)
-      | 8  => UVALUE_I8 (repr des_int)
-      | 32 => UVALUE_I32 (repr des_int)
-      | 64 => UVALUE_I64 (repr des_int)
-      | _  => UVALUE_None (* invalid size. *)
-      end
-    | DTYPE_Float => UVALUE_Float (Float32.of_bits (repr (sbyte_list_to_Z bytes)))
-    | DTYPE_Double => UVALUE_Double (Float.of_bits (repr (sbyte_list_to_Z bytes)))
-
-    | DTYPE_Pointer =>
-      match bytes with
-      | Ptr addr :: tl => UVALUE_Addr addr
-      | _ => UVALUE_None (* invalid pointer. *)
-      end
-    | DTYPE_Array sz t' =>
-      let fix array_parse count byte_sz bytes :=
-          match count with
-          | O => []
-          | S n => (deserialize_sbytes_defined (firstn byte_sz bytes) t')
-                     :: array_parse n byte_sz (skipn byte_sz bytes)
-          end in
-      UVALUE_Array (array_parse (Z.to_nat sz) (Z.to_nat (sizeof_dtyp t')) bytes)
-    | DTYPE_Struct fields =>
-      let fix struct_parse typ_list bytes :=
-          match typ_list with
-          | [] => []
-          | t :: tl =>
-            let size_ty := Z.to_nat (sizeof_dtyp t) in
-            (deserialize_sbytes_defined (firstn size_ty bytes) t)
-              :: struct_parse tl (skipn size_ty bytes)
-          end in
-      UVALUE_Struct (struct_parse fields bytes)
-    | _ => UVALUE_None (* TODO add more as serialization support increases *)
-    end.
-
-  Definition deserialize_sbytes (bytes : list SByte) (t : dtyp) : uvalue :=
-    if all_not_sundef bytes
-    then deserialize_sbytes_defined bytes t
-    else UVALUE_Undef t.
-
   (* Todo - complete proofs, and think about moving to MemoryProp module. *)
   (* The relation defining serializable dvalues. *)
   Inductive serialize_defined : dvalue -> Prop :=
@@ -335,62 +292,24 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
   | wf_cons : forall b l, sbyte_list_wf l -> sbyte_list_wf (Byte b :: l)
   .
 
-  (*
-Lemma sbyte_list_to_Z_inverse:
-  forall i1 : int1, (sbyte_list_to_Z (Z_to_sbyte_list 8 (Int1.unsigned i1))) =
-               (Int1.unsigned i1).
-Proof.
-  intros i1.
-  destruct i1. simpl.
-Admitted. *)
-
-
-  (*
-Lemma serialize_inverses : forall dval,
-    serialize_defined dval -> exists typ, deserialize_sbytes (serialize_dvalue dval) typ = dval.
-Proof.
-  intros. destruct H.
-  (* DVALUE_Addr. Type of pointer is not important. *)
-  - exists (TYPE_Pointer TYPE_Void). reflexivity.
-  (* DVALUE_I1. Todo: subversion lemma for integers. *)
-  - exists (TYPE_I 1).
-    simpl.
-
-
-    admit.
-  (* DVALUE_I32. Todo: subversion lemma for integers. *)
-  - exists (TYPE_I 32). admit.
-  (* DVALUE_I64. Todo: subversion lemma for integers. *)
-  - exists (TYPE_I 64). admit.
-  (* DVALUE_Struct [] *)
-  - exists (TYPE_Struct []). reflexivity.
-  (* DVALUE_Struct fields *)
-  - admit.
-  (* DVALUE_Array [] *)
-  - exists (TYPE_Array 0 TYPE_Void). reflexivity.
-  (* DVALUE_Array fields *)
-  - admit.
-Admitted.
-   *)
-
   (* Construct block indexed from 0 to n. *)
-  Fixpoint init_block_h (n:nat) (m:mem_block) : mem_block :=
+  Fixpoint init_block_h (dt:dtyp) (n:nat) (m:mem_block) : mem_block :=
     match n with
-    | O => add 0 SUndef m
-    | S n' => add (Z.of_nat n) SUndef (init_block_h n' m)
+    | O => add 0 (Z.of_nat n, UVALUE_Undef dt) m
+    | S n' => add (Z.of_nat n) (Z.of_nat n, UVALUE_Undef dt) (init_block_h dt n' m)
     end.
 
   (* Initializes a block of n 0-bytes. *)
-  Definition init_block (n:Z) : mem_block :=
+  Definition init_block (dt:dtyp) (n:Z) : mem_block :=
     match n with
     | 0 => empty
-    | Z.pos n' => init_block_h (BinPosDef.Pos.to_nat (n' - 1)) empty
+    | Z.pos n' => init_block_h dt (BinPosDef.Pos.to_nat (n' - 1)) empty
     | Z.neg _ => empty (* invalid argument *)
     end.
 
   (* Makes a block appropriately sized for the given type. *)
   Definition make_empty_mem_block (ty:dtyp) : mem_block :=
-    init_block (sizeof_dtyp ty).
+    init_block ty (sizeof_dtyp ty).
 
   Definition make_empty_block (ty:dtyp) : logical_block :=
     let block := make_empty_mem_block ty in
@@ -452,7 +371,6 @@ Admitted.
   (* Get next key in logical map *)
   Definition next_logical_key (m : memory) : Z :=
     next_key (snd m).
-
 
   (* Get next key in concrete map *)
   Definition next_concrete_key (m : memory) : Z :=
@@ -526,7 +444,7 @@ Admitted.
           := match dst_block with
              | LBlock size bytes concrete_id => (size, bytes, concrete_id)
              end in
-      let sdata := lookup_all_index src_o (unsigned len) src_bytes SUndef in
+      let sdata := lookup_all_index src_o (unsigned len) src_bytes (0, UVALUE_Undef DTYPE_Void) in
       let dst_bytes' := add_all_index sdata dst_o dst_bytes in
       let dst_block' := LBlock dst_sz dst_bytes' dst_cid in
       let m' := add_logical dst_b dst_block' m in
@@ -603,7 +521,7 @@ Admitted.
         | DVALUE_Addr (b, i) =>
           match lookup_logical b m with
           | Some (LBlock _ block _) =>
-            ret ((m, s), deserialize_sbytes (lookup_all_index i (sizeof_dtyp t) block SUndef) t)
+            ret ((m, s), lookup_all_index i (sizeof_dtyp t) block (0, UVALUE_Undef DTYPE_Void))
           (* Asking for a non-allocated block is undefined behaviour. *)
           | None => raiseUB "Loading from block that has never been allocated."
           end

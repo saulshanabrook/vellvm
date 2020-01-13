@@ -112,8 +112,8 @@ Module TopLevelEnv <: Environment.
 
   Definition build_global_environment (CFG : CFG.mcfg dtyp) : itree L0 unit :=
     allocate_globals (m_globals CFG) ;;
-                     allocate_declarations ((m_declarations CFG) ++ (List.map (df_prototype) (m_definitions CFG)));;
-                     translate _exp_E_to_L0 (initialize_globals (m_globals CFG)).
+    allocate_declarations ((m_declarations CFG) ++ (List.map (df_prototype) (m_definitions CFG)));;
+    translate _exp_E_to_L0 (initialize_globals (m_globals CFG)).
 
   (** Local environment implementation
     The map-based handlers are defined parameterized over a domain of key and value.
@@ -130,14 +130,14 @@ Module TopLevelEnv <: Environment.
   Definition address_one_function (df : definition dtyp (CFG.cfg dtyp)) : itree L0 (dvalue * D.function_denotation) :=
     let fid := (dc_name (df_prototype df)) in
     fv <- trigger (GlobalRead fid) ;;
-       ret (fv, D.denote_function df).
+    ret (fv, D.denote_function df).
 
   (* (for now) assume that [main (i64 argc, i8** argv)]
     pass in 0 and null as the arguments to main
     Note: this isn't compliant with standard C semantics
    *)
   Definition main_args := [DV.UVALUE_I64 (DynamicValues.Int64.zero);
-                             DV.UVALUE_Addr (Memory.A.null)
+                           DV.UVALUE_Addr (Memory.A.null)
                           ].
 
   (**
@@ -177,6 +177,9 @@ Module TopLevelEnv <: Environment.
     'defns <- map_monad address_one_function (m_definitions mcfg) ;;
     'addr <- trigger (GlobalRead (Name "main")) ;;
     D.denote_mcfg defns DTYPE_Void (dvalue_to_uvalue addr) main_args.
+
+  Definition denote_vellvm' (mcfg : CFG.mcfg dtyp) : itree L0' res_L0 :=
+    translate _L0_to_L0' (denote_vellvm mcfg).
 
   (**
      Now that we know how to denote a whole llvm program, we can _interpret_
@@ -249,19 +252,24 @@ Module TopLevelEnv <: Environment.
      to [mcfg], normalizes the types, denotes the [mcfg] and finally interprets the tree
      starting from empty environments.
    *)
+  Definition lift_sem_to_mcfg {E X} `{FailureE -< E}
+             (sem: (CFG.mcfg DynamicTypes.dtyp) -> itree E X):
+    list (toplevel_entity typ (list (LLVMAst.block typ))) -> itree E X :=
+    fun prog =>
+      let scfg := Vellvm.AstLib.modul_of_toplevel_entities _ prog in
+
+      match CFG.mcfg_of_modul _ scfg with
+      | Some ucfg =>
+        let mcfg := TopLevelEnv.normalize_types ucfg in
+
+        sem mcfg
+
+      | None => raise "Ill-formed program: mcfg_of_modul failed."
+      end.
+
   Definition model_user (user_intrinsics: IS.intrinsic_definitions) (prog: list (toplevel_entity typ (list (block typ)))): PropT (itree L5) res_L4 :=
-    let scfg := Vellvm.AstLib.modul_of_toplevel_entities _ prog in
-
-    match CFG.mcfg_of_modul _ scfg with
-    | Some ucfg =>
-      let mcfg := normalize_types ucfg in
-
-      let t := denote_vellvm mcfg in
-
-      interp_vellvm_model_user user_intrinsics t [] ([],[]) ((M.empty, M.empty), [[]])
-
-    | None => lift (raise "Ill-formed program: mcfg_of_modul failed.")
-    end.
+    let t := lift_sem_to_mcfg denote_vellvm prog in
+    interp_vellvm_model_user user_intrinsics t [] ([],[]) ((M.empty, M.empty), [[]]).
 
   (**
      Finally, the reference interpreter assumes no user-defined intrinsics.

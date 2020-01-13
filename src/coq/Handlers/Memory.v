@@ -315,7 +315,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
     let block := make_empty_mem_block ty in
     LBlock (sizeof_dtyp ty) block None.
 
-  Fixpoint handle_gep_h (t:dtyp) (b:Z) (off:Z) (vs:list dvalue) (m:memory) : err (memory * dvalue):=
+  Fixpoint handle_gep_h (t:dtyp) (off:Z) (vs:list dvalue): err Z :=
     match vs with
     | v :: vs' =>
       match v with
@@ -325,7 +325,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
         match t with
         | DTYPE_Vector _ ta
         | DTYPE_Array _ ta =>
-          handle_gep_h ta b (off + k * (sizeof_dtyp ta)) vs' m
+          handle_gep_h ta (off + k * (sizeof_dtyp ta)) vs'
         | DTYPE_Struct ts
         | DTYPE_Packed_struct ts => (* Handle these differently in future *)
           let offset := fold_left (fun acc t => acc + sizeof_dtyp t)
@@ -333,7 +333,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
           match nth_error ts n with
           | None => failwith "overflow"
           | Some t' =>
-            handle_gep_h t' b (off + offset) vs' m
+            handle_gep_h t' (off + offset) vs'
           end
         | _ => failwith ("non-i32-indexable type")
         end
@@ -342,7 +342,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
         let n := BinIntDef.Z.to_nat k in
         match t with
         | DTYPE_Vector _ ta | DTYPE_Array _ ta =>
-                              handle_gep_h ta b (off + k * (sizeof_dtyp ta)) vs' m
+                              handle_gep_h ta (off + k * (sizeof_dtyp ta)) vs'
         | _ => failwith ("non-i8-indexable type")
         end
       | DVALUE_I64 i =>
@@ -351,12 +351,24 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
         match t with
         | DTYPE_Vector _ ta
         | DTYPE_Array _ ta =>
-          handle_gep_h ta b (off + k * (sizeof_dtyp ta)) vs' m
+          handle_gep_h ta (off + k * (sizeof_dtyp ta)) vs'
         | _ => failwith ("non-i64-indexable type")
         end
       | _ => failwith "non-I32 index"
       end
-    | [] => ret (m, DVALUE_Addr (b, off))
+    | [] => ret off
+    end.
+
+  Definition handle_gep (t:dtyp) (dv:dvalue) (vs:list dvalue) : err dvalue :=
+    match vs with
+    | DVALUE_I32 i :: vs' => (* TODO: Handle non i32 indices *)
+      match dv with
+      | DVALUE_Addr (b, o) =>
+        off <- handle_gep_h t (o + (sizeof_dtyp t) * (unsigned i)) vs' ;;
+        ret (DVALUE_Addr (b, off))
+      | _ => failwith "non-address"
+      end
+    | _ => failwith "non-I32 index"
     end.
 
 
@@ -406,17 +418,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
       let m'        := add_concrete id new_block m in
       let m''       := add_logical  b (LBlock sz bytes (Some id)) m' in
       (id, m'')
-    end.
-
-  Definition handle_gep (t:dtyp) (dv:dvalue) (vs:list dvalue) (m:memory) : err (memory * dvalue):=
-    match vs with
-    | DVALUE_I32 i :: vs' => (* TODO: Handle non i32 indices *)
-      match dv with
-      | DVALUE_Addr (b, o) =>
-        handle_gep_h t b (o + (sizeof_dtyp t) * (unsigned i)) vs' m
-      | _ => failwith "non-address"
-      end
-    | _ => failwith "non-I32 index"
     end.
 
   (* LLVM 5.0 memcpy
@@ -598,11 +599,10 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
       match e with
       | Intrinsic t name args =>
         (* Pick all arguments, they should all be unique. *)
-        dargs <- map_monad (fun v => trigger (pick v (exists x, forall da, concretize v da -> da = x))) args ;;
         if string_dec name "llvm.memcpy.p0i8.p0i8.i32" then  (* FIXME: use reldec typeclass? *)
-          match handle_memcpy dargs m with
+          match handle_memcpy args m with
           | inl err => raise err
-          | inr m' => ret ((m', s), UVALUE_None)
+          | inr m' => ret ((m', s), DVALUE_None)
           end
         else
           raise ("Unknown intrinsic: " ++ name)
@@ -647,7 +647,8 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
    *)
   Section PARAMS.
   Variable (E F : Type -> Type).
-    Definition E_trigger {M} : forall R, E R -> (stateT M (itree (E +' F)) R) :=
+
+  Definition E_trigger {M} : forall R, E R -> (stateT M (itree (E +' F)) R) :=
       fun R e m => r <- trigger e ;; ret (m, r).
 
   Definition F_trigger {M} : forall R, F R -> (stateT M (itree (E +' F)) R) :=
@@ -655,7 +656,8 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(A)).
 
   Definition interp_memory `{PickE -< E +' F} `{FailureE -< E +' F} `{UBE -< E +' F}:
     itree (E +'  IntrinsicE +' MemoryE +' F) ~> stateT memory_stack (itree (E +' F)) :=
-    interp_state (case_ E_trigger (case_ handle_intrinsic (case_ handle_memory F_trigger))).
+    interp_state (case_ E_trigger
+                 (case_ handle_intrinsic (case_ handle_memory F_trigger))).
 
   End PARAMS.
 

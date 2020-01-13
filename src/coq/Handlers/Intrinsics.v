@@ -109,12 +109,12 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
                        | inl msg => raise msg
                        | inr result => Ret result
                        end
-          | None => fun pf => (eq_rect X (fun a => itree L0 a) (trigger e)) uvalue pf
+          | None => fun pf => (eq_rect X (fun a => itree L0 a) (trigger e)) dvalue pf
           end
       end eq_refl.
 
   (* CB / YZ / SAZ: TODO "principle this" *)
-  Definition extcall_trigger : Handler CallE L0 :=
+  Definition extcall_trigger : Handler ExternalCallE L0 :=
   fun X e => trigger e.
 
   Definition rest_trigger : Handler (LLVMGEnvE +' (LLVMEnvE +' LLVMStackE) +' MemoryE +' PickE +' UBE +' DebugE +' FailureE) L0 :=

@@ -1,0 +1,67 @@
+* General memory model ideas
+
+  - Clarify what's undefined behaviour in the memory model.
+  - ptoi / itop should be supported.
+  - undef should be preserved through loads / stores.
+    + load from fresh alloca yields undef
+  - loads which cast between data types?
+
+* Alloca
+
+  - UB if there is not enough stack space.
+  - loads from fresh alloca are undef
+  - can specify alignment
+  - acts like stack
+  - order of allocated memory is unspecified.
+
+* Loads
+
+  - The argument to the load instruction specifies the memory address
+    from which to load. The type specified must be a first class type
+    of known size (i.e. not containing an opaque structural type).
+  - When loading a value of a type like i20 with a size that is not an
+    integral number of bytes, the result is undefined if the value was
+    not originally written using a store of the same type.
+    + UB... Has to be *same type* for store.
+    + Should *probably* store original type with memory.
+
+* Store
+
+  - When writing a value of a type like i20 with a size that is not an
+    integral number of bytes, it is unspecified what happens to the
+    extra bits that do not belong to the type, but they will typically
+    be overwritten.
+    + The bits at the end are "undef"
+
+* Volatile memory operations?
+
+   https://llvm.org/docs/LangRef.html#volatile-memory-accesses
+   
+  - If the load is marked as volatile, then the optimizer is not
+    allowed to modify the number or order of execution of this load
+    with other volatile operations.
+
+  Can we handle this kind of thing? Might need a separate set of
+  volatile memory events / a flag to leave some events uninterpreted.
+
+* Endianness
+
+  - specified in the data layout, same as alignment.
+
+* Alignment
+
+  - The alignment may not be greater than 1 << 29.
+  - Overestimating alignment is UB.
+    + Underestimating may just lead to inefficient code.
+
+* Things we currently don't support
+** TODO size_of_dtyp for vector seems to be wrong (and others missing
+** TODO loading / storing vectors
+
+* Rough idea of how to handle bytewise uvalues...
+
+  Roughly... Let's say I have an i64 in memory and I load the smallest
+  byte into an i8.
+
+  I want to be able to keep all nondeterminism, so I need to extend
+  uvalues.

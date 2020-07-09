@@ -20,13 +20,8 @@ Require Import Ascii.
 Import ListNotations.
 
 Import EqvNotation.
-
-(* Equalities --------------------------------------------------------------- *)
 Instance eq_dec_int : RelDec (@eq int) := Data.Z.RelDec_zeq.
 Instance eqv_int : Eqv int := (@eq int).
-
-(* SAZ : These should be moved to part of the standard library, or at least to
-   ExtLib *)
 Module AsciiOrd <: UsualOrderedType.
   Definition t := ascii.
   Definition eq := @eq t.
@@ -244,19 +239,6 @@ Module RawIDOrd <: UsualOrderedType.
   Defined.
 
 End RawIDOrd.
-
-(* Module RawIDDec <: MiniDecidableType. *)
-(*   Definition t := raw_id. *)
-(*   Lemma eq_dec : forall (x y : raw_id), {x = y} + {x <> y}. *)
-(*   Proof. *)
-(*     decide equality. *)
-(*     - destruct (string_dec s s0); tauto. *)
-(*     - destruct (n == n0); tauto. *)
-(*     - destruct (n == n0); tauto. *)
-(*   Defined. *)
-(* End RawIDDec. *)
-
-(* Module RawID := Make_UDT(RawIDDec).  *)
 Instance eq_dec_raw_id : RelDec (@eq raw_id) := RelDec_from_dec (@eq raw_id) RawIDOrd.eq_dec.
 Instance eqv_raw_id : Eqv raw_id := (@eq raw_id).
 Hint Unfold eqv_raw_id: core.
@@ -302,8 +284,6 @@ Module Ident := Make_UDT(IdentDec).
 
 Instance eq_dec_ident : RelDec (@eq ident) := RelDec_from_dec (@eq ident) Ident.eq_dec.
 Instance eqv_ident : Eqv ident := (@eq ident).
-
-(* Induction Principles ----------------------------------------------------- *)
 
 Section TypInd.
 
@@ -365,37 +345,6 @@ Qed.
 End TypInd.
 
 Section ExpInd.
-(*
-| EXP_Ident   (id:ident)
-| EXP_Integer (x:int)
-| EXP_Float   (f:float)
-| EXP_Bool    (b:bool)
-| EXP_Null
-| EXP_Zero_initializer
-| EXP_Cstring (s:string)
-| EXP_Undef
-| EXP_Struct        (fields: list (typ * a))
-| EXP_Packed_struct (fields: list (typ * a))
-| EXP_Array         (elts: list (typ * a))
-| EXP_Vector        (elts: list (typ * a))
-| OP_IBinop           (iop:ibinop) (t:typ) (v1:a) (v2:a)
-| OP_ICmp             (cmp:icmp)   (t:typ) (v1:a) (v2:a)
-| OP_FBinop           (fop:fbinop) (fm:list fast_math) (t:typ) (v1:a) (v2:a)
-| OP_FCmp             (cmp:fcmp)   (t:typ) (v1:a) (v2:a)
-| OP_Conversion     (conv:conversion_type) (t_from:typ) (v:a) (t_to:typ)
-| OP_GetElementPtr  (t:typ) (ptrval:(typ * a)) (idxs:list (typ * a))
-| OP_ExtractElement (vec:(typ * a)) (idx:(typ * a))
-| OP_InsertElement  (vec:(typ * a)) (elt:(typ * a)) (idx:(typ * a))
-| OP_ShuffleVector  (vec1:(typ * a)) (vec2:(typ * a)) (idxmask:(typ * a))
-| OP_ExtractValue   (vec:(typ * a)) (idxs:list int)
-| OP_InsertValue    (vec:(typ * a)) (elt:(typ * a)) (idxs:list int)
-| OP_Select         (cnd:(typ * a)) (v1:(typ * a)) (v2:(typ * a)) (* if * then * else *)
-.
-
-(* static values *)
-Inductive value : Set :=
-| SV : Expr value -> value.
- *)
   Variable T : Set.
   Variable P : (exp T) -> Prop.
   Hypothesis IH_Ident   : forall (id:ident), P ((EXP_Ident id)).

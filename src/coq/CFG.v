@@ -22,9 +22,6 @@ Import ListNotations.
 Import EqvNotation.
 Import MonadNotation.
 Open Scope monad_scope.
-
-(* SAZ: The notion of pc, and many other things in this file is now obsolete *)
-(* program counter denotes an instruction with a block of a function -------- *)
 Record pc :=
   mk_pc {
       fn : function_id;
@@ -137,23 +134,6 @@ Definition block_to_cmd (b:block T) (iid:instr_id) : option (cmd * option instr_
     find_instr (blk_code b) iid term_id
 .
 
-(*
-Definition fetch (CFG : mcfg) (p:pc) : option cmd:=
-  let 'mk_pc fid bid iid := p in
-  cfg <- find_function CFG fid ;;
-  blk <- find_block (blks (df_instrs T cfg)) bid ;;
-  '(c, _) <- block_to_cmd blk iid ;;
-  ret c.
-
-Definition incr_pc (CFG:mcfg) (p:pc) : option pc :=
-  let 'mk_pc fid bid iid := p in
-  cfg <- find_function CFG fid ;;
-  blk <- find_block (blks (df_instrs T cfg)) bid ;;
-  '(c, n) <- block_to_cmd blk iid ;;
-  iid_next <- n ;;
-  ret (mk_pc fid bid iid_next).
-*)
-
 Inductive block_entry : Set :=
 | BlockEntry (phis:list (local_id * (phi T))) (p:pc).
 
@@ -174,22 +154,6 @@ Definition find_function_entry (CFG:mcfg) (fid:function_id) : option function_en
   let cfg := df_instrs dfn in
   blk <- find_block (blks cfg) (init cfg) ;;
   ret (FunctionEntry (df_args dfn) (mk_pc fid (init cfg) (blk_entry_id blk))).
-
-
-(*
-Definition code_of_definition (d:definition (list block)) (p:pt) : option cmd :=
-  cmd_from_blocks p (df_instrs d).
-
-Definition blks_of_definition (d:definition (list block)) block_id : option pt :=
-  'b <- lookup_block (df_instrs d) block_id;
-  Some (fallthrough (blk_term_id b) (blk_instrs b)).
-
-Definition phis_of_definition (d:definition (list block)) block_id : option block_entry :=
-  'b <- lookup_block (df_instrs d) block_id;
-  block_to_phis b.
-*)
-
-(* YZ experiment: guaranteeing success of the conversion by only generating definitions with at least one (entry) block *)
 Definition init_of_definition (d: definition T (block T * list (block T))) : block_id :=
   blk_id (fst (df_instrs d)).
 

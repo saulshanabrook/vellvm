@@ -7,6 +7,6 @@
 (library
   (name testing)
   (wrapped false)
-  (libraries extracted libvellvm str)
-  (synopsis "Vellvm Testing Library")
+  (libraries extracted libvir str)
+  (synopsis "Vir Testing Library")
   )

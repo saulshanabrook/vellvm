@@ -5,7 +5,7 @@
 
 (executables
  (names main)
-  (libraries extracted libvellvm testing unix str)
+  (libraries extracted libvir testing unix str)
   )
 
 

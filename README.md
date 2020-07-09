@@ -10,6 +10,8 @@ Remove all comments that have to do with TODO, doubts, potential alternative, sp
 Leave in high level comments that explains the code if they are clean enough
 Write a Readme that maps concepts from the paper to definitions from the development
 
+But add in the Readme an explanation that anonymization purpose conflicted with documentation, and that assuming acceptation of the paper, a clean, fully documented artifact will be submitted for reviewing
+
 # Structure of the repository
 
 TODO point out handlers.

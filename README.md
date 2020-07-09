@@ -1,39 +1,18 @@
-# Vellvm
-[![Build Status](https://travis-ci.com/vellvm/vellvm.svg?branch=master)](https://travis-ci.com/vellvm/vellvm)
+# Vir
 
-Vellvm is a Coq formalization of the semantics of (a subset of) the
-LLVM compiler IR that is intended for _formal verification_ of
-LLVM-based software.  It is being developed at the
-University of Pennsylvania as part of the DeepSpec project.
+TODO
 
-### See:
- - [Vellvm](http://www.cis.upenn.edu/~stevez/vellvm/)
- - [DeepSpec](http://deepspec.org)
- - [LLVM](http://llvm.org)
+“The formalization of a Helix front-end for VIR, of which we report in Section 7, being an ongoing work whose details are outside the scope of this submission, we have chosen not to include it as part of the artifact submitted. A public link will be made available after the end of the anonimization phase that will attest of any claim made in the paper” 
 
-# Participants
- - Steve Zdancewic
- - Yannick Zakowski
- - Calvin Beck
- - Olek Gierczak
-
-## Past Contributors
- - Vivien Durey 
- - Dmitri Garbuzov 
- - William Mansky
- - Milo Martin
- - Santosh Nagarakatte 
- - Emmett Neyman 
- - Christine Rizkallah 
- - Robert Zajac
- - Richard Zhang 
- - Jianzhou Zhao
-
----
+Create a branch on github
+Substitute mentions of Vellvm for mentions of VIR
+Remove all comments that have to do with TODO, doubts, potential alternative, speculations
+Leave in high level comments that explains the code if they are clean enough
+Write a Readme that maps concepts from the paper to definitions from the development
 
 # Structure of the repository
 
-/src/ci   - travis configuration
+TODO point out handlers.
 
 /src/coq  - Coq formalization (see Denotation.v and TopLevel.v most notably)
 
@@ -47,7 +26,7 @@ University of Pennsylvania as part of the DeepSpec project.
 
 /tests - various LLVM source code tests
 
-# Installing / Compiling Vellvm
+# Installing / Compiling Vir
 
 ### Assumes: 
   - coqc   : version 8.9.1 or 8.10.0 (and coqdep, etc.) 

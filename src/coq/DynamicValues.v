@@ -1,13 +1,3 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
-
 From Coq Require Import
      ZArith DecidableClass List String Omega Bool.Bool.
 
@@ -44,8 +34,6 @@ Set Contextual Implicit.
 Open Scope Z_scope.
 
 Instance Eqv_nat : Eqv nat := (@eq nat).
-
-(* Set up representations for for i1, i32, and i64 *)
 Module Wordsize1.
   Definition wordsize := 1%nat.
   Remark wordsize_not_zero: wordsize <> 0%nat.
@@ -98,11 +86,6 @@ Proof.
            ++ right. intro X.
               inversion X; subst; contradiction.
 Qed.
-
-(* What's a good way to prove this ? *)
-(* IY: This is not ideal, but here is an equivalent formulation with an ugly
-   if-else chain.. I feel like there must be some clean way to prove the
-   original lemma using boolean reflection. *)
 Lemma unsupported_cases : forall {X} (sz : Z) (N : ~ IX_supported sz) (x64 x32 x8 x1 x : X),
     (if (sz =? 64) then x64
       else if (sz =? 32) then x32
@@ -161,8 +144,6 @@ Definition ll_float  := Floats.float32.
 Definition ll_double := Floats.float.
 
 Module DVALUE(A:Vir.MemoryAddress.ADDRESS).
-
-(* The set of dynamic values manipulated by an LLVM program. *)
 Inductive dvalue : Set :=
 | DVALUE_Addr (a:A.addr)
 | DVALUE_I1 (x:int1)
@@ -221,9 +202,6 @@ Section DvalueInd.
       }
   Qed.
 End DvalueInd.
-
-
-(* The set of dynamic values manipulated by an LLVM program. *)
 Inductive uvalue : Set :=
 | UVALUE_Addr (a:A.addr)
 | UVALUE_I1 (x:int1)
@@ -244,7 +222,7 @@ Inductive uvalue : Set :=
 | UVALUE_FBinop           (fop:fbinop) (fm:list fast_math) (v1:uvalue) (v2:uvalue)
 | UVALUE_FCmp             (cmp:fcmp)   (v1:uvalue) (v2:uvalue)
 | UVALUE_Conversion       (conv:conversion_type) (v:uvalue) (t_to:dtyp)
-| UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue)) (* TODO: do we ever need this? GEP raises an event? *)
+| UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue))
 | UVALUE_ExtractElement   (vec: uvalue) (idx: uvalue)
 | UVALUE_InsertElement    (vec: uvalue) (elt:uvalue) (idx:uvalue)
 | UVALUE_ShuffleVector    (vec1:uvalue) (vec2:uvalue) (idxmask:uvalue)
@@ -324,8 +302,6 @@ Section UvalueInd.
     - apply IH_Select; auto.
   Qed.
 End UvalueInd.
-
-(* Injection of [dvalue] into [uvalue] *)
 Fixpoint dvalue_to_uvalue (dv : dvalue) : uvalue :=
   match dv with
   | DVALUE_Addr a => UVALUE_Addr a
@@ -342,8 +318,6 @@ Fixpoint dvalue_to_uvalue (dv : dvalue) : uvalue :=
   | DVALUE_Array elts => UVALUE_Array (map dvalue_to_uvalue elts)
   | DVALUE_Vector elts => UVALUE_Vector (map dvalue_to_uvalue elts)
   end.
-
-(* Partial injection of [uvalue] into [dvalue] *)
 Fixpoint uvalue_to_dvalue (uv : uvalue) : err dvalue :=
   match uv with
   | UVALUE_Addr a                          => ret (DVALUE_Addr a)
@@ -374,25 +348,6 @@ Fixpoint uvalue_to_dvalue (uv : uvalue) : err dvalue :=
     ret (DVALUE_Vector elts')
 
   | _ => failwith "Attempting to convert a partially non-reduced uvalue to dvalue. Should not happen"
-                 (* YZ: likely useless to recurse: I think it should be an invariant that:
-                    1: We only call [uvalue_to_dvalue] on concrete [uvalue]s
-                    2: That concrete [uvalue] do not contain any operators, i.e. are already fully reduced
-                  *)
-                 (* TODO: recursively convert dvalue to uvalue with evaluation*)
-  (*
-  | UVALUE_IBinop iop v1 v2                => ret (DVALUE_IBinop iop v1 v2)
-  | UVALUE_ICmp cmp v1 v2                  => ret (DVALUE_ICmp cmp v1 v2)
-  | UVALUE_FBinop fop fm v1 v2             => ret (DVALUE_FBinop fop fm v1 v2)
-  | UVALUE_FCmp cmp v1 v2                  => ret (DVALUE_FCmp cmp v1 v2)
-  | UVALUE_Conversion conv v t_to          => ret (DVALUE_Conversion conv v t_to)
-  | UVALUE_GetElementPtr t ptrval idxs     => ret (DVALUE_GetElementPtr t ptrval idxs)
-  | UVALUE_ExtractElement vec idx          => ret (DVALUE_ExtractElement vec idx)
-  | UVALUE_InsertElement vec elt idx       => ret (DVALUE_InsertElement vec elt idx)
-  | UVALUE_ShuffleVector vec1 vec2 idxmask => ret (DVALUE_ShuffleVector vec1 vec2 idxmask)
-  | UVALUE_ExtractValue vec idxs           => ret (DVALUE_ExtractValue vec idxs)
-  | UVALUE_InsertValue vec elt idxs        => ret (DVALUE_InsertValue vec elt idxs)
-  | UVALUE_Select cnd v1 v2                => ret (DVALUE_Select cnd v1 v2)
-   *)
   end.
 
 
@@ -453,12 +408,6 @@ Proof.
     + rewrite H. cbn. inversion IHelts. reflexivity.
       constructor; auto.
 Qed.
-
-
-(* returns true iff the uvalue contains no occurrence of UVALUE_Undef. *)
-(* YZ: See my comment above. If I'm correct, then we should also fail on operators and hence have:
-   is_concrete uv = true <-> uvalue_to_dvalue uv = Some v
- *)
 Fixpoint is_concrete (uv : uvalue) : bool :=
   match uv with
   | UVALUE_Addr a => true
@@ -476,39 +425,7 @@ Fixpoint is_concrete (uv : uvalue) : bool :=
   | UVALUE_Array elts => allb is_concrete elts
   | UVALUE_Vector elts => allb is_concrete elts
   | _ => false
-  (* | UVALUE_IBinop iop v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_ICmp cmp v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_FBinop fop fm v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_FCmp cmp v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_Conversion conv v t_to => is_concrete v *)
-  (* | UVALUE_GetElementPtr t ptrval idxs => allb is_concrete (ptrval :: idxs) *)
-  (* | UVALUE_ExtractElement vec idx => allb is_concrete [vec ; idx] *)
-  (* | UVALUE_InsertElement vec elt idx => allb is_concrete [vec ; elt ; idx] *)
-  (* | UVALUE_ShuffleVector vec1 vec2 idxmask => allb is_concrete [vec1 ; vec2 ; idxmask] *)
-  (* | UVALUE_ExtractValue vec idxs => is_concrete vec *)
-  (* | UVALUE_InsertValue vec elt idxs => allb is_concrete [vec ; elt] *)
-  (* | UVALUE_Select cnd v1 v2 => allb is_concrete [cnd ; v1 ; v2] *)
   end.
-
-(*
-(* YZ: TODO: need a more general induction principle over uvalue to prove this due to Structs/Arrays/Vectors *)
-Lemma uvalue_to_dvalue_is_concrete: forall uv,
-    is_concrete uv = true <-> exists v, uvalue_to_dvalue uv = inr v.
-Proof.
-  induction uv using uvalue_ind'; simpl; split; intros HX;
-    first [easy | eexists; reflexivity  | destruct HX; easy | idtac].
-  - exists (match (map_monad uvalue_to_dvalue fields) with
-       | inl _ => DVALUE_None
-       | inr v0 => DVALUE_Struct v0
-       end).
-    admit.
-  - 
-Admitted.  
-*)
-
-
-(* If both operands are concrete, uvalue_to_dvalue them and run them through
-   opd, else run the abstract ones through opu *)
 Definition uvalue_to_dvalue_binop {A : Type}
            (opu : uvalue -> uvalue -> A) (opd : dvalue -> dvalue -> A) (uv1 uv2 : uvalue) : A :=
   let ma := dv1 <- uvalue_to_dvalue uv1 ;; dv2 <- uvalue_to_dvalue uv2 ;; ret (opd dv1 dv2)
@@ -516,8 +433,6 @@ Definition uvalue_to_dvalue_binop {A : Type}
      | inl e => opu uv1 uv2
      | inr a => a
      end.
-
-(* Like uvalue_to_dvalue_binop, but the second operand is already concrete *)
 Definition uvalue_to_dvalue_binop2 {A : Type}
            (opu : uvalue -> uvalue -> A) (opd : dvalue -> dvalue -> A) (uv1 : uvalue) (dv2 : dvalue) : A :=
   let ma := dv1 <- uvalue_to_dvalue uv1 ;; ret (opd dv1 dv2)
@@ -534,14 +449,12 @@ Definition uvalue_to_dvalue_uop {A : Type}
      | inr a => a
      end.
 
-(* TODO: define [refines : uvalue -> dvalue -> Prop] which characterizes the nondeterminism of undef values *)
-
 Section hiding_notation.
   Local Open Scope sexp_scope.
 
   Fixpoint serialize_dvalue' (dv:dvalue): sexp :=
     match dv with
-    | DVALUE_Addr a => Atom "address" (* TODO: insist that memory models can print addresses? *)
+    | DVALUE_Addr a => Atom "address"
     | DVALUE_I1 x => Atom "dvalue(i1)"
     | DVALUE_I8 x => Atom "dvalue(i8)"
     | DVALUE_I32 x => Atom "dvalue(i32)"
@@ -564,7 +477,7 @@ Section hiding_notation.
 
   Fixpoint serialize_uvalue' (pre post: string) (uv:uvalue): sexp :=
     match uv with
-    | UVALUE_Addr a => Atom (pre ++ "address" ++ post)%string (* TODO: insist that memory models can print addresses? *)
+    | UVALUE_Addr a => Atom (pre ++ "address" ++ post)%string
     | UVALUE_I1 x => Atom (pre ++ "uvalue(i1)" ++ post)%string
     | UVALUE_I8 x => Atom (pre ++ "uvalue(i8)" ++ post)%string
     | UVALUE_I32 x => Atom (pre ++ "uvalue(i32)" ++ post)%string
@@ -586,14 +499,6 @@ Section hiding_notation.
     | UVALUE_ICmp cmp v1 v2 => [serialize_uvalue' "(" "" v1; to_sexp cmp; serialize_uvalue' "" ")" v2]
     | UVALUE_FBinop fop _ v1 v2 => [serialize_uvalue' "(" "" v1; to_sexp fop; serialize_uvalue' "" ")" v2]
     | UVALUE_FCmp cmp v1 v2 => [serialize_uvalue' "(" "" v1; to_sexp cmp; serialize_uvalue' "" ")" v2]
-    (* | UVALUE_Conversion       (conv:conversion_type) (v:uvalue) (t_to:dtyp) *)
-    (* | UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue)) (* TODO: do we ever need this? GEP raises an event? *) *)
-    (* | UVALUE_ExtractElement   (vec: uvalue) (idx: uvalue) *)
-    (* | UVALUE_InsertElement    (vec: uvalue) (elt:uvalue) (idx:uvalue) *)
-    (* | UVALUE_ShuffleVector    (vec1:uvalue) (vec2:uvalue) (idxmask:uvalue) *)
-    (* | UVALUE_ExtractValue     (vec:uvalue) (idxs:list int) *)
-    (* | UVALUE_InsertValue      (vec:uvalue) (elt:uvalue) (idxs:list int) *)
-    (* | UVALUE_Select           (cnd:uvalue) (v1:uvalue) (v2:uvalue) *)
     | _ => Atom "TODO: show_uvalue"
     end.
 
@@ -702,13 +607,6 @@ Section DecidableEquality.
   Hint Unfold eqv_dvalue : core.
 End DecidableEquality.
 
-(* TODO: include Undefined values in this way? i.e. Undef is really a predicate on values
-   Note: this isn't correct because it won't allow for undef fields of a struct or elts of an array
-Inductive dvalue' : Set :=
-| DVALUE_Undef (p:dvalue -> bool) (* TODO: used to include type information. is it necessary? (t:dtyp)  *)
-| DVALUE_Val (d:dvalue).
-*)
-
 Definition is_DVALUE_I1 (d:dvalue) : bool :=
   match d with
   | DVALUE_I1 _ => true
@@ -739,17 +637,12 @@ Definition is_DVALUE_IX (d:dvalue) : bool :=
 
 Class VInt I : Type :=
   {
-    (* Comparisons *)
     eq : I -> I -> bool;
     cmp : comparison -> I -> I -> bool;
     cmpu : comparison -> I -> I -> bool;
-
-    (* Constants *)
     bitwidth : nat;
     zero : I;
     one : I;
-
-    (* Arithmetic *)
     add : I -> I -> I;
     add_carry : I -> I -> I -> I;
     add_overflow : I -> I -> I -> I;
@@ -770,17 +663,11 @@ Class VInt I : Type :=
     shru : I -> I -> I;
 
     negative : I -> I;
-
-    (* Logic *)
     and : I -> I -> I;
     or : I -> I -> I;
     xor : I -> I -> I;
-
-    (* Bounds *)
     min_signed : Z;
     max_signed : Z;
-
-    (* Conversion *)
     to_dvalue : I -> dvalue;
     unsigned : I -> Z;
     signed : I -> Z;
@@ -790,19 +677,14 @@ Class VInt I : Type :=
 
 
   Global Instance VInt1 : VInt Int1.int :=
-  {
-    (* Comparisons *)
+    {
     eq := Int1.eq;
     cmp := Int1.cmp;
     cmpu := Int1.cmpu;
 
     bitwidth := 1;
-
-    (* Constants *)
     zero := Int1.zero;
     one := Int1.one;
-
-    (* Arithmetic *)
     add := Int1.add;
     add_carry := Int1.add_carry;
     add_overflow := Int1.add_overflow;
@@ -823,17 +705,11 @@ Class VInt I : Type :=
     shru := Int1.shru;
 
     negative := Int1.negative;
-
-    (* Logic *)
     and := Int1.and;
     or := Int1.or;
     xor := Int1.xor;
-
-    (* Bounds *)
     min_signed := Int1.min_signed;
     max_signed := Int1.max_signed;
-
-    (* Conversion *)
     to_dvalue := DVALUE_I1;
     unsigned := Int1.unsigned;
     signed := Int1.signed;
@@ -843,19 +719,14 @@ Class VInt I : Type :=
 
 
   Global Instance VInt8 : VInt Int8.int :=
-  {
-    (* Comparisons *)
+    {
     eq := Int8.eq;
     cmp := Int8.cmp;
     cmpu := Int8.cmpu;
 
     bitwidth := 8;
-
-    (* Constants *)
     zero := Int8.zero;
     one := Int8.one;
-
-    (* Arithmetic *)
     add := Int8.add;
     add_carry := Int8.add_carry;
     add_overflow := Int8.add_overflow;
@@ -876,17 +747,11 @@ Class VInt I : Type :=
     shru := Int8.shru;
 
     negative := Int8.negative;
-
-    (* Logic *)
     and := Int8.and;
     or := Int8.or;
     xor := Int8.xor;
-
-    (* Bounds *)
     min_signed := Int8.min_signed;
     max_signed := Int8.max_signed;
-
-    (* Conversion *)
     to_dvalue := DVALUE_I8;
     unsigned := Int8.unsigned;
     signed := Int8.signed;
@@ -896,19 +761,14 @@ Class VInt I : Type :=
 
 
   Global Instance VInt32 : VInt Int32.int :=
-  {
-    (* Comparisons *)
+    {
     eq := Int32.eq;
     cmp := Int32.cmp;
     cmpu := Int32.cmpu;
 
     bitwidth := 32;
-
-    (* Constants *)
     zero := Int32.zero;
     one := Int32.one;
-
-    (* Arithmetic *)
     add := Int32.add;
     add_carry := Int32.add_carry;
     add_overflow := Int32.add_overflow;
@@ -929,17 +789,11 @@ Class VInt I : Type :=
     shru := Int32.shru;
 
     negative := Int32.negative;
-
-    (* Logic *)
     and := Int32.and;
     or := Int32.or;
     xor := Int32.xor;
-
-    (* Bounds *)
     min_signed := Int32.min_signed;
     max_signed := Int32.max_signed;
-
-    (* Conversion *)
     to_dvalue := DVALUE_I32;
     unsigned := Int32.unsigned;
     signed := Int32.signed;
@@ -948,19 +802,14 @@ Class VInt I : Type :=
   }.
 
   Global Instance VInt64 : VInt Int64.int :=
-  {
-    (* Comparisons *)
+    {
     eq := Int64.eq;
     cmp := Int64.cmp;
     cmpu := Int64.cmpu;
 
     bitwidth := 64;
-
-    (* Constants *)
     zero := Int64.zero;
     one := Int64.one;
-
-    (* Arithmetic *)
     add := Int64.add;
     add_carry := Int64.add_carry;
     add_overflow := Int64.add_overflow;
@@ -981,17 +830,11 @@ Class VInt I : Type :=
     shru := Int64.shru;
 
     negative := Int64.negative;
-
-    (* Logic *)
     and := Int64.and;
     or := Int64.or;
     xor := Int64.xor;
-
-    (* Bounds *)
     min_signed := Int64.min_signed;
     max_signed := Int64.max_signed;
-
-    (* Conversion *)
     to_dvalue := DVALUE_I64;
     unsigned := Int64.unsigned;
     signed := Int64.signed;
@@ -1006,18 +849,7 @@ Class VInt I : Type :=
   Definition undef_int {Int} `{VInt Int}  := UVALUE_Undef (DTYPE_I (Z.of_nat bitwidth)).
 
   Definition to_uvalue {Int} `{VInt Int} (i : Int) : uvalue := dvalue_to_uvalue (to_dvalue i).
-
-  (* Arithmetic Operations ---------------------------------------------------- *)
   Section ARITHMETIC.
-
-    (* Evaluate integer opererations to get a dvalue.
-
-     These operations are between VInts, which are "vir"
-     integers. This is a typeclass that wraps all of the integer
-     operations that we use for integer types with different bitwidths.
-
-     SAZ: The "undef" here should refer to undefined behavior, not UVALUE_Undef, right?
-     *)
     Definition eval_int_op {Int} `{VInt Int} (iop:ibinop) (x y: Int) : undef dvalue :=
       match iop with
       | Add nuw nsw =>

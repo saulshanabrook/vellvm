@@ -1,14 +1,3 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
-
-
 open Printf
 open Unix
 
@@ -126,6 +115,3 @@ let link (mods:string list) (out_fn:string) (opt_level:string) : unit =
 	(List.fold_left (fun s -> fun i -> s ^ " -I" ^ i) "" !include_paths)
         (List.fold_left (fun s -> fun l -> s ^ " -l" ^ l) "" !libs))
     raise_error
-
-
-

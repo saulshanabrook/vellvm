@@ -1,14 +1,3 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
-(* begin hide *)
-
 From Coq Require Import
      ZArith String List
      FSets.FMapWeakList
@@ -574,10 +563,10 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         match t with
 
         | TERM_Ret (dt, op) =>
-          dv <- denote_exp (Some dt) op ;; (* TODO: actually done in denote_mcfg. Remove after validation *)
+          dv <- denote_exp (Some dt) op ;;
           ret (inr dv)
 
-        | TERM_Ret_void => (* TODO: actually done in denote_mcfg. Remove after validation *)
+        | TERM_Ret_void =>
           ret (inr UVALUE_None)
 
         | TERM_Br (dt,op) br1 br2 =>

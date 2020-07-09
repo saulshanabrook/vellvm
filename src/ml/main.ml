@@ -1,13 +1,3 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
-
 (* A main harness for Coq-extracted LLVM Transformations *)
 open Arg
 open Assert
@@ -50,7 +40,6 @@ let test_pp_dir dir =
   Printf.printf "%s\n" (outcome_to_string outcome);
   raise (Ran_tests (successful outcome))
 
-(* Ugly duplication. TODO: reuse more existing facility *)
 let ast_pp_file_inner path =
   let _ = Platform.verb @@ Printf.sprintf "* processing file: %s\n" path in
   let file, ext = Platform.path_to_basename_ext path in
@@ -152,5 +141,3 @@ let _ =
 
   with Ran_tests true -> exit 0
      | Ran_tests false -> exit 1
-
-

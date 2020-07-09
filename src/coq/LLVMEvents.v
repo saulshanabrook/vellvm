@@ -1,13 +1,3 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
-
 From Coq Require Import
      ZArith
      List
@@ -33,27 +23,6 @@ From Vir Require Import
      DynamicTypes
      DynamicValues
      Error.
-
-(****************************** LLVM Events *******************************)
-(**
-   Vir's semantics relies on _Interaction Trees_, a generic data-structure allowing to model
-   effectful computations.
-   This file defined the interface provided to the interaction trees, that is the set of
-   events that a LLVM program can trigger.
-   These events are then concretely interpreted as a succession of handler, as defined in the
-   _Handlers_ folder.
-   The possible events are:
-   * Function calls [CallE]
-   * Calls to intrinsics whose implementation _do not_ depends on the memory [IntrinsicE]
-   * Interactions with the global environment [GlobalE]
-   * Interactions with the local environment [LocalE]
-   * Manipulation of the frame stack for local environments [StackE]
-   * Interactions with the memory [MemoryE]
-   * Concretization of a under-defined value [PickE]
-   * Undefined behaviour [UBE]
-   * Failure [FailureE]
-   * Debugging messages [DebugE]
-*)
 
 Set Implicit Arguments.
 Set Contextual Implicit.

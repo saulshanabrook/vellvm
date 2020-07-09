@@ -1,16 +1,4 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
-
 (** * Plugging the pieces together: executable and propositional semantics for Vir *)
-
-(* begin hide *)
 From Coq Require Import
      Ensembles List String ZArith.
 
@@ -79,7 +67,6 @@ Import D IS.
 
   (* Who is in charge of allocating the addresses for external functions declared in this mcfg? *)
   Definition allocate_declaration (d:declaration dtyp) : itree L0 unit :=
-    (* SAZ TODO:  Don't allocate pointers for LLVM intrinsics declarations *)
     'v <- trigger (Alloca DTYPE_Pointer);;
     trigger (GlobalWrite (dc_name d) v).
 
@@ -167,14 +154,6 @@ Import D IS.
     'addr <- trigger (GlobalRead (Name entry)) ;;
     D.denote_mcfg defns ret_typ (dvalue_to_uvalue addr) args.
 
-
-  (* SAZ: main_args and denote_vir_main may not be needed anymore, but I'm keeping them 
-     For backwards compatibility.
-  *)
-  (* (for now) assume that [main (i64 argc, i8** argv)]
-    pass in 0 and null as the arguments to main
-    Note: this isn't compliant with standard C semantics
-   *)
   Definition main_args := [DV.UVALUE_I64 (DynamicValues.Int64.zero);
                            DV.UVALUE_Addr (Addr.null)
                           ].
@@ -195,8 +174,6 @@ Import D IS.
   Definition mcfg_of_tle (p: list (toplevel_entity typ (block typ * list (block typ)))) :=
     convert_types (CFG.mcfg_of_modul _ (modul_of_toplevel_entities _ p)).
 
-  (* YZ TODO : We overload the term interpreter for the general notion of lifting handlers and
-     for the executable version of the semantics *)
   Definition interpreter_user
              (ret_typ : dtyp)
              (entry : string)

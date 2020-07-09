@@ -1,15 +1,5 @@
-
-(* TODO: This file needs to be ported for use with ExtLib.
-     - replace eq_dec with RelDec and Eqv instances 
-*)
-
-
 Require Import ZArith.
-
-(* CompCert dependencies *)
 Require Import Integers Floats.
-
-(* Vir dependencies *)
 Require Import Vir.Util.
 Require Import Vir.LLVMAst Vir.AstLib Vir.CFG.
 Require Import Vir.DynamicValues Vir.StepSemantics Vir.Memory.

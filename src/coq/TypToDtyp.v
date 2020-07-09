@@ -130,7 +130,7 @@ Program Fixpoint typ_to_dtyp (env : list (ident * typ)) (t : typ) {measure (List
   | TYPE_Identified id =>
     let opt := find (fun a => Ident.eq_dec id (fst a)) env in
     match opt with
-    | None => DTYPE_Void   (* TODO: should this be None? *)
+    | None => DTYPE_Void
     | Some (_, t) => typ_to_dtyp (remove_key Ident.eq_dec id env) t
     end
 
@@ -183,7 +183,7 @@ Lemma typ_to_dtyp_equation  : forall env t,
     | TYPE_Identified id =>
       let opt := find (fun a => Ident.eq_dec id (fst a)) env in
       match opt with
-      | None => DTYPE_Void   (* TODO: should this be None? *)
+      | None => DTYPE_Void
       | Some (_, t) => typ_to_dtyp (remove_key Ident.eq_dec id env) t
       end
 

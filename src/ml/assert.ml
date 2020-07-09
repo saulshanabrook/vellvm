@@ -1,12 +1,3 @@
-(* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
- *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
- *                                                                            *
- *   This file is distributed under the terms of the GNU General Public       *
- *   License as published by the Free Software Foundation, either version     *
- *   3 of the License, or (at your option) any later version.                 *
- ---------------------------------------------------------------------------- *)
 type assertion = (unit -> unit)
 
 type 'a test = 
@@ -95,7 +86,3 @@ let outcome_to_string (o:outcome):string =
     ) in
   let (p,f,tot,str) = List.fold_left helper (0,0,0,"") o in
   str ^ sep ^ (Printf.sprintf "Passed: %d/%d\nFailed: %d/%d\n" p tot f tot)
-  
-
-
-

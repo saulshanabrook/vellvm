@@ -31,41 +31,10 @@ Require Import Paco.paco.
 Import ListNotations.
 Import ITree.Basics.Basics.Monads.
 
-
-(* From Coq Require Import *)
-(*      Ensembles *)
-(*      Setoid *)
-(*      RelationClasses *)
-(*      Logic *)
-(*      Morphisms *)
-(*      Relations *)
-(*      List. *)
-
-(* From ExtLib Require Import *)
-(*      Structures.Functor *)
-(*      Structures.Monad *)
-(*      Structures.MonadTrans *)
-(*      Data.Monads.EitherMonad. *)
-
-(* From ITree Require Import *)
-(*      Basics.Basics *)
-(*      ITreeDefinition *)
-(*      Eq.Eq *)
-(*      Eq.UpToTaus *)
-(*      ITree *)
-(*      Basics.Monad *)
-(*      KTree *)
-(*      KTreeFacts. *)
-
-(* From Paco Require Import paco. *)
-
 Import MonadNotation.
 Import CatNotations.
 Local Open Scope monad_scope.
 Local Open Scope cat_scope.
-
-
-(* TODO: Move to itrees library --------------------------------------------- *)
 Lemma eutt_iter'' {E I1 I2 R1 R2}
       (RI1 RI2 : I1 -> I2 -> Prop)
       (HSUB: RI2 <2= RI1)
@@ -989,12 +958,6 @@ Section PropMonad.
       (forall T TT e,
           (prop_compose TT g_spec (h_spec T e))
             (interp g (h T e))).
-
-
-
-  
-
-  
   
   Definition singletonT {E}: itree E ~> PropT E :=
     fun R t t' => t' ≈ t.
@@ -1967,7 +1930,5 @@ Proof.
           -- reflexivity.
           -- intros b HRET. apply HRkbc. rewrite EQb. eapply Returns_bind; eauto.
   Qed.
-  
-
 
 End MonadLaws.

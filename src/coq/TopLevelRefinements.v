@@ -7,7 +7,6 @@ From ITree Require Import
      KTreeFacts
      Eq.Eq.
 
-(* YZ TODO : Revisit the dependency w.r.t. Refinement *)
 From Vir Require Import
      Util
      PropT
@@ -46,7 +45,6 @@ Module R := Refinement.Make Memory.Addr LLVMEvents.
 Import R. 
 
 (**
-   YZ: Trying to figure how to tidy up everything. This file is currently a holdall.
    In here, we have:
    * partial interpreters to each levels;
    * hierarchies of refinements of mcfgs and proofs of inclusions;
@@ -70,7 +68,6 @@ Import R.
     chain of relations on [mcfg typ].
  *)
 
-(** BEGIN TO MOVE *)
 Lemma subrelation_R_TT:
   forall A (R : relation A), subrelation R TT.
 Proof. firstorder. Qed.
@@ -95,13 +92,6 @@ Proof.
   eapply subrelation_prod_left. apply subrelation_R_TT. all: apply PR.
 Qed.
 
-
-(* Instance runState_proper_eqit {E A env} : Proper (Monad.eqm ==> Logic.eq ==> eutt Logic.eq) (@runState E A env). *)
-(* Proof. *)
-(*   repeat intro; subst. unfold runState. *)
-(*   unfold eqm, ITreeMonad.EqM_ITree in H. *)
-(*   rewrite H; reflexivity. *)
-(* Qed. *)
 
 Global Instance interp_state_proper {T E F S}
          (h: forall T : Type, E T -> Monads.stateT S (itree F) T)
@@ -129,8 +119,6 @@ Instance TT_equiv :
 Proof.
   intros A; split; repeat intro; auto.
 Qed.
-
-(** END TO MOVE *)
 
 Section REFINEMENT.
   

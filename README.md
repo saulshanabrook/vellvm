@@ -1,16 +1,19 @@
+# TODO
+
+- Write a Readme that maps concepts from the paper to definitions from the development
+
 # Vir
 
-TODO
+This contains the bulk of VIR, anonymized for submission. For the
+purposes of anonymization, most documentation and comments have been
+removed, and there may be some whitespace artifacts as a
+result. Should the paper be accepted a clean, fully documented
+artifact will be submitted for review.
+
+# Helix
 
 “The formalization of a Helix front-end for VIR, of which we report in Section 7, being an ongoing work whose details are outside the scope of this submission, we have chosen not to include it as part of the artifact submitted. A public link will be made available after the end of the anonimization phase that will attest of any claim made in the paper” 
 
-Create a branch on github
-Substitute mentions of Vir for mentions of VIR
-Remove all comments that have to do with TODO, doubts, potential alternative, speculations
-Leave in high level comments that explains the code if they are clean enough
-Write a Readme that maps concepts from the paper to definitions from the development
-
-But add in the Readme an explanation that anonymization purpose conflicted with documentation, and that assuming acceptation of the paper, a clean, fully documented artifact will be submitted for reviewing
 
 # Structure of the repository
 

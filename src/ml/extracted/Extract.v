@@ -1,6 +1,6 @@
-Require Vellvm.TopLevel.
-Require Vellvm.Transformations.Transform.
-Require Vellvm.ParserHelper.
+Require Vir.TopLevel.
+Require Vir.Transformations.Transform.
+Require Vir.ParserHelper.
 
 Require ExtrOcamlBasic.
 Require ExtrOcamlString.

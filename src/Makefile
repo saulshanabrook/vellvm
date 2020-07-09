@@ -8,7 +8,7 @@ EXTRACTDIR = ml/extracted
 
 ITREEDIR=../lib/InteractionTrees
 
-COQINCLUDES=$(foreach d, $(COQDIR), -R $(d) Vellvm) -R $(EXTRACTDIR) Extract -R $(ITREEDIR)/theories/ ITree 
+COQINCLUDES=$(foreach d, $(COQDIR), -R $(d) Vir) -R $(EXTRACTDIR) Extract -R $(ITREEDIR)/theories/ ITree 
 COQC="$(COQBIN)coqc" -q $(COQINCLUDES) $(COQCOPTS)
 COQDEP="$(COQBIN)coqdep" $(COQINCLUDES)
 COQEXEC="$(COQBIN)coqtop" -q -w none $(COQINCLUDES) -batch -load-vernac-source
@@ -37,13 +37,13 @@ all:
 	@test -f .depend || $(MAKE) depend
 	$(MAKE) coq
 	$(MAKE) extracted
-	$(MAKE) vellvm
+	$(MAKE) vir
 
 interp:
 	@test -f .depend || $(MAKE) depend
 	$(MAKE) coqinterp
 	$(MAKE) extracted
-	$(MAKE) vellvm
+	$(MAKE) vir
 
 coq: $(VOFILES)
 
@@ -81,20 +81,20 @@ depend: itrees $(VFILES)
 EXE=_build/default/ml/main.exe
 
 $(EXE): extracted ml/dune ml/extracted/dune ml/testing/dune
-	@echo "Compiling Vellvm"
+	@echo "Compiling Vir"
 	dune build ml/main.exe 
 
-vellvm: $(EXE)
-	cp $(EXE) vellvm
+vir: $(EXE)
+	cp $(EXE) vir
 
-test: vellvm
-	./vellvm --test
+test: vir
+	./vir --test
 
 print-includes:
 	@echo $(COQINCLUDES)
 
-clean: clean-vellvm clean-itrees
-clean-vellvm:
+clean: clean-vir clean-itrees
+clean-vir:
 	rm -f .depend
 	find $(COQDIR) -name "*.vo" -delete
 	find $(COQDIR) -name "*.vio" -delete
@@ -103,11 +103,11 @@ clean-vellvm:
 	rm -f $(EXTRACTDIR)/STAMP $(EXTRACTDIR)/*.ml $(EXTRACTDIR)/*.mli
 	dune clean
 	rm -rf output
-	rm -f vellvm
+	rm -f vir
 	rm -f doc/coq2html.ml doc/coq2html doc/*.cm? doc/*.o
 clean-itrees:
 	make -C $(ITREEDIR) clean
-.PHONY: clean-vellvm clean-itrees
+.PHONY: clean-vir clean-itrees
 
 doc/coq2html: 
 	make -C ../lib/coq2html

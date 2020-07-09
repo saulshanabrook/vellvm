@@ -5,7 +5,7 @@ TODO
 “The formalization of a Helix front-end for VIR, of which we report in Section 7, being an ongoing work whose details are outside the scope of this submission, we have chosen not to include it as part of the artifact submitted. A public link will be made available after the end of the anonimization phase that will attest of any claim made in the paper” 
 
 Create a branch on github
-Substitute mentions of Vellvm for mentions of VIR
+Substitute mentions of Vir for mentions of VIR
 Remove all comments that have to do with TODO, doubts, potential alternative, speculations
 Leave in high level comments that explains the code if they are clean enough
 Write a Readme that maps concepts from the paper to definitions from the development
@@ -44,14 +44,14 @@ TODO point out handlers.
 
 Compilation:
 
-1. clone the vellvm git repo with `--recurse-submodule` option (`git clone --recurse-submodules`)
+1. clone the vir git repo with `--recurse-submodule` option (`git clone --recurse-submodules`)
 2. run `make` in the /src directory
 
 # Running
 
-Do `src/vellvm -help` from the command line.
+Do `src/vir -help` from the command line.
 
-Try `src/vellvm -interpret tests/ll/factorial.ll`.
+Try `src/vir -interpret tests/ll/factorial.ll`.
 
 
 # Notes

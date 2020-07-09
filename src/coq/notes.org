@@ -14,10 +14,10 @@
      
 ** Subset the development for the DSSS 
    - find minimal interesting subset
-   - define IMP -> Vellvm compiler
+   - define IMP -> Vir compiler
    - prove correct
 
-** Vellvm IR
+** Vir IR
 
 
 *** Features
@@ -35,8 +35,8 @@
  - 'metadata' propagation 
 
 
-** Vellvm <-> LLVM connection
-*** Vellvm IR vs. LLVM AST
+** Vir <-> LLVM connection
+*** Vir IR vs. LLVM AST
  - branch targets <-> phi translation
 
 

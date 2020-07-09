@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -15,7 +15,7 @@
 ;; open DynamicValues
 ;; open Handlers.LLVMEvents
 
-(* Vellvm test cases -------------------------------------------------------- *)
+(* Vir test cases -------------------------------------------------------- *)
 
 
 let parse_pp_test path =
@@ -32,7 +32,7 @@ let parse_pp_test path =
       let _ = llc_parse vll_file dot_s in
       ()
     with
-    PlatformError _ -> failwith (Printf.sprintf "vellvm output bad file: %s" vll_file)
+    PlatformError _ -> failwith (Printf.sprintf "vir output bad file: %s" vll_file)
   with
     PlatformError _ -> ()
 

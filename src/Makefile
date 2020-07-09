@@ -21,8 +21,7 @@ COQFILESINTERP := Numeric/Archi Numeric/Coqlib Numeric/Integers Numeric/Zbits Nu
 									Handlers/Intrinsics Handlers/Local Handlers/Global Handlers/Stack Handlers/Pick Handlers/Memory Handlers/UndefinedBehaviour Handlers/Handlers\
 									Denotation InterpreterMCFG InterpreterCFG TopLevel Refinement TopLevelRefinements
 
-COQFILESOPT    := Transformations/Transform Transformations/Renaming Transformations/DeadInstr Transformations/Traversal\
-									Transformations/Transformation 
+COQFILESOPT    :=
 
 OLLVMFILES :=
 

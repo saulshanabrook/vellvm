@@ -48,13 +48,10 @@ Section StackMap.
           Ret ((init, env::stk), tt)
         | StackPop =>
           match stk with
-          (* CB TODO: should this raise an error? Is this UB? *)
           | [] => raise "Tried to pop too many stack frames."
           | (env'::stk') => Ret ((env',stk'), tt)
           end
         end.
-
-    (* Transform a local handler that works on maps to one that works on stacks *)
     Definition handle_local_stack {E} `{FailureE -< E} (h:(LocalE k v) ~> stateT map (itree E)) :
       LocalE k v ~> stateT (map * stack) (itree E)
       :=
@@ -108,20 +105,6 @@ Section StackMap.
 
   End PARAMS.
 
-    (* SAZ: I wasn't (yet) able to completey disentangle the ocal events from the stack events.
-       This version makes the stack a kind of "wrapper" around the locals and provides a way
-       of lifting locals into this new state.
-
-       There should be some kind of lemma long the lines of:
-
-        [forall (t:itree (E +' LocalE k v +' F) V) (env:map) (s:stack),
-         run_local t env ≅
-         Itree.map fst (run_local_stack (translate _into_stack t) (env, s))]
-
-       Here, [_into_stack : (E +' LocalE k v +' F) ~> (E +' ((LocalE k v) +' StackE k v) +' F)]
-       is the inclusion into stack events.
-    *)
-
 End StackMap.
 
 From ExtLib Require Import
@@ -132,4 +115,3 @@ From Vir Require Import
 Module Make (A : ADDRESS) (LLVMEvents : LLVM_INTERACTIONS(A)).
   Definition lstack := @stack (list (raw_id * LLVMEvents.DV.uvalue)).
 End Make.
-

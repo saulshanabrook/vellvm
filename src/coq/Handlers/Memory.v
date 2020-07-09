@@ -54,20 +54,6 @@ Import ListNotations.
 
 Set Implicit Arguments.
 Set Contextual Implicit.
-(* end hide *)
-
-(** * Memory Model
-
-    This file implements VIR's memory model as an handler for the [MemoryE] family of events.
-    The model is inspired by CompCert's memory model, but differs in that it maintains two
-    representation of the memory, a logical one and a low-level one.
-    Pointers (type signature [MemoryAddress.ADDRESS]) are implemented as a pair containing
-    an address and an offset.
-*)
-
-(** ** Type of pointers
-    Implementation of the notion of pointer used: an address and an offset.
- *)
 Module Addr : MemoryAddress.ADDRESS with Definition addr := (Z * Z) % type.
   Definition addr := (Z * Z) % type.
   Definition null := (0, 0).
@@ -83,12 +69,6 @@ Module Addr : MemoryAddress.ADDRESS with Definition addr := (Z * Z) % type.
     - right. intros H. inversion H; subst. apply n. reflexivity.
   Qed.
 End Addr.
-
-(** ** Memory model
-    Implementation of the memory model, i.e. a handler for [MemoryE].
-    The memory itself, [memory], is a finite map (using the standard library's AVLs)
-    indexed on [Z].
- *)
 Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
   Import LLVMEvents.
   Import DV.
@@ -97,15 +77,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
   Definition addr := Addr.addr.
 
   Module IM := FMapAVL.Make(Coq.Structures.OrderedTypeEx.Z_as_OT).
-
-  (** ** Finite maps
-      We use finite maps in several place of the memory model. We rely on the AVL implementation from the standard library.
-      We redefine locally the operations we use and their axiomatisation as the interface exposed by the standard library
-      tends to leak out the [Raw] underlying implementation, and feels overall tedious to use.
-   *)
   Section Map_Operations.
-
-    (* Polymorphic type of maps indexed by [Z] *)
     Definition IntMap := IM.t.
 
     Definition add {a} k (v:a) := IM.add k v.
@@ -113,31 +85,17 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Definition member {a} k (m:IntMap a) := IM.mem k m.
     Definition lookup {a} k (m:IntMap a) := IM.find k m.
     Definition empty {a} := @IM.empty a.
-
-    (* We use two notions of equivalence of maps depending on the type of objects stored.
-       When we can get away with Leibniz's equality over the return type, we simply use
-       [Equal] that implements extensional equality (and equality of domains).
-       When the domain of value itself has a non-trivial notion of equivalence, we use [Equiv]
-       which relax functional equivalence up-to this relation.
-     *)
     Definition Equal {a} : IntMap a -> IntMap a -> Prop :=
       fun m m' => forall k, lookup k m = lookup k m'.
     Definition Equiv {a} (R : a -> a -> Prop) : IntMap a -> IntMap a -> Prop :=
       fun m m' =>
         (forall k, member k m <-> member k m') /\
         (forall k e e', lookup k m = Some e -> lookup k m' = Some e' -> R e e').
-
-    (* Extends the map with a list of pairs key/value.
-     Note: additions start from the end of the list, so in case of duplicate
-     keys, the binding in the front will shadow though in the back.
-     *)
     Fixpoint add_all {a} ks (m:IntMap a) :=
       match ks with
       | [] => m
       | (k,v) :: tl => add k v (add_all tl m)
       end.
-
-    (* Extends the map with the bindings {(i,v_1) .. (i+n-1, v_n)} for [vs ::= v_1..v_n] *)
     Fixpoint add_all_index {a} vs (i:Z) (m:IntMap a) :=
       match vs with
       | [] => m
@@ -149,23 +107,15 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       | O => []
       | S x => start :: Zseq (Z.succ start) x
       end.
-
-    (* Give back a list of values from [|i|] to [|i| + |sz| - 1] in [m].
-     Uses [def] as the default value if a lookup failed.
-     *)
     Definition lookup_all_index {a} (i:Z) (sz:Z) (m:IntMap a) (def:a) : list a :=
       List.map (fun x =>
                   match lookup x m with
                   | None => def
                   | Some val => val
                   end) (Zseq i (Z.to_nat sz)).
-
-    (* Takes the join of two maps, favoring the first one over the intersection of their domains *)
     Definition union {a} (m1 : IntMap a) (m2 : IntMap a)
       := IM.map2 (fun mx my =>
                     match mx with | Some x => Some x | None => my end) m1 m2.
-
-    (* TODO : Move the three following functions *)
     Fixpoint max_default (l:list Z) (x:Z) :=
       match l with
       | [] => x
@@ -226,13 +176,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       end.
 
   End Map_Operations.
-
-  (** ** Theory of the general operations over the finite maps we manipulate
-   *)
   Section Map_Theory.
-
-    (* begin hide *)
-    (** ** Utilitary lemmas  *)
     Lemma MapsTo_inj : forall {a} k v v' (m : IM.t a),
       IM.MapsTo k v m ->
       IM.MapsTo k v' m ->
@@ -290,12 +234,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       intros.
       apply range_list_nth_z; lia.
     Qed.
-
-    (* end hide *)
-
-    (** ** [member]/[lookup] interaction
-        Keys are in the domain if and only if they lead to values when looked-up
-     *)
     Lemma member_lookup {a} : forall k (m : IM.t a),
       member k m -> exists v, lookup k m = Some v.
     Proof.
@@ -317,10 +255,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       apply IM.Raw.Proofs.find_2 in IN; eauto.
       eapply IM.Raw.Proofs.MapsTo_In; eauto.
     Qed.
-
-    (** ** [add]/[lookup] interaction
-        Lookups look up the lastly added value
-     *)
     Lemma lookup_add_eq : forall {a} k x (m : IM.t a),
         lookup k (add k x m) = Some x.
     Proof.
@@ -350,10 +284,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       unfold IM.MapsTo in *.
       eapply IM.Raw.Proofs.MapsTo_In,EQy.
     Qed.
-
-    (** ** [add]/[member] interaction
-        Added keys are a member of the map
-     *)
     Lemma member_add_eq {a}: forall k v (m: IM.t a),
         member k (add k v m).
     Proof.
@@ -380,11 +310,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         rewrite IM.Raw.Proofs.add_in; right; auto.
         apply IM.Raw.Proofs.mem_2 in IN; auto.
     Qed.
-
-    (** ** Equivalences
-        Both notions of equivalence of maps that we manipulate are indeed equivalences
-        (assuming the relation on values is itself an equivalence for [Equiv]).
-     *)
     Global Instance Equal_Equiv {a}: Equivalence (@Equal a).
     Proof.
       split.
@@ -427,10 +352,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       repeat intro; subst.
       destruct (RelDec.rel_dec_p k y); [subst; rewrite 2 lookup_add_eq; auto | rewrite 2 lookup_add_ineq; auto].
     Qed.
-
-    (** ** [add]/[add]
-        Consecutive extensions of the map either commute or erase the oldest one.
-     *)
     Lemma add_add : forall {a} off b1 b2 (m : IM.t a),
         Equal (add off b2 (add off b1 m)) (add off b2 m).
     Proof.
@@ -480,9 +401,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       inv H0.
     Qed.
 
-    (** ** Behavior of [lookup_all_index]
-     *)
-
     Lemma lookup_all_index_cons {a} : forall k (n : Z) (m : IntMap a) def,
         n >= 0 ->
         lookup_all_index k (Z.succ n) m def =
@@ -518,8 +436,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         rewrite Nat2Z.id.
         reflexivity.
     Qed.
-
-    (* Generalization of [lookup_add_ineq]: adding outside of the range of the lookup is inconsequential *)
     Lemma lookup_all_index_add_out {a} : forall k n (m : IntMap a) key x def,
         (key < k \/ key >= k + n) ->
         lookup_all_index k n (add key x m) def =
@@ -539,10 +455,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       f_equal.
       rewrite lookup_all_index_add_out; auto; try lia.
     Qed.
-
-    (** ** Behavior of [add_all_index]
-     *)
-    (* Generalization of [lookup_add_eq]: looking in range of the additions is fully defined *)
     Lemma lookup_add_all_index_in {a} : forall l k z (m : IntMap a) v,
         z <= k <= z + Zlength l - 1 ->
         list_nth_z l (k - z) = Some v ->
@@ -560,8 +472,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         destruct (zeq (k - z)) eqn:INEQ'; [lia |].
         replace (k - (z + 1)) with (Z.pred (k-z)) by lia; auto.
     Qed.
-
-     (* (Different from [lookup_all_index_add_out]) Generalization of [lookup_add_eq]: looking out of range of the additions can ignore the additions *)
     Lemma lookup_add_all_index_out {a} : forall l k z (m : IntMap a),
         (k < z \/ k >= z + Zlength l) ->
         lookup k (add_all_index l z m) = lookup k m.
@@ -578,8 +488,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         rewrite Zlength_correct.
         lia.
     Qed.
-
-    (* Generalization of [add_ad], with the added constraint on the size of the lists *)
     Lemma add_all_index_twice {a} : forall (l1 l2 : list a) z m,
         Zlength l1 = Zlength l2 ->
         Equal (add_all_index l2 z (add_all_index l1 z m))
@@ -595,30 +503,9 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
   End Map_Theory.
 
-    (* TODO SAZ: mem_block should keep track of its allocation size so
-    that operations can fail if they are out of range
-
-    CB: I think this might happen implicitly with make_empty_block --
-    it initializes the IntMap with only the valid indices. As long as the
-    lookup functions handle this properly, anyway.
-     *)
-
   Section Datatype_Definition.
-
-    (** ** Simple view of memory
-      A concrete block is determined by its id and its size.
-     *)
     Inductive concrete_block :=
     | CBlock (size : Z) (block_id : Z) : concrete_block.
-
-    (** ** Logical view of memory
-      A logical block is determined by a size and a mapping from [Z] to special bytes,
-      we call such a mapping a [mem_block].
-      Those bytes can either be an actually 8bits byte, an address of a pointer,
-      a [PtrFrag], marking bytes that are part of an address but not its first byte,
-      or a special undefined byte.
-      It may also correspond to a concrete block whose id is then provided.
-     *)
     Inductive SByte :=
     | Byte : byte -> SByte
     | Ptr : addr -> SByte
@@ -627,41 +514,16 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Definition mem_block    := IntMap SByte.
     Inductive logical_block :=
     | LBlock (size : Z) (bytes : mem_block) (concrete_id : option Z) : logical_block.
-
-    (** ** Memory
-      A concrete memory, resp. logical memory, maps addresses to concrete blocks, resp. logical blocks.
-      A memory is a pair of both views of the memory.
-     *)
     Definition concrete_memory := IntMap concrete_block.
     Definition logical_memory  := IntMap logical_block.
     Definition memory          := (concrete_memory * logical_memory)%type.
-
-    (** ** Stack frames
-      A frame contains the list of block ids that need to be freed when popped,
-      i.e. when the function returns.
-      A [frame_stack] is a list of such frames.
-     *)
     Definition mem_frame := list Z.
     Inductive frame_stack : Type := | Singleton (f : mem_frame) | Snoc (s : frame_stack) (f : mem_frame).
-    (* Definition frame_stack := list mem_frame. *)
-
-    (** ** Memory stack
-      The full notion of state manipulated by the monad is a pair of a [memory] and a [mem_stack].
-     *)
     Definition memory_stack : Type := memory * frame_stack.
 
   End Datatype_Definition.
 
   Section Serialization.
-
-   (** ** Serialization
-       Conversion back and forth between values and their byte representation
-   *)
-
-    (* Converts an integer [x] to its byte representation over [n] bytes.
-     The representation is little endian. In particular, if [n] is too small,
-     only the least significant bytes are returned.
-     *)
     Fixpoint bytes_of_int (n: nat) (x: Z) {struct n}: list byte :=
       match n with
       | O => nil
@@ -670,17 +532,11 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
     Definition sbytes_of_int (count:nat) (z:Z) : list SByte :=
       List.map Byte (bytes_of_int count z).
-
-    (* Converts a list of bytes to an integer.
-     The byte encoding is assumed to be little endian.
-     *)
     Fixpoint int_of_bytes (l: list byte): Z :=
       match l with
       | nil => 0
       | b :: l' => Byte.unsigned b + int_of_bytes l' * 256
       end.
-
-    (* Partial function casting a [Sbyte] into a simple [byte] *)
     Definition Sbyte_to_byte (sb:SByte) : option byte :=
       match sb with
       | Byte b => ret b
@@ -705,8 +561,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Definition sbyte_list_to_Z (bytes:list SByte) : Z :=
       int_of_bytes (sbyte_list_to_byte_list bytes).
 
-    (** Length properties *)
-
     Lemma length_bytes_of_int:
       forall n x, List.length (bytes_of_int n x) = n.
     Proof.
@@ -728,12 +582,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       rewrite Byte.Z_mod_modulus_eq. reflexivity.
       apply two_p_gt_ZERO. omega. apply two_p_gt_ZERO. omega.
     Qed.
-
-    (** ** Serialization of [dvalue]
-      Serializes a dvalue into its SByte-sensitive form.
-      Integer are stored over 8 bytes.
-      Pointers as well: the address is stored in the first, [PtrFrag] flags mark the seven others.
-     *)
     Fixpoint serialize_dvalue (dval:dvalue) : list SByte :=
       match dval with
       | DVALUE_Addr addr => (Ptr addr) :: (repeat PtrFrag 7)
@@ -747,27 +595,18 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       | DVALUE_Packed_struct fields
       | DVALUE_Array fields
       | DVALUE_Vector fields =>
-        (* note the _right_ fold is necessary for byte ordering. *)
         fold_right (fun 'dv acc => ((serialize_dvalue dv) ++ acc) % list) [] fields
-      | _ => [] (* TODO add more dvalues as necessary *)
+      | _ => []
       end.
-
-    (** ** Well defined block
-      A list of [sbytes] is considered undefined if any of its bytes is undefined.
-      This predicate checks that they are all well-defined.
-     *)
     Definition all_not_sundef (bytes : list SByte) : bool :=
       forallb id (map Sbyte_defined bytes).
-
-    (** ** Size of a dynamic type
-      Computes the byte size of a [dtyp]. *)
     Fixpoint sizeof_dtyp (ty:dtyp) : Z :=
       match ty with
-      | DTYPE_I 1          => 8 (* All integers are padded to 8 bytes. *)
-      | DTYPE_I 8          => 8 (* All integers are padded to 8 bytes. *)
-      | DTYPE_I 32         => 8 (* All integers are padded to 8 bytes. *)
-      | DTYPE_I 64         => 8 (* All integers are padded to 8 bytes. *)
-      | DTYPE_I x          => 0 (* Unsupported integers *)
+      | DTYPE_I 1          => 8
+      | DTYPE_I 8          => 8
+      | DTYPE_I 32         => 8
+      | DTYPE_I 64         => 8
+      | DTYPE_I x          => 0
       | DTYPE_Pointer      => 8
       | DTYPE_Packed_struct l
       | DTYPE_Struct l     => fold_left (fun acc x => acc + sizeof_dtyp x) l 0
@@ -776,20 +615,14 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       | DTYPE_Float        => 4
       | DTYPE_Double       => 8
       | DTYPE_Half         => 4
-      | DTYPE_X86_fp80     => 4 (* TODO: Unsupported, currently modeled by Float32 *)
-      | DTYPE_Fp128        => 4 (* TODO: Unsupported, currently modeled by Float32 *)
-      | DTYPE_Ppc_fp128    => 4 (* TODO: Unsupported, currently modeled by Float32 *)
+      | DTYPE_X86_fp80     => 4
+      | DTYPE_Fp128        => 4
+      | DTYPE_Ppc_fp128    => 4
       | DTYPE_Metadata     => 0
-      | DTYPE_X86_mmx      => 0 (* TODO: Unsupported *)
-      | DTYPE_Opaque       => 0 (* TODO: Unsupported *)
-      | _                  => 0 (* TODO: add support for more types as necessary *)
+      | DTYPE_X86_mmx      => 0
+      | DTYPE_Opaque       => 0
+      | _                  => 0
       end.
-
-    (** ** Deserialization of a list of sbytes
-      Deserialize a list [bytes] of SBytes into a uvalue of type [t],
-      assuming that none of the bytes are undef.
-      Truncate integer as dictated by [t].
-     *)
     Fixpoint deserialize_sbytes_defined (bytes:list SByte) (t:dtyp) {struct t} : uvalue :=
       match t with
       | DTYPE_I sz =>
@@ -799,7 +632,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         | 8  => UVALUE_I8 (repr des_int)
         | 32 => UVALUE_I32 (repr des_int)
         | 64 => UVALUE_I64 (repr des_int)
-        | _  => UVALUE_None (* invalid size. *)
+        | _  => UVALUE_None
         end
       | DTYPE_Float => UVALUE_Float (Float32.of_bits (repr (sbyte_list_to_Z bytes)))
       | DTYPE_Double => UVALUE_Double (Float.of_bits (repr (sbyte_list_to_Z bytes)))
@@ -807,7 +640,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       | DTYPE_Pointer =>
         match bytes with
         | Ptr addr :: tl => UVALUE_Addr addr
-        | _ => UVALUE_None (* invalid pointer. *)
+        | _ => UVALUE_None
         end
       | DTYPE_Array sz t' =>
         let fix array_parse count byte_sz bytes :=
@@ -845,27 +678,14 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
                 :: struct_parse tl (skipn size_ty bytes)
             end in
         UVALUE_Packed_struct (struct_parse fields bytes)
-      | _ => UVALUE_None (* TODO add more as serialization support increases *)
+      | _ => UVALUE_None
       end.
-
-    (* Returns undef if _any_ sbyte is undef.
-     Note that this means for instance that the result of the deserialization of an I1
-     depends on all the bytes provided, not just the first one!
-     *)
     Definition deserialize_sbytes (bytes : list SByte) (t : dtyp) : uvalue :=
       if all_not_sundef bytes
       then deserialize_sbytes_defined bytes t
       else UVALUE_Undef t.
-
-    (** ** Reading values in memory
-      Given an offset in [mem_block], we decode a [uvalue] at [dtyp] [t] by looking up the
-      appropriate number of [SByte] and deserializing them.
-     *)
     Definition read_in_mem_block (bk : mem_block) (offset : Z) (t : dtyp) : uvalue :=
       deserialize_sbytes (lookup_all_index offset (sizeof_dtyp t) bk SUndef) t.
-
-    (* Todo - complete proofs, and think about moving to MemoryProp module. *)
-    (* The relation defining serializable dvalues. *)
     Inductive serialize_defined : dvalue -> Prop :=
     | d_addr: forall addr,
         serialize_defined (DVALUE_Addr addr)
@@ -889,8 +709,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         serialize_defined dval ->
         serialize_defined (DVALUE_Array fields_list) ->
         serialize_defined (DVALUE_Array (dval :: fields_list)).
-
-    (* Lemma assumes all integers encoded with 8 bytes. *)
 
     Inductive sbyte_list_wf : list SByte -> Prop :=
     | wf_nil : sbyte_list_wf []
@@ -1005,8 +823,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
             apply Z.add_cancel_r; auto.
           * rewrite Nat2Z.inj_succ. rewrite Z.mul_succ_l. omega.
     Qed.
-
-    (* TODO: does this exist somewhere else? *)
     Lemma app_prefix :
       forall {A} (a b c : list A),
         b = c -> a ++ b = a ++ c.
@@ -1026,7 +842,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       intros dv dt TYP.
       induction TYP using dvalue_has_dtyp_ind'; auto.
       - cbn. rewrite DynamicValues.unsupported_cases_match. reflexivity. auto.
-      - (* Structs *)
+      -
         rewrite sizeof_struct_cons.
         cbn.
         rewrite <- sizeof_serialized with (dv:=f); auto.
@@ -1052,7 +868,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
           rewrite fold_sizeof.
           omega.
-      - (* Packed Structs *)
+      -
         rewrite sizeof_packed_struct_cons.
         cbn.
         rewrite <- sizeof_serialized with (dv:=f); auto.
@@ -1078,7 +894,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
           rewrite fold_sizeof.
           omega.
-      - (* Arrays *)
+      -
         generalize dependent sz.
         induction xs; intros sz H.
         + cbn. apply firstn_nil.
@@ -1104,7 +920,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
                pose proof Zle_0_nat (Datatypes.length xs).
                apply Z.mul_nonneg_nonneg; auto.
           * rewrite Nat2Z.inj_succ. rewrite Z.mul_succ_l. omega.
-      - (* Vectors *)
+      -
         generalize dependent sz.
         induction xs; intros sz H.
         + cbn. apply firstn_nil.
@@ -1312,18 +1128,18 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Proof.
       intros dval t TYP.
       induction TYP using dvalue_has_dtyp_ind'; auto.
-      - (* I1 *) admit.
-      - (* I8 *) admit.
-      - (* I32 *) admit.
-      - (* I64 *) admit.
+      - admit.
+      - admit.
+      - admit.
+      - admit.
       - cbn. rewrite DynamicValues.unsupported_cases_match; auto.
-      - (* Double *) admit.
-      - (* Float *) admit.
-      - (* Half *) admit.
-      - (* X86_fp80 *) admit.
-      - (* FP128 *) admit.
-      - (* Ppc_fp128 *) admit.
-      - (* Structs *)
+      - admit.
+      - admit.
+      - admit.
+      - admit.
+      - admit.
+      - admit.
+      -
         generalize dependent f.
         generalize dependent dt.
         generalize dependent dts.
@@ -1365,7 +1181,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           rewrite H0.
 
           reflexivity.
-      - (* Packed Structs *)
+      -
         generalize dependent f.
         generalize dependent dt.
         generalize dependent dts.
@@ -1407,7 +1223,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           rewrite H0.
 
           reflexivity.
-      - (* Arrays *)
+      -
         generalize dependent sz.
         generalize dependent dt.
         induction xs; intros dt IH IHdtyp sz H; inversion H.
@@ -1440,7 +1256,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           rewrite Nat2Z.id.
           reflexivity.
           auto.
-      - (* Vectors *)
+      -
         generalize dependent sz.
         generalize dependent dt.
         induction xs; intros dt IH IHdtyp Hvect sz H; inversion H.
@@ -1478,16 +1294,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
   End Serialization.
 
   Section GEP.
-
-    (** ** Get Element Pointer
-      Retrieve the address of a subelement of an indexable (i.e. aggregate) [dtyp] [t] (i.e. vector, array, struct, packed struct).
-      The [off]set parameter contains the current entry address of the aggregate structure being analyzed, while the list
-      of [dvalue] [vs] describes the indexes of interest used to access the subelement.
-      The interpretation of these values slightly depends on the type considered.
-      But essentially, for instance in a vector or an array, the head value should be an [i32] describing the index of interest.
-      The offset is therefore incremented by this index times the size of the type of elements stored. Finally, a recursive call
-      at this new offset allows for deeper unbundling of a nested structure.
-     *)
     Fixpoint handle_gep_h (t:dtyp) (off:Z) (vs:list dvalue): err Z :=
       match vs with
       | v :: vs' =>
@@ -1500,7 +1306,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           | DTYPE_Array _ ta =>
             handle_gep_h ta (off + k * (sizeof_dtyp ta)) vs'
           | DTYPE_Struct ts
-          | DTYPE_Packed_struct ts => (* Handle these differently in future *)
+          | DTYPE_Packed_struct ts =>
             let offset := fold_left (fun acc t => acc + sizeof_dtyp t)
                                     (firstn n ts) 0 in
             match nth_error ts n with
@@ -1532,14 +1338,10 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         end
       | [] => ret off
       end.
-
-    (* At the toplevel, GEP takes a [dvalue] as an argument that must contain a pointer, but no other pointer can be recursively followed.
-     The pointer set the block into which we look, and the initial offset. The first index value add to the initial offset passed to [handle_gep_h] for the actual access to structured data.
-     *)
     Definition handle_gep_addr (t:dtyp) (a:addr) (vs:list dvalue) : err addr :=
       let '(b, o) := a in
       match vs with
-      | DVALUE_I32 i :: vs' => (* TODO: Handle non i32 / i64 indices *)
+      | DVALUE_I32 i :: vs' =>
         off <- handle_gep_h t (o + (sizeof_dtyp t) * (unsigned i)) vs' ;;
         ret (b, off)
       | DVALUE_I64 i :: vs' =>
@@ -1580,54 +1382,30 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Qed.
 
     Definition logical_empty : logical_memory := empty.
-
-    (* Returns a fresh key for use in memory map *)
     Definition logical_next_key (m : logical_memory) : Z
       := let keys := map fst (IM.elements m) in
          1 + maximumBy Z.leb (-1) keys.
-
-    (** ** Initialization of blocks
-      Constructs an initial [mem_block] of undefined [SByte]s, indexed from 0 to n.
-     *)
     Fixpoint init_block_undef (n:nat) (m:mem_block) : mem_block :=
       match n with
       | O => add 0 SUndef m
       | S n' => add (Z.of_nat n) SUndef (init_block_undef n' m)
       end.
-
-    (* Constructs an initial [mem_block] containing [n] undefined [SByte]s, indexed from [0] to [n - 1].
-     If [n] is negative, it is treated as [0].
-     *)
     Definition init_block (n:Z) : mem_block :=
       match n with
       | 0 => empty
       | Z.pos n' => init_block_undef (BinPosDef.Pos.to_nat (n' - 1)) empty
-      | Z.neg _ => empty (* invalid argument *)
+      | Z.neg _ => empty
       end.
-
-    (* Constructs an initial [mem_block] appropriately sized for a given type [ty]. *)
     Definition make_empty_mem_block (ty:dtyp) : mem_block :=
       init_block (sizeof_dtyp ty).
-
-    (* Constructs an initial [logical_block] appropriately sized for a given type [ty]. *)
     Definition make_empty_logical_block (ty:dtyp) : logical_block :=
       let block := make_empty_mem_block ty in
       LBlock (sizeof_dtyp ty) block None.
-
-    (** ** Array element lookup
-      A [mem_block] can be seen as storing an array of elements of [dtyp] [t], from which we retrieve
-      the [i]th [uvalue].
-      The [size] argument has no effect, but we need to provide one to the array type.
-     *)
     Definition get_array_cell_mem_block (bk : mem_block) (bk_offset : Z) (i : nat) (size : Z) (t : dtyp) : err uvalue :=
       'offset <- handle_gep_h (DTYPE_Array size t)
                              bk_offset
                              [DVALUE_I64 (DynamicValues.Int64.repr (Z.of_nat i))];;
       inr (read_in_mem_block bk offset t).
-
-    (** ** Array lookups -- mem_block
-      Retrieve the values stored at position [from] to position [from + len - 1] in an array stored in a [mem_block].
-     *)
     Definition get_array_mem_block (bk : mem_block) (bk_offset : Z) (from len : nat) (size : Z) (t : dtyp) : err (list uvalue) :=
       map_monad (fun i => get_array_cell_mem_block bk bk_offset i size t) (seq from len).
 
@@ -1649,7 +1427,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Definition concrete_next_key (m : concrete_memory) : Z :=
       let keys         := List.map fst (IM.elements m) in
       let max          := max_default keys 0 in
-      let offset       := 1 in (* TODO: This should be "random" *)
+      let offset       := 1 in
       match lookup max m with
       | None => offset
       | Some (CBlock sz _) => max + sz + offset
@@ -1658,8 +1436,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
   End Concrete_Operations.
 
   Section Memory_Operations.
-
-      (** ** Smart lookups *)
       Definition get_concrete_block_mem (b : Z) (m : memory) : option concrete_block :=
         let concrete_map := fst m in
         lookup b concrete_map.
@@ -1667,16 +1443,10 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       Definition get_logical_block_mem (b : Z) (m : memory) : option logical_block :=
         let logical_map := snd m in
         lookup b logical_map.
-
-      (* Get the next key in the logical map *)
       Definition next_logical_key_mem (m : memory) : Z :=
         logical_next_key (snd m).
-
-      (* Get the next key in the concrete map *)
       Definition next_concrete_key_mem (m : memory) : Z :=
         concrete_next_key (fst m).
-
-      (** ** Extending the memory  *)
       Definition add_concrete_block_mem (id : Z) (b : concrete_block) (m : memory) : memory :=
         match m with
         | (cm, lm) =>
@@ -1688,13 +1458,8 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         | (cm, lm) =>
           (cm, add id b lm)
         end.
-
-    (* Check if the block for an address is allocated *)
-    (* TODO: should this check if everything is in range...? *)
     Definition allocated (a : addr) (m : memory_stack) : Prop :=
       let '((_,lm),_) := m in member (fst a) lm.
-
-    (* Do two memory regions overlap each other? *)
     Definition overlaps (a1 : addr) (sz1 : Z) (a2 : addr) (sz2 : Z) : Prop :=
       let a1_start := snd a1 in
       let a1_end   := snd a1 + sz1 in
@@ -1745,32 +1510,17 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       unfold overlaps_dtyp, overlaps.
       omega.
     Qed.
-      (** ** Concretization of blocks
-          Look-ups a concrete block in memory. The logical memory acts first as a potential layer of indirection:
-          - if no logical block is found, the input is directly returned.
-          - if a logical block is found, and that a concrete block is associated, the address of this concrete block
-          is returned, paired with the input memory.
-          - if a logical block is found, but that no concrete block is (yet) associated to it, then the associated
-          concrete block is allocated, and the association is added to the logical block.
-       *)
       Definition concretize_block_mem (b:Z) (m:memory) : Z * memory :=
         match get_logical_block_mem b m with
-        | None => (b, m) (* TODO: Not sure this makes sense??? *)
+        | None => (b, m)
         | Some (LBlock sz bytes (Some cid)) => (cid, m)
         | Some (LBlock sz bytes None) =>
-          (* Allocates a concrete block for this one *)
           let id        := next_concrete_key_mem m in
           let new_block := CBlock sz b in
           let m'        := add_concrete_block_mem id new_block m in
           let m''       := add_logical_block_mem  b (LBlock sz bytes (Some id)) m' in
           (id, m'')
         end.
-
-      (** ** Abstraction of blocks
-          Retrieve a logical description of a block as address and offset from its concrete address.
-          The non-trivial part consists in extracting from the [concrete_memory] the concrete address
-          and block corresponding to a logical one.
-       *)
       Definition get_real_cid (cid : Z) (m : memory) : option (Z * concrete_block)
         := IM.fold (fun k '(CBlock sz bid) a => if (k <=? cid) && (cid <? k + sz)
                                              then Some (k, CBlock sz bid)
@@ -1782,33 +1532,17 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
              '(rid, CBlock sz bid) <- get_real_cid cid m ;;
              ret (bid, cid-rid)
            end.
-
-      (* LLVM 5.0 memcpy
-         According to the documentation: http://releases.llvm.org/5.0.0/docs/LangRef.html#llvm-memcpy-intrinsic
-         this operation can never fail?  It doesn't return any status code...
-       *)
-
-      (* TODO probably doesn't handle sizes correctly...
-       *)
-      (** ** MemCopy
-          Implementation of the [memcpy] intrinsics.
-       *)
       Definition handle_memcpy (args : list dvalue) (m:memory) : err memory :=
         match args with
         | DVALUE_Addr (dst_b, dst_o) ::
                       DVALUE_Addr (src_b, src_o) ::
                       DVALUE_I32 len ::
-                      DVALUE_I32 align :: (* alignment ignored *)
-                      DVALUE_I1 volatile :: [] (* volatile ignored *)  =>
+                      DVALUE_I32 align ::
+                      DVALUE_I1 volatile :: []  =>
 
           let mem_block_size := unsigned len in
-          (* From LLVM Docs : The 'llvm.memcpy.*' intrinsics copy a block of
-             memory from the source location to the destination location,
-             which are not allowed to overlap. *)
-          (* IY: Could clean up with boolean reflection? *)
           if (no_overlap_b (dst_b, dst_o) mem_block_size
-                                 (src_b, src_o) mem_block_size) then
-            (* No guarantee that src_block has a certain size. *)
+                           (src_b, src_o) mem_block_size) then
             src_block <- trywith "memcpy src block not found"
                                 (get_logical_block_mem src_b m) ;;
             dst_block <- trywith "memcpy dst block not found"
@@ -1821,18 +1555,12 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
             let '(dst_sz, dst_bytes, dst_cid)
                 := match dst_block with
                   | LBlock size bytes concrete_id => (size, bytes, concrete_id)
-                  end in
-
-            (* IY: What happens if [src_block_size < mem_block_size]?
-               Since we have logical blocks, there isn't a way to get around
-               this, and SUndef is invoked. Is this desired behavior? *)
+                   end in
             let sdata := lookup_all_index src_o (unsigned len) src_bytes SUndef in
             let dst_bytes' := add_all_index sdata dst_o dst_bytes in
             let dst_block' := LBlock dst_sz dst_bytes' dst_cid in
             let m' := add_logical_block_mem dst_b dst_block' m in
             (ret m' : err memory)
-          (* IY: For now, we're returning a "failwith". Maybe it's more ideal
-             to return an "UNDEF" here? *)
           else failwith "memcpy has overlapping src and dst memory location"
         | _ => failwith "memcpy got incorrect arguments"
         end.
@@ -1840,18 +1568,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
   End Memory_Operations.
 
   Section Frame_Stack_Operations.
-
-    (* The initial frame stack is not an empty stack, but a singleton stack containing an empty frame *)
     Definition frame_empty : frame_stack := Singleton [].
-
-    (** ** Free
-        [free_frame f m] deallocates the frame [f] from the memory [m].
-        This acts on both representations of the memory:
-        - on the logical memory, it simply removes all keys indicated by the frame;
-        - on the concrete side, for each element of the frame, we lookup in the logical memory
-        if it is bounded to a logical block, and if so if this logical block contains an associated
-        concrete block. If so, we delete this association from the concrete memory.
-     *)
     Definition free_concrete_of_logical
                (b : Z)
                (lm : logical_memory)
@@ -1876,47 +1593,22 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
   End Frame_Stack_Operations.
 
   Section Memory_Stack_Operations.
-
-   (** ** Top-level interface
-       Ideally, outside of this module, the [memory_stack] datatype should be abstract and all interactions should go
-       through this interface.
-    *)
-
-    (** ** The empty memory
-        Both the concrete and logical views of the memory are empty maps, i.e. nothing is allocated.
-        It is a matter of convention, by we consider the empty memory to contain a single empty frame
-        in its stack, rather than an empty stack.
-     *)
     Definition empty_memory_stack : memory_stack := ((concrete_empty, logical_empty), frame_empty).
-
-    (** ** Smart lookups *)
 
     Definition get_concrete_block (m : memory_stack) (key : Z) : option concrete_block :=
       get_concrete_block_mem key (fst m).
 
     Definition get_logical_block (m : memory_stack) (key : Z) : option logical_block :=
       get_logical_block_mem key (fst m).
-
-    (** ** Fresh key getters *)
-
-    (* Get the next key in the logical map *)
     Definition next_logical_key (m : memory_stack) : Z :=
       next_logical_key_mem (fst m).
-
-    (* Get the next key in the concrete map *)
     Definition next_concrete_key (m : memory_stack) : Z :=
       next_concrete_key_mem (fst m).
-
-    (** ** Extending the memory  *)
     Definition add_concrete_block (id : Z) (b : concrete_block) (m : memory_stack) : memory_stack :=
       let '(m,s) := m in (add_concrete_block_mem id b m,s).
 
     Definition add_logical_block (id : Z) (b : logical_block) (m : memory_stack) : memory_stack :=
       let '(m,s) := m in (add_logical_block_mem id b m,s).
-
-    (** ** Array lookups -- memory_stack
-      Retrieve the values stored at position [from] to position [from + len - 1] in an array stored at address [a] in memory.
-     *)
     Definition get_array (m: memory_stack) (a : addr) (from len: nat) (size : Z) (t : dtyp) : err (list uvalue) :=
       let '(b, o) := a in
       match get_logical_block m b with
@@ -1978,8 +1670,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           destruct τ;
           cbn in ALLOC; inversion ALLOC; subst; cbn; auto.
     Qed.
-
-    (* TODO: very similar to overlaps *)
     Definition dtyp_fits (m : memory_stack) (a : addr) (τ : dtyp) :=
       exists sz bytes cid,
         get_logical_block m (fst a) = Some (LBlock sz bytes cid) /\
@@ -2001,10 +1691,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         ret (add_logical_block b block' m)
       | None => failwith "Attempting to write to a non-allocated address"
       end.
-
-    (* Test whether a given address belong to the current main frame,
-       and hence if it will be collected when the current function returns
-     *)
     Definition in_frame (a : addr) (m : memory_stack) : Prop :=
       let '(_,s) := m in
       match s with
@@ -2051,8 +1737,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
   Section Memory_Stack_Theory.
 
-    (** ** Block level lemmas *)
-
     Lemma get_logical_block_of_add_logical_block :
       forall (m : memory_stack) (key : Z) (lb : logical_block),
         get_logical_block (add_logical_block key lb m) key = Some lb.
@@ -2092,17 +1776,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       unfold DynamicValues.Int8.modulus,DynamicValues.Int8.wordsize, DynamicValues.Wordsize8.wordsize, two_power_nat in *.
       cbn in *; lia.
     Qed.
-
-    (** ** Deserialize - Serialize
-        Starting from a dvalue [val] whose [dtyp] is [t], if:
-        1. we serialize [val], getting a [list SByte]
-        2. we add all these bytes to the memory block, starting from the position [off], getting back a new [mem_block] m'
-        3. we lookup in this new memory [m'] the indices starting from [off] for the size of [t], getting back a [list SByte]
-        4. we deserialize this final list of bytes
-        then we should get back the initial value [val], albeit injected into [uvalue].
-
-        The proof should go by induction over [TYP] I think, and rely on [lookup_all_index_add] notably.
-     *)
     Lemma deserialize_serialize : forall val t (TYP : dvalue_has_dtyp val t),
         forall off (bytes : mem_block),
           off >= 0 ->
@@ -2139,13 +1812,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       - admit.
       - admit.
       - admit.
-     Admitted.
-
-    (** ** Write - Read
-        The expected law: reading the key that has just been written to returns the written value.
-        The only subtlety comes from the fact that it holds _if_ the read is performed at the type of
-        the written value.
-     *)
+    Admitted.
     Lemma write_read :
       forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr),
         write m a val = inr m' ->
@@ -2160,7 +1827,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       cbn.
       unfold read_in_mem_block.
       rewrite deserialize_serialize; auto.
-      (* The address needs to be well-formed in that the offset is positive *)
       admit.
     Admitted.
 
@@ -2216,11 +1882,11 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         destruct (Z.le_gt_cases off (off' + sizeof_dtyp τ')) as [Hle | Hnle].
         + destruct (Z.le_gt_cases off' (off + sizeof_dtyp τ)) as [Hle' | Hnle'].
           * exfalso. auto.
-          * (* Overlap because off + sizeof_dtyp τ < off', so second memory region is "to the right" *)
+          *
             unfold read_in_mem_block.
             rewrite lookup_all_index_add_all_index_no_overlap; auto.
             rewrite sizeof_serialized with (dt:=τ); auto; lia.
-        + (* off' + sizeof_dtyp τ' < off, so second memory region is "to the left" *)
+        +
           unfold read_in_mem_block.
           rewrite lookup_all_index_add_all_index_no_overlap; auto.
       - rewrite lookup_add_ineq; auto.
@@ -2304,8 +1970,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       - apply no_key_not_in with (v:=lb) in NOKEY.
         contradiction.
     Qed.
-
-    (* This is false for VOID, and 0 length arrays *)
     Lemma read_empty_block : forall τ,
         read_in_mem_block (make_empty_mem_block τ) 0 τ = UVALUE_Undef τ.
     Proof.
@@ -2319,23 +1983,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       Focus 2.
       cbn.
     Admitted.
-
-    (* CB TODO: Figure out where these predicates should live, or figure
-       out how to get rid of them. Currently not using some of these... *)
-
-    (* Is a dtyp supported in the memory model?
-
-       This is mostly to rule out:
-
-       - arbitrary bitwidth integers
-       - half
-       - x86_fp80
-       - fp128
-       - ppc_fp128
-       - metadata
-       - x86_mmx
-       - opaque
-     *)
     Inductive is_supported : dtyp -> Prop :=
     | is_supported_DTYPE_I1 : is_supported (DTYPE_I 1)
     | is_supported_DTYPE_I8 : is_supported (DTYPE_I 8)
@@ -2356,8 +2003,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
     Definition not_undef (v : uvalue) : Prop
       := forall τ, v <> UVALUE_Undef τ.
-
-    (* TODO: finish a less specialized version of this *)
     Lemma read_array_not_pointer : forall mem a τ sz v dv,
         not_undef v ->
         read mem a (DTYPE_Array sz τ) = inr v ->
@@ -2374,49 +2019,14 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       unfold read_in_mem_block in READ.
       unfold deserialize_sbytes in READ.
       break_match.
-      - (* Fully defined *)
+      -
         inversion READ; subst.
         cbn in CONVERT.
         break_match; inversion CONVERT.
-      - (* Undefined *)
+      -
         inversion READ; subst;
         eapply NU; eauto.
     Qed.
-
-    (* Lemma read_value_has_dtyp : forall mem a τ v dv, *)
-    (*     is_supported τ -> *)
-    (*     not_pointer τ -> *)
-    (*     non_void τ -> *)
-    (*     read mem a τ = inr v -> *)
-    (*     uvalue_to_dvalue v = inr dv -> *)
-    (*     dvalue_has_dtyp dv τ. *)
-    (* Proof. *)
-    (*   intros mem a τ v dv SUP NP NV READ CONVERT. *)
-    (*   unfold read in READ. *)
-    (*   break_match; try solve [inversion READ]. *)
-    (*   break_match; subst. *)
-    (*   unfold read_in_mem_block in READ. *)
-    (*   unfold deserialize_sbytes in READ. *)
-    (*   break_match. *)
-    (*   - (* Fully defined *) *)
-    (*     inversion SUP; *)
-    (*       try solve [exfalso; auto]; *)
-    (*       try solve [inversion READ; subst; inversion CONVERT; subst; constructor]. *)
-
-    (*     +  *)
-    (*     unfold deserialize_sbytes_defined in READ. *)
-    (*     cbn in *. *)
-    (*     + inversion READ; subst; inversion CONVERT; subst. *)
-    (*       constructor. *)
-    (*     + unfold deserialize_sbytes_defined in READ *)
-    (*       break_match; inversion SUP; subst. *)
-    (*       inversion READ; subst; inversion CONVERT; subst; *)
-    (*       constructor. *)
-
-    (*   - (* UNDEF, actually a contradiction *) *)
-    (*     inversion READ; subst. *)
-    (*     cbn in CONVERT. inversion CONVERT. *)
-    (* Qed. *)
 
     Lemma allocate_succeeds : forall m1 τ,
         non_void τ ->
@@ -2468,9 +2078,9 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
               unfold next_logical_key, next_logical_key_mem, overlaps in *.
               cbn in *.
               destruct (Z.eq_dec (logical_next_key lm) (fst a')) as [Ha' | Ha'].
-              -- (* Bogus branch where a' is the freshly allocated block *)
+              --
                 exfalso. eapply next_logical_key_fresh; erewrite Ha'; eauto.
-              -- (* Good branch *)
+              --
                 rewrite lookup_add_ineq; auto.
           }
       - split.
@@ -2490,9 +2100,9 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
               unfold next_logical_key, next_logical_key_mem, overlaps in *.
               cbn in *.
               destruct (Z.eq_dec (logical_next_key lm) (fst a')) as [Ha' | Ha'].
-              -- (* Bogus branch where a' is the freshly allocated block *)
+              --
                 exfalso. eapply next_logical_key_fresh; erewrite Ha'; eauto.
-              -- (* Good branch *)
+              --
                 rewrite lookup_add_ineq; auto.
           }
     Qed.
@@ -2620,8 +2230,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       repeat intro; subst.
       constructor; auto.
     Qed.
-
-    (* YZ : Either exists, or define more properly *)
     Definition equiv_sum {A : Type} (R : A -> A -> Prop) : err A -> err A -> Prop :=
       fun ma ma' => match ma,ma' with
                  | inr a, inr a' => R a a'
@@ -2648,10 +2256,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Qed.
 
   End Memory_Stack_Theory.
-
-  (** ** Memory Handler
-      Implementation of the memory model per se as a memory handler to the [MemoryE] interface.
-   *)
   Definition handle_memory {E} `{FailureE -< E} `{UBE -< E}: MemoryE ~> stateT memory_stack (itree E) :=
     fun _ e m =>
       match e with
@@ -2712,8 +2316,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           end
         | _            => raise "Non integer passed to ItoP"
         end
-
-      (* TODO take integer size into account *)
       | PtoI t a =>
         match a, t with
         | DVALUE_Addr ptr, DTYPE_I sz =>
@@ -2729,8 +2331,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     fun _ e '(m, s) =>
       match e with
       | Intrinsic t name args =>
-        (* Pick all arguments, they should all be unique. *)
-        if string_dec name "llvm.memcpy.p0i8.p0i8.i32" then  (* FIXME: use reldec typeclass? *)
+        if string_dec name "llvm.memcpy.p0i8.p0i8.i32" then
           match handle_memcpy args m with
           | inl err => raise err
           | inr m' => ret ((m', s), DVALUE_None)
@@ -2738,44 +2339,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         else
           raise ("Unknown intrinsic: " ++ name)
       end.
-
-
-  (* TODO: clean this up *)
-  (* {E} `{failureE -< E} : IO ~> stateT memory (itree E)  *)
-  (* Won't need to be case analysis, just passes through failure + debug *)
-  (* Might get rid of this one *)
-  (* This can't show that IO ∉ E :( *)
-  (* Alternative 2: Fix order of effects
-
-   Layer interpretors so that they each chain into the next. Have to
-   do ugly matches everywhere :(.
-
-   Split the difference:
-
-   `{IO -< IO +' failureE +' debugE}
-
-   Alternative 3: follow 2, and then use notations to make things better.
-
-   Alternative 4: Extend itrees mechanisms with some kind of set operations.
-
-   If you want to allow sums on the left of your handlers, you want
-   this notion of an atomic handler / event, which is different from a
-   variable or a sum...
-
-   `{E +' F -< G}
-
-   This seems too experimental to try to work out now --- chat with Li-yao about it.
-
-   Alternative 2 might be the most straightforward way to get things working in the short term.
-
-   We just want to get everything hooked together to build and test
-   it. Then think about making the interfaces nicer. The steps to alt
-   2, start with LLVM1 ordering as the basic default. Then each stage
-   of interpretation peels off one, or reintroduces the same kind of
-   events / changes it.
-
-
-   *)
   Section PARAMS.
     Variable (E F G : Type -> Type).
     Context `{FailureE -< F} `{UBE -< F} `{PickE -< F}.
@@ -2996,31 +2559,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         - rewrite <- GET. auto.
       Qed.
 
-      (* Lemma write_read : *)
-      (*   forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr), *)
-      (*     write m a val = inr m' -> *)
-      (*     read m' a t = inr (dvalue_to_uvalue val). *)
-      (* Proof. *)
-      (*   intros m m' t val a Hwrite. *)
-      (*   unfold write in Hwrite. *)
-      (*   unfold read. *)
-      (*   destruct (get_logical_block m a) eqn:Hbk. *)
-      (*   - destruct l eqn:Hl. destruct a as [b o]. *)
-      (*     cbn in Hbk. *)
-      (*     cbn in Hwrite. *)
-      (*     inversion Hwrite. *)
-      (*     cbn. *)
-
-      (*     (* TODO: clean this up *) *)
-      (*     epose proof get_logical_block_of_add_logical_block m (b, o). *)
-      (*     unfold get_logical_block in H2. *)
-      (*     rewrite H2. clear H2. *)
-
-      (*     rewrite blah. *)
-      (*     reflexivity. *)
-      (*   - inversion Hwrite. *)
-      (* Qed. *)
-
       Lemma no_overlap_reflect :
         forall x y s, reflect (no_overlap x s y s) (no_overlap_b x s y s).
       Proof.
@@ -3056,7 +2594,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           + rewrite Z.gt_lt_iff in H2.
             rewrite <- Z.gtb_lt in H2.
             rewrite H2 in EQ3. inversion EQ3.
-          (* TODO: Write symmetric variants of Z.gtb_lt lemmas. *)
       Qed.
 
       Lemma app_prefix_eq :
@@ -3119,7 +2656,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           { cbn. lia. }
           rewrite <- HeqLEN in H2.
           destruct (zeq (Z.of_nat LEN) 0) eqn: LENZERO.
-          + intuition. (* absurd case *)
+          + intuition.
           + Search (Z.pred (Z.of_nat _)).
             rewrite <- Nat2Z.inj_pred. 2 : lia.
             apply IHl. cbn in HeqLEN. lia.
@@ -3238,12 +2775,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           + apply Nat2Z.is_nonneg.
           + apply Nat2Z.is_nonneg.
       Qed.
-
-      (* Note : For the current version of subevents, [interp_memory] must
-        have subevent clauses assumed in Context, or else the
-        [handle_intrinsic] handler will not get properly invoked. *)
-      (* IY: This is specialized to DTYPE_Array for practical
-         purposes. We could conjure a more complete definition later. *)
       Lemma interp_memory_intrinsic_memcpy :
         forall (m : memory_stack) (dst src : Addr.addr) (sz : Z)
           (dst_val src_val : uvalue) (dτ : dtyp) volatile align,

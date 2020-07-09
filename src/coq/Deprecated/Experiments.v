@@ -80,11 +80,7 @@ Proof.
       specialize IHs_equiv_step with (s:=s0). apply IHs_equiv_step in R0. punfold R0.
     + pfold. apply s_equiv_cons_z_l.
       apply IHHs in H. punfold H.
-Qed.      
-
-
-(* A more relaxed notion of equivalence where the 0's can be inserted finitely often in either 
-   stream. *)
+Qed.
 Inductive seq_step (seq : stream nat -> stream nat -> Prop) : stream nat -> stream nat -> Prop :=
 | seq_nil  : seq_step seq snil snil
 | seq_cons : forall s1 s2 n (R : seq s1 s2), seq_step seq (scons n s1) (scons n s2)
@@ -117,20 +113,7 @@ Proof.
   intros s.
   pfold.
   destruct s; auto.
-Qed.  
-
-
-(* HELP! *)
-
-(* Gil Hur's Solution ------------------------------------------------------- *)
-
-(* Key Ingredients:
-    - use classical logic to allow us to decide between
-      infinitely diverging stutters vs. finitely many stutters
-    - give an equivalent presentation of seq that "large-steps" over
-      the finite stutters to arrive back at an equivalent event
-      as defined by gseq using gseq_step
-*) 
+Qed. 
 
 
 Require Import Program Classical.
@@ -363,151 +346,6 @@ Qed.
 
 
 
-
-(*  ------------------------------------------------------------------------- *)
-(* Below are various attempts that don't work. ------------------------------ *)
-(*  ------------------------------------------------------------------------- *)
-
-
-(* MY BROKEN ATTEMPT but getting in the right direction ... *)
-(*
-CoFixpoint zeros := scons 0 zeros.
-
-Definition zero_hd (s:stream nat) : Prop :=
-  match s with
-  | scons Z _ => True
-  | _ => False
-  end.
-
-Definition not_zero_hd (s:stream nat) : Prop :=
-  match s with
-  | snil => True
-  | scons (S _) _ => True
-  | scons Z _ => False
-  end.
-
-Lemma zero_hd_dc : forall s, {zero_hd s} + {not_zero_hd s}.
-Proof.
-  intros s.
-  destruct s.
-  right. simpl. auto.
-  destruct n. left. simpl. auto.
-  right. simpl. auto.
-Qed.  
-
-Inductive zeros_step (zs : stream nat -> Prop) : stream nat -> Prop :=
-| zeros_z : forall s, zs s -> zeros_step zs (scons 0 s)
-.                                   
-Hint Constructors zeros_step.
-
-Lemma zeros_step_mono : monotone1 zeros_step.
-Proof.
-  unfold monotone1. intros. induction IN; eauto.
-Qed.
-Hint Resolve zeros_step_mono : paco.
-
-Definition zeros_p (s : stream nat) := paco1 zeros_step bot1 s.
-
-Inductive not_zeros : stream nat -> Prop :=
-| not_zeros_nil : not_zeros snil
-| not_zeros_b : forall n s, not_zeros (scons (S n) s)
-| not_zeros_z : forall s, not_zeros s -> not_zeros (scons 0 s)
-.                                             
-Hint Constructors not_zeros.
-
-CoInductive coFalse := .
-Lemma false_co_false : False <-> coFalse.
-Proof.
-  split.
-  intros. inversion H.
-  intros. destruct H.
-Qed.
-
-Lemma zeros_p_not_zeros : forall s, zeros_p s -> not (not_zeros s).
-Proof.
-  intros.
-  unfold not.
-  intros.
-  induction H0.
-  punfold H. inversion H.
-  punfold H. inversion H.
-  apply IHnot_zeros. punfold H. inversion H. subst. pclearbot. exact H2.
-Qed.
-
-Lemma zeros_not_zeros_p : forall s, not (not_zeros s) -> zeros_p s.
-Proof.
-  pcofix CIH.
-  intros.
-  destruct s.
-  assert False. apply H0. constructor. inversion H.
-  destruct n.
-  pfold. constructor. right. apply CIH. unfold not. intros. apply H0.
-  constructor. exact H.
-  assert False.
-  apply H0. constructor. inversion H.
-Qed.  
-  
-
-
-Inductive teq_step (teq : stream nat -> stream nat -> Prop) : stream nat -> stream nat -> Prop :=
-| teq_nil : teq_step teq snil snil
-| teq_div : forall s1 s2, teq s1 s2 -> zero_hd s1 -> zero_hd s2 -> teq_step teq (scons 0 s1) (scons 0 s2)
-| teq_cons : forall s1 s2 n, teq s1 s2 -> teq_step teq (scons (S n) s1) (scons (S n) s2)
-| teq_z_b : forall s1 s2, teq_step teq s1 s2 -> teq_step teq (scons 0 s1) (scons 0 s2)
-| teq_z_l : forall s1 s2, not_zero_hd s2 -> teq_step teq s1 s2 -> teq_step teq (scons O s1) s2
-| teq_z_r : forall s1 s2, not_zero_hd s1 -> teq_step teq s1 s2 -> teq_step teq s1 (scons O s2)
-.                                                                
-Hint Constructors teq_step.
-
-Lemma teq_step_mono : monotone2 teq_step.
-Proof.
-  unfold monotone2. intros x0 x1 r r' IN LE. 
-  induction IN; eauto.
-Qed.
-Hint Resolve teq_step_mono : paco.
-
-Definition teq (s t : stream nat) := paco2 teq_step bot2 s t .
-Hint Unfold teq.
-
-Lemma teq_trans : forall s1 s2 s3, teq s1 s2 -> teq s2 s3 -> teq s1 s3.
-Proof.
-  pcofix CIH.
-  intros s1 s2 s3 H12 H23.
-  generalize dependent s3.
-  punfold H12.
-  induction H12; intros s3 H23.
-  - punfold H23. remember snil as s.
-    induction H23; inversion Heqs; subst; auto.
-    + pfold. constructor; auto.
-      assert (paco2 teq_step r snil s2). apply IHteq_step; auto.
-      punfold H1.
-  - punfold H23. remember (scons 0 s2) as s.
-    pclearbot.
-    induction H23; inversion Heqs; subst; auto.
-    + pfold. apply teq_div; auto. right. eapply CIH. apply H. pclearbot. apply H2.
-    + pfold.
-      
-      assert (paco2 teq_step r zeros s2). apply IHteq_step.
-      rewrite (@id_stream_eq _ zeros) at 1. simpl. reflexivity.
-      punfold H0.
-    + simpl in H. inversion H.
-  - punfold H23. remember (scons (S n) s2) as s.
-    induction H23; inversion Heqs; subst; auto.
-    + rewrite (@id_stream_eq _ zeros) in Heqs. simpl in Heqs. inversion Heqs.
-    + pfold. constructor. pclearbot. right. eapply CIH. apply H. apply H0.
-    + pfold. apply teq_z_r. simpl.  auto.
-      assert (paco2 teq_step r (scons (S n) s1) s3).
-      apply IHteq_step; auto.
-      punfold H2.
-  - punfold H23. remember (scons 0 s2) as s.
-    induction H23; inversion Heqs; subst; auto.
-    + pcofix CIH'.
-      rewrite (@id_stream_eq _ zeros) in Heqs. simpl in Heqs. inversion Heqs.
-      
-*)
-
-
-
 Lemma teq_seq : forall s1 s2, teq s1 s2 -> seq s1 s2.
 Proof.
   pcofix CIH.
@@ -546,12 +384,9 @@ Proof.
   punfold H.
   induction H; try constructor; auto.
   - pclearbot. right. apply CIH. punfold R.
-Qed.    
-
-(* HELP! *)
+Qed.
 Lemma seq_trans : forall d1 d2 d3, seq d1 d2 -> seq d2 d3 -> seq d1 d2.
 Proof.
-  (* I don't know how to do this! *)
 Abort.
 
 
@@ -594,57 +429,6 @@ Lemma seq_trans' : forall (R:stream nat -> stream nat -> Prop) (s t u : stream n
     (forall d1 d2 d3, seq_step R d1 d2 -> R d2 d3 -> seq_step R d1 d3) ->    
     paco2 seq_step R s t -> paco2 seq_step R t u -> paco2 seq_step R s u.
 Proof.
-(*
-  pcofix CIH.
-  intros s t u Hrefl HS H12 H23.
-  generalize dependent s.
-  punfold H23.
-  induction H23; intros s Hs.
-  - punfold Hs.
-    pfold.
-    eapply seq_step_mono. eapply Hs.
-    intros. destruct PR.
-    + right. eapply CIH. apply Hrefl. apply HS. apply H.  apply Hrefl.
-    + right. apply CIH0. exact H.
-  - remember (scons n s1) as s0. generalize dependent s2.
-    punfold Hs.
-    induction Hs; try inversion Heqs0; intros s2' HR; subst.
-    + pfold. apply seq_cons. right. 
-      destruct R0. destruct HR.
-      eapply CIH. apply Hrefl. apply HS. apply H. apply H0.
-      eapply CIH. apply Hrefl. apply HS. apply Hrefl.
-      pfold.
-
-    
-  - remember (scons n s1) as s0. generalize dependent s2.
-    punfold Hs. rewrite <- HeqR in Hs. 
-    induction Hs; try inversion Heqs0; intros s2' HR; subst.
-    + pfold. apply seq_cons. pclearbot. right. eapply CIH.
-      exact R0. exact HR.
-    + pfold. apply seq_cons_z_l.
-      pclearbot. 
-      assert (paco2 seq_step r s0 (scons n s2')).
-      eapply IHHs; auto.  
-      punfold H0.
-    + pfold. apply seq_cons_z_r.
-      destruct HR. punfold H.
-      
-      pclearbot. punfold HR.
-      eapply seq_step_trans; eauto.
-      intros. destruct H. destruct H0.
-      right. eapply CIH. punfold H. punfold H0. pfold. eapply seq_step_mono. apply H.
-      intros. left. destruct PR.
-      right. eapply CIH. 
-      
-  - remember (scons 0 s1) as s0.
-    punfold Hs. rewrite <- HeqR in Hs.
-    induction Hs; try inversion Heqs0; subst.
-    + pclearbot. pfold. apply seq_cons_z_l.
-      specialize IHseq_step with (s:=s0). apply IHseq_step in R0. punfold R0.
-    + pfold. apply seq_cons_z_l.
-      apply IHHs in H. punfold H.
-Qed.      
-*)
 Admitted.
 
 Lemma seq_r_trans' : forall (R:stream nat -> stream nat -> Prop) (d1 d2 d3 : stream nat),
@@ -660,11 +444,6 @@ Proof.
     + constructor.
     + apply seq_cons_z_l. apply IHseq_step; auto.
 Admitted.
-
-
-
-
-(* Old stuff and other experiments ------------------------------------------ *)
 
 Section S_EQUIV_COIND.
 

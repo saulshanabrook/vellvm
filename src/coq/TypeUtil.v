@@ -24,10 +24,7 @@ Open Scope list_scope.
 Ltac contra :=
   try match goal with
   | [Heq : ?x = ?y, Hneq : ?y <> ?x |- _] => symmetry in Heq
-  end; contradiction.
-
-
-(* Inductive predicate for types in LLVM with a size *)
+      end; contradiction.
 Inductive sized_typ : list (ident * typ) -> typ -> Prop :=
 | sized_typ_I :
     forall (defs : list (ident * typ)) (sz : int),
@@ -89,13 +86,6 @@ Inductive sized_typ : list (ident * typ) -> typ -> Prop :=
     forall (defs : list (ident * typ)) (id : ident),
       (exists (t : typ), In (id, t) defs -> sized_typ defs t) -> sized_typ defs (TYPE_Identified id)
 .
-
-
-(* Inductive predicate for types in LLVM that can be elements of vectors.
-
-   "elementtype" may be any integer, floating-point or pointer type.
-
-   https://llvm.org/docs/LangRef.html#vector-type *)
 Inductive element_typ : typ -> Prop :=
 | element_typ_Pointer : forall (t : typ), element_typ (TYPE_Pointer t)
 | element_typ_I : forall (sz : int), element_typ (TYPE_I sz)
@@ -106,9 +96,6 @@ Inductive element_typ : typ -> Prop :=
 | element_typ_Fp128 : element_typ TYPE_Fp128
 | element_typ_Ppc_fp128 : element_typ TYPE_Ppc_fp128
 .
-  
-
-(* Predicate to ensure that an ident is guarded by a pointer everywhere in a type in an environment *)
 Inductive guarded_typ : ident -> list (ident * typ) -> typ -> Prop :=
 | guarded_typ_I :
     forall (id : ident) (env : list (ident * typ)) (sz : int),
@@ -222,23 +209,6 @@ Inductive first_class_typ : typ -> Prop :=
 Definition function_ret_typ (t : typ) : Prop :=
   first_class_typ t /\ t <> TYPE_Metadata.
 
-
-(* Inductive predicate for well-formed LLVM types.
-
-   wf_typ env t
-
-   means that 't' is a well-formed type in the environment 'env'. The
-   environment just associates identifiers to types, so this contains
-   things like user-defined structure types.
-
-   well-formed LLVM types should cover every valid type in LLVM.
-
-   Examples of invalid types:
-
-   - Vectors of size 0
-   - Arrays with unsized elements
-   - Recursive structures (must be guarded by a pointer) *)
-
 Inductive wf_typ : list (ident * typ) -> typ -> Prop :=
 | wf_typ_Pointer:
     forall (defs : list (ident * typ)) (t : typ),
@@ -291,29 +261,18 @@ Inductive wf_typ : list (ident * typ) -> typ -> Prop :=
       (forall (a : typ), In a args -> sized_typ defs a) ->
       (forall (a : typ), In a args -> wf_typ defs a) ->
       wf_typ defs (TYPE_Function ret args)
-
-(* Arrays are only well formed if the size is >= 0, and the element type is sized. *)
 | wf_typ_Array :
     forall (defs : list (ident * typ)) (sz : int) (t : typ),
       sz >= 0 -> sized_typ defs t -> wf_typ defs t -> wf_typ defs (TYPE_Array sz t)
-
-(* Vectors of size 0 are not allowed, and elements must be of element_typ. *)
 | wf_typ_Vector :
     forall (defs : list (ident * typ)) (sz : int) (t : typ),
       sz > 0 -> element_typ t -> wf_typ defs t -> wf_typ defs (TYPE_Vector sz t)
-
-(* Any type identifier must exist in the environment.
-
-   Additionally the identifier must not occur anywhere in the type
-   that it refers to *unless* it is guarded by a pointer. *)
 | wf_typ_Identified :
     forall (defs : list (ident * typ)) (id : ident),
       (exists t, In (id, t) defs) ->
       (forall (t : typ), In (id, t) defs -> guarded_typ id defs t) ->
       (forall (t : typ), In (id, t) defs -> wf_typ defs t) ->
       wf_typ defs (TYPE_Identified id)
-
-(* Fields of structure must be sized types *)
 | wf_typ_Struct :
     forall (defs : list (ident * typ)) (fields : list typ),
       (forall (f : typ), In f fields -> sized_typ defs f) ->
@@ -391,29 +350,18 @@ Inductive guarded_wf_typ : list (ident * typ) -> typ -> Prop :=
       (forall (a : typ), In a args -> sized_typ defs a) ->
       (forall (a : typ), In a args -> guarded_wf_typ defs a) ->
       guarded_wf_typ defs (TYPE_Function ret args)
-
-(* Arrays are only well formed if the size is >= 0, and the element type is sized. *)
 | guarded_wf_typ_Array :
     forall (defs : list (ident * typ)) (sz : int) (t : typ),
       sz >= 0 -> sized_typ defs t -> guarded_wf_typ defs t -> guarded_wf_typ defs (TYPE_Array sz t)
-
-(* Vectors of size 0 are not allowed, and elemnts must be of element_typ. *)
 | guarded_wf_typ_Vector :
     forall (defs : list (ident * typ)) (sz : int) (t : typ),
       sz > 0 -> element_typ t -> guarded_wf_typ defs t -> guarded_wf_typ defs (TYPE_Vector sz t)
-
-(* Identifier must be in the typing environment.
-
-   Additionally the identifier must not occur anywhere in the type
-   that it refers to *unless* it is guarded by a pointer. *)
 | guarded_wf_typ_Identified :
     forall (defs : list (ident * typ)) (id : ident),
       (exists t, In (id, t) defs) ->
       (forall (t : typ), In (id, t) defs -> guarded_typ id defs t) ->
       (forall (t : typ), In (id, t) defs -> guarded_wf_typ defs t) ->
       guarded_wf_typ defs (TYPE_Identified id)
-
-(* Fields of structure must be sized types *)
 | guarded_wf_typ_Struct :
     forall (defs : list (ident * typ)) (fields : list typ),
       (forall (f : typ), In f fields -> sized_typ defs f) ->
@@ -441,12 +389,6 @@ Theorem wf_typ_is_guarded_wf_typ :
 Proof.
   induction 1; auto.
 Qed.
-
-
-(* An unrolled type is an LLVM type that contains no identifiers,
-   unless the identifier is behind a pointer.
-
- *)
 
 
 Inductive unrolled_typ : typ -> Prop :=
@@ -780,7 +722,7 @@ Lemma normalize_type_equation : forall env t,
   | TYPE_Identified id =>
     let opt := find (fun a => Ident.eq_dec id (fst a)) env in
     match opt with
-    | None => TYPE_Identified id   (* TODO: should this be None? *)
+    | None => TYPE_Identified id
     | Some (_, t) => normalize_type (remove_key Ident.eq_dec id env) t
     end
 
@@ -917,9 +859,6 @@ Qed.
 
 Hint Constructors sized_typ.
 Hint Constructors guarded_typ.
-
-
-(* Types with no identifiers *)
 Inductive simple_typ : typ -> Prop :=
 | simple_typ_I : forall sz, simple_typ (TYPE_I sz)
 | simple_typ_Pointer : forall t, simple_typ t -> simple_typ (TYPE_Pointer t)
@@ -1104,12 +1043,7 @@ Proof.
              end;
              auto);
         try (intros id Hidin; solve_guard).
-
-  (* Identifiers *)
   repeat simpl_remove_keys.
-
-  (* If id is in ids, this means that guarded_typ id defs
-     (TYPE_Identified id), which is a contradiction. *)
   assert (~ In id ids) as Hnotin by solve_guard.
 
   replace (find (fun a : ident * typ => Ident.eq_dec id (fst a)) (remove_keys Ident.eq_dec ids defs)) with

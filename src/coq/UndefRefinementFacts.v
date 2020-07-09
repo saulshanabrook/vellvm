@@ -50,11 +50,6 @@ Import TopLevelEnv.
 Import IO.
 Import D.
 
-
-(* -------------------------------------------------------- *)
-(* Facts about multiplication and undef                     *)
-(* -------------------------------------------------------- *)
-
 Theorem undef_refines_mul_undef_undef:
   refine_uvalue (UVALUE_Undef (DTYPE_I 64)) (UVALUE_IBinop (Mul false false) (UVALUE_Undef (DTYPE_I 64)) (UVALUE_Undef (DTYPE_I 64))).
 Proof.
@@ -195,11 +190,6 @@ Lemma zero_refines_a_mul_undef :
 Proof.
 Admitted.
 
-
-(* -------------------------------------------------------- *)
-(* Facts about undef and bitwise and                        *)
-(* -------------------------------------------------------- *)
-
 Theorem undef_refines_and_undef_undef:
   refine_uvalue (UVALUE_Undef (DTYPE_I 64)) (UVALUE_IBinop And (UVALUE_Undef (DTYPE_I 64)) (UVALUE_Undef (DTYPE_I 64))).
 Proof.
@@ -229,10 +219,6 @@ Proof.
         omega.
 Qed.
 
-(* -------------------------------------------------------- *)
-(* Facts about undef and bitwise or                         *)
-(* -------------------------------------------------------- *)
-
 Theorem undef_refines_or_undef_undef:
   refine_uvalue (UVALUE_Undef (DTYPE_I 64)) (UVALUE_IBinop Or (UVALUE_Undef (DTYPE_I 64)) (UVALUE_Undef (DTYPE_I 64))).
 Proof.
@@ -254,11 +240,6 @@ Proof.
       * rewrite Integers.Int64.unsigned_repr by (cbn; omega).
         reflexivity.
 Qed.
-
-
-(* -------------------------------------------------- *)
-(* Division and undef facts                           *)
-(* -------------------------------------------------- *)
 
 Theorem undef_refines_undef_udiv_1:
     refine_uvalue (UVALUE_Undef (DTYPE_I 64)) (UVALUE_IBinop (UDiv false) (UVALUE_Undef (DTYPE_I 64)) (UVALUE_I64 (DynamicValues.Int64.repr 1))).

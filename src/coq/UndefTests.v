@@ -4,10 +4,6 @@ Import ListNotations.
 
 From Coq Require Import List String Ascii ZArith.
 Open Scope string_scope.
-
-
-
-(* InstSimplify's undef.ll tests *)
 Definition undef_test0_block : block dtyp :=
   {|
     blk_id := (Anon 0%Z);
@@ -449,9 +445,6 @@ Definition undef_test39_block : block dtyp
       blk_term := (IVoid 0%Z, TERM_Ret ((DTYPE_I 32%Z), (EXP_Ident (ID_Local (Name "b")))));
       blk_comments := None
     |}.
-
-
-(* InstSimplify's undef.ll tests *)
 Definition undef_test0_cfg : cfg dtyp :=
   {| init := (Anon 0%Z);
      blks := [{|
@@ -1568,8 +1561,6 @@ Definition undef_test39 : list (toplevel_entity typ (list (block typ)))
                           blk_comments := None
                         |}]
         |}].
-
-(* InstSimplify's undef.ll tests *)
 Definition undef_tests : list (toplevel_entity typ (list (block typ)))
   := [TLE_Definition {|
   df_prototype := {|dc_name := (Name "test0");

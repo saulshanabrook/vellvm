@@ -66,8 +66,6 @@ let run_uvalue_test (test:DV.uvalue -> bool) path =
     | Ok dv -> (test dv, "")
   in
   if not res then failwith (path ^ " test failed: " ^ msg); ()
-
-(* https://www.rosettacode.org/wiki/String_matching#OCaml *)
 let sting_begins_with s1 s2 =
   let len1 = String.length s1
   and len2 = String.length s2 in
@@ -153,7 +151,6 @@ let i32_tests : (string * int) list =
 
 let i64_tests : (string * int) list =
   [
-    (* ("../tests/ll/gep1.ll", 6); (* need CString support for this *)*)
     ("../tests/ll/gep2.ll", 4);
     ("../tests/ll/gep3.ll", 1);
     ("../tests/ll/gep4.ll", 2);
@@ -218,8 +215,6 @@ let i64_test (i1:int64) = function
   | DV.UVALUE_I64 i2 ->
      Int64.eq i1 i2
   | _ -> false
-
-(* NOTE: OCaml's floats are actually 64-bit doubles, but contain 32-bit floats as a subset *)
 let float_test (i1:float) = function
   | DV.UVALUE_Float i2 ->
     compare i1 (Camlcoq.camlfloat_of_coqfloat32 i2) = 0

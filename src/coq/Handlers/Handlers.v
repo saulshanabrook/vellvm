@@ -27,8 +27,6 @@ From Vir.Handlers Require Export
      Pick
      UndefinedBehaviour
 .
-
-(* Handlers get instantiated over the domain of addresses provided by the memory model *)
 Module LLVMEvents := LLVMEvents.Make(Memory.Addr).
 Module Global := Global.Make Memory.Addr LLVMEvents.
 Module Local  := Local.Make  Memory.Addr LLVMEvents.

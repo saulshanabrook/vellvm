@@ -53,11 +53,6 @@ Arguments trywith _ _ _ _ _: simpl nomatch.
 Definition failwith {A:Type} {F} `{Monad F} `{MonadExc string F} (s:string) : F A := raise s.
 Hint Unfold failwith: core.
 Arguments failwith _ _ _ _: simpl nomatch.
-
-(* SAZ:
-   I believe that these refer to "undefined behavior", not "undef" values.  
-   Raname them to "UB" and "UB_or_err"?
-*)
 Definition undef := err.
 Definition undef_or_err := eitherT string err.
 

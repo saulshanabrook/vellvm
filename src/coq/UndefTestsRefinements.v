@@ -49,11 +49,6 @@ Import R.
 Import TopLevelEnv.
 Import IO.
 Import D.
-
-
-(* -------------------------------------------------- *)
-(* Interpretation / refinement of blocks.             *)
-(* -------------------------------------------------- *)
 Definition block_interp_uvalue (b: block dtyp) := denote_block b.
 Definition block_interp_L1 (b : block dtyp) g := run_state (interp_global (block_interp_uvalue b)) g.
 Definition block_interp_L2 (b : block dtyp) g l := run_state (interp_local (block_interp_L1 b g)) l.
@@ -111,8 +106,6 @@ Ltac refine_a_times_undef :=
   match goal with
   | [ |- Znumtheory.Zis_gcd ?a ?m ?x ] =>  replace x with (Z.gcd a m) by (cbv; auto)
   end; apply Znumtheory.Zgcd_is_gcd.
-
-(* These should probably be hint databases? *)
 Ltac refine_mul_uvalue :=
   solve [ refine_a_times_undef
         | apply zero_refines_undef_mul_a
@@ -251,27 +244,14 @@ Proof.
   simpl.
   refine_uvalue.
 Qed.
-
-
-(* -------------------------------------------------- *)
-(* CFG interpretation / refinement                    *)
-(* -------------------------------------------------- *)
 Definition cfg_interp_uvalue (c : cfg dtyp) := denote_cfg c.
 Definition cfg_interp_L1 (c : cfg dtyp) := interp_global (cfg_interp_uvalue c) [].
 Definition cfg_interp_L2 (c : cfg dtyp) := interp_local (cfg_interp_L1 c) [].
 Definition cfg_interp_L3 (c : cfg dtyp) := M.interp_memory (cfg_interp_L2 c) (M.empty, [[]]).
 
 Definition refine_cfg_L2 c1 c2 := eutt (TT × (TT × refine_uvalue)) (cfg_interp_L2 c1) (cfg_interp_L2 c2).
-
-(* -------------------------------------------------- *)
-(* Block substitution into CFG.                       *)
-(* -------------------------------------------------- *)
-
-(* Replace a block with a given block r if the ids match *)
 Definition replace_block {T} (r : block T) (b : block T) : block T :=
   if blk_id b ~=? blk_id r then r else b.
-
-(* Endomorphism for replacing blocks that have the same id as a given block *)
 Section block_replace.
   Variable T : Set.
   Variable b : block T.
@@ -284,8 +264,6 @@ Section block_replace.
   Definition cfg_replace_block : endo (cfg T)
     := f_endo.
 End block_replace.
-
-(* CB TODO: bad name *)
 Lemma blk_id_eq :
   forall T b bid,
     (if @blk_id T b ~=? bid then true else false) = true ->
@@ -314,8 +292,6 @@ Proof.
       * simpl. rewrite Hpa.
         eapply IHl; eauto.
 Qed.
-
-(* CB: TODO bad name *)
 Lemma blk_id_eq_if :
   forall T x y bid,
     blk_id x = blk_id y ->
@@ -327,8 +303,6 @@ Proof.
   subst. rewrite H.
   destruct (blk_id y ~=? blk_id y); firstorder.
 Qed.
-
-(* CB: TODO bad name *)
 Lemma if_lift :
   forall A T (b0 b : block T) (x y : A),
     (if blk_id b0 ~=? blk_id b then x else y) = (if (if blk_id b0 ~=? blk_id b then true else false) then x else y).
@@ -490,58 +464,3 @@ Proof.
   cbn. unfold f_endo. unfold endo_list. rewrite cfg_replace_block_find.
   unfold cat.
 Qed.
-
-
-(* SCRAPYARD. Will probably need some of these things, but not sure about all of them. *)
-
-(*
-Instance interp_local_Proper
-         {E F G : Type -> Type} `{FailureE -< E +' F +' G}
-         k v map `{Map k v map} `{Serialize.Serialize k} (st : map)
-         R (RR : relation R)
-         (f : itree (E +' F +' LocalE k v +' G) R -> itree (E +' F +' LocalE k v +' G) R) :
-  Proper ((fun t1 t2 => @eutt (E +' F +' G) _ _ (TT × RR) (interp_local t1 st) (interp_local t2 st)) ==> (fun t1 t2 => @eutt (E +' F +' G) _ _ (TT × RR) (interp_local t1 st) (interp_local t2 st))) f.
-intros t1 t2 ?.
-Admitted.
-*)
-
-(*
-Instance interp_global_Proper
-         {E F G : Type -> Type} `{FailureE -< E +' F +' G}
-         k v map `{Map k v map} `{Serialize.Serialize k} (st : map)
-         R (RR : relation R)
-         (f : itree (E +' F +' GlobalE k v +' G) R -> itree (E +' F +' GlobalE k v +' G) R) :
-  Proper ((fun t1 t2 => @eutt (E +' F +' G) _ _ (TT × RR) (interp_global t1 st) (interp_global t2 st)) ==> (fun t1 t2 => @eutt (E +' F +' G) _ _ (TT × RR) (interp_global t1 st) (interp_global t2 st))) f.
-intros t1 t2 ?.
-Admitted.
-*)
-
-(*
-Theorem interp_bind_st
-  : forall (E F : Type -> Type) (R S : Type) (ST : Type) (st : ST)
-      (f : forall T : Type, E T -> stateT ST (itree F) T) (t : itree E R) (k : R -> itree E S),
-    interp f (ITree.bind t k) st ≅ ITree.bind (interp f t st) (fun '(s, r) => interp f (k r) s).
-Proof.
-Admitted.
-
-Theorem interp_translate_st
-     : forall (E F G : Type -> Type) (ST : Type) (st : ST) (f : forall T : Type, E T -> F T)
-         (h : forall T : Type, F T -> stateT ST (itree G) T) (R : Type) 
-         (t : itree E R),
-       interp h (translate f t) st
-       ≅ interp (fun (T : Type) (e : E T) => h T (f T e)) t st.
-Proof.
-Admitted.
-
-Theorem interp_ret_st :
-  forall (E F : Type -> Type) (R : Type) (ST : Type) (st : ST) (f : forall T : Type, E T -> stateT ST (itree F) T) (x : R),
-    interp f (Ret x) st ≅ ITree.map (fun x => (st, x)) (Ret x).
-Proof.
-Admitted.
-
-Theorem interp_trigger_st :
-  forall (E F : Type -> Type) (R : Type) (ST : Type) (st : ST) (f : forall T : Type, E T -> stateT ST (itree F) T)
-    (e : E R), interp f (ITree.trigger e) st ≳ f R e st.
-Proof.
-Admitted.
- *)

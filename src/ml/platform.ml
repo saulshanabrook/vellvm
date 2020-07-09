@@ -9,22 +9,12 @@
  ---------------------------------------------------------------------------- *)
 
 
-(* -------------------------------------------------------------------------- *)
-(** Assembling and linking for X86.  Depends on the underlying OS platform    *)
-
-
 open Printf
 open Unix
 
 exception PlatformError of string * string
 
-
-(* -------------------------------------------------------------------------- *)
-(* Platform specific configuration: Unix/Linux vs. Mac OS X                   *)
-
-let os = Sys.os_type   (* One of "Unix" "Win32" or "Cygwin" *)
-
-(* Default to Mac OS X configuration *)
+let os = Sys.os_type
 let linux = ref false
 let linux_target_triple = ref "x86_64-suse-linux"
 let mangle name = if !linux then name else ("_" ^ name)
@@ -53,9 +43,6 @@ let rm_cmd = ref "rm -rf "
 let verbose = ref false
 let verb msg = (if !verbose then print_string msg)
 
-      
-(* paths -------------------------------------------------------------------- *)
-
 let path_sep = "/"
 let dot_path = "./"
 let output_path = ref "output"
@@ -64,9 +51,6 @@ let lib_paths = ref []
 let lib_search_paths = ref []
 let include_paths = ref []
 let executable_name = ref "a.out"
-
-
-(* Set the link commands properly, ensure output directory exists *)
 let configure () =
   if os <> "Unix" then failwith "Windows not supported"
   else begin
@@ -81,12 +65,8 @@ let configure () =
   with Unix_error (ENOENT,_,_) ->
     (verb @@ Printf.sprintf "creating output directory: %s\n" !output_path);
     mkdir !output_path 0o755
-  end
-
-
-(* filename munging --------------------------------------------------------- *)
+    end
 let path_to_basename_ext (path:string) : string * string =
-  (* The path is of the form ... "foo/bar/baz/<file>.ext" *)
   let paths = Str.split (Str.regexp_string path_sep) path in
   let _ = if (List.length paths) = 0 then failwith @@ sprintf "bad path: %s" path in
   let filename = List.hd (List.rev paths) in
@@ -97,21 +77,13 @@ let path_to_basename_ext (path:string) : string * string =
     begin match List.rev l with
       | [] -> failwith "path_to_basename_ext got bad path"
       | ext::rst -> (String.concat "" (List.rev rst), ext)
-    end
-
-(* compilation and shell commands-------------------------------------------- *)
-
-(* Platform independent shell command *)  
+    end  
 let sh (cmd:string) (ret:string -> int -> 'a) : 'a =
   verb (sprintf "* %s\n" cmd);
   match (system cmd) with
   | WEXITED   i -> ret cmd i
   | WSIGNALED i -> raise (PlatformError (cmd, sprintf "Signaled with %d." i))
   | WSTOPPED  i -> raise (PlatformError (cmd, sprintf "Stopped with %d." i))
-
-(* Generate a name that does not already exist.
-   basedir includes the path separator
-*)
 let gen_name (basedir:string) (basen:string) (baseext:string) : string =  
   let rec nocollide ofs =
     let nfn = sprintf "%s/%s%s%s" basedir basen

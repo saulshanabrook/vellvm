@@ -8,22 +8,6 @@ From Vir Require Import
      CFG
      LLVMAst.
 
-(** ** Definition of generic transformations on Vir's abstract syntax.
-    The general idea is to define two functions, an endofunction and an fmap
-    over each syntactic construct in the ast.
-    The additional trick is to parameterize all instances explicitly by
-    instances of its substructures.
-    By default, the endofunction would result in the identity, while the fmap one would
-    be the expected [fmap] function.
-    However, the point of this additional boilerplate is to be able to override the default
-    behavior at any level by simply locally defining other [fmap] or [endo] instances.
-
-    Examples of use are provided at the end of the file.
-
-   NOTE YZ: I wrote the code as such for historical reasons, but I believe all instances of [endo] for
-   structures that are family of types could be redefined as [endo id].
- *)
-
 Section Endo.
 
   Class Endo (T: Type) := endo: T -> T.
@@ -399,12 +383,6 @@ Section Endo.
 
   End Semantics.
 
-  (** **
-      By default, the solver can always pick the identity as an instance.
-     However both structural traversal from this section and local
-     instances should always have priority over this, hence the 100.
-   *)
-
   Global Instance Endo_id (T: Set): Endo T | 100 := fun x: T => x.
 
  End Endo.
@@ -704,49 +682,22 @@ Section Examples.
 
   Section SubstId.
 
-    (** ** 
-        Example definition of a transformation swapping identifier [x] for identifier [y] and reciprocally in a [cfg]
-     *)
-
     Variable x y: raw_id.
-
-    (* We define the swapping over [raw_id] *)
     Definition swap_raw_id (id:raw_id) : raw_id :=
       if id ~=? x then y else
         if id ~=? y then x else
           id.
-
-    (* The default instance of [Endo raw_id] that would get picked would be [endo_id]. We locally hijack this choice with our swapping function *)
     Instance swap_endo_raw_id : Endo raw_id := swap_raw_id.
-
-    (* We can now get for free the swapping over a whole [cfg] *)
     Definition swap_cfg T: Endo (cfg T) := endo.
-
-    (** **
-      If we print the definition of [swap_cfg] with implicits, we can see that the sub-term [Endo_cfg swap_cfg (...)].
-      Since we have resolved the choice of instance at definition time, we can use this definition outside
-      of this section without worrying about it anymore.
-  Set Printing Implicit.
-  Print swap_cfg.
-     *)
-
-    (* And we can do the same for a whole [mcfg] *)
     Definition swap_mcfg T: Endo (mcfg T) := fmap id.
 
   End SubstId.
 
   Section SubstCFG.
 
-    (** **
-        Example definition of a transformation substituting a [cfg] in a [mcfg]
-     *)
-
     Context {T : Set}.
     Variable fid: function_id.
     Variable new_f : cfg T.
-
-    (* We define the substitution of cfgs *)
-    (* Note: this assumes the new function shares the exact same prototype. *)
     Instance subst_cfg_endo_cfg: Endo (definition T (cfg T)) :=
       fun f =>
         if (dc_name (df_prototype f)) ~=? fid

@@ -1,6 +1,4 @@
 (*  ------------------------------------------------------------------------- *)
-(* Adapted for use in Vir by Steve Zdancewic (c) 2017                      *)
-(*  ------------------------------------------------------------------------- *)
 
 open Format
 
@@ -9,8 +7,6 @@ let of_str = Camlcoq.camlstring_of_coqstring
 let to_int = Camlcoq.Z.to_int
 let to_float = Camlcoq.camlfloat_of_coqfloat
 let to_float32 = Camlcoq.camlfloat_of_coqfloat32
-
-(* TODO: Use pp_option everywhere instead of inlined matching *)
 let pp_option ppf f o =
   match o with
   | None -> ()
@@ -23,8 +19,6 @@ let pp_print_option f ppf o =
 
 let pp_print_int ppf n =
   fprintf ppf "%d%%Z" (to_int n)
-
-(* Backward compatibility with 4.01.0 *)
 let rec pp_print_list ?(pp_sep = Format.pp_print_cut) pp_v ppf = function
 | [] -> ()
 | v :: vs ->
@@ -73,11 +67,6 @@ and gident : Format.formatter -> LLVMAst.global_id -> unit =
     fprintf ppf "(ID_Global %s)" (str_of_raw_id i);
 
 and ident : Format.formatter -> LLVMAst.ident -> unit =
-
-  (* let ident_format : (string -> int) -> Format.formatter -> string -> unit = *)
-  (* fun finder ppf i -> *)
-  (* if i.[0] >= '0' && i.[0] <= '9' then pp_print_int ppf (finder i) *)
-  (* else pp_print_string ppf i in *)
 
   fun ppf ->
   function
@@ -340,7 +329,7 @@ and inst_exp : Format.formatter -> (LLVMAst.typ LLVMAst.exp) -> unit =
   | EXP_Struct _
   | EXP_Packed_struct _
   | EXP_Zero_initializer
-  | EXP_Cstring _ -> assert false (* there should be no "raw" exps as instructions *)
+  | EXP_Cstring _ -> assert false
 
   | OP_IBinop (op, t, v1, v2) ->
     fprintf ppf "(OP_IBinop %a %a %a %a)"

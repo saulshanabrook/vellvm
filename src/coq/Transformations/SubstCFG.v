@@ -175,7 +175,6 @@ Section Substitute_cfg_correct.
     split_bind.
 
     {
-      (* Reasoning about initialization *)
       admit.
     }
 
@@ -183,7 +182,6 @@ Section Substitute_cfg_correct.
     apply eutt_clo_bind with foo_rel.
 
     {
-      (* Denotation of each cfg *)
       apply interp_to_L2_map_monad.
       admit.
     }
@@ -193,21 +191,11 @@ Section Substitute_cfg_correct.
     rewrite 2 interp_to_L2_bind.
     split_bind.
 
-    { (* Getting the address of "main" *)
+    {
       admit.
     }
 
-    (* Tying the recursive knot *)
-
     admit.
-  (*   rewrite 2 interp_to_L2_bind. *)
-
-
-
-
-(* -------------------------------------------------- *)
-(* Block substitution into CFG.                       *)
-(* -------------------------------------------------- *)
 
 Section Substitute_block.
 
@@ -228,9 +216,6 @@ Fixpoint replace_pred {A} (p : A -> bool) (a : A) (xs : list A) : list A :=
 From ExtLib Require Import
      Core.RelDec
      Programming.Eqv.
-
-
-(* Replace a block with a given block r if the ids match *)
 Definition replace_block {T} (r : block T) (b : block T) : block T :=
   if blk_id b ~=? blk_id r then r else b.
 

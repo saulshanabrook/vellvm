@@ -7,18 +7,12 @@
  *   License as published by the Free Software Foundation, either version     *
  *   3 of the License, or (at your option) any later version.                 *
  ---------------------------------------------------------------------------- *)
-
-
-(* An assertion is just a unit->unit function that either *)
-(* succeeds silently or throws an Failure exception.       *)
 type assertion = (unit -> unit)
 
 type 'a test = 
   | Test of string * (string * 'a) list
 
 type suite = (assertion test) list
-
-(* Assertions *)
 
 let assert_eq v1 v2 : assertion =
   fun () -> if v1 <> v2 then failwith "not equal" else ()
@@ -33,10 +27,6 @@ let assert_eqfs f v2 : assertion =
     else ()
 
 let assert_fail : assertion = fun () -> failwith "assert fail"
-
-
-
-(* Generating Test Results *)
 
 type result = 
   | Pass 
@@ -64,9 +54,6 @@ let run_suite (s:suite):outcome =
 let successful (o:outcome) : bool =
   List.for_all (fun (Test (_,cases)) -> List.for_all (fun (_,r) -> r = Pass) cases) o
 
-(***********************)
-(* Reporting functions *)
-
 let result_test_to_string (name_pts:string) (r:result test): string =
   let string_of_case (name, res) =
     let (p, m) =
@@ -82,8 +69,6 @@ let result_test_to_string (name_pts:string) (r:result test): string =
       name_pts ^ ":" ^ 
       (List.fold_left (fun rest -> fun case -> rest ^ "\n" ^ (string_of_case case)) "" cases)
   end
-
-(* returns (name_pts, passed, failed, total, points_earned, max_given, max_hidden) *)
 let get_results (t:result test) =
   let num_passed cases = 
     List.fold_left (fun cnt (_,r) -> match r with Pass -> cnt + 1 | _ -> cnt) 0 cases in

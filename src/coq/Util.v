@@ -391,8 +391,6 @@ Section nat_Show.
      generalize H0.
      apply string_of_nat_inj, pos_to_nat_inj; intros abs; apply ineq; rewrite abs; reflexivity. }
   Qed.
-
-  (* Things are much simpler otherwise with a binary representation... *)
   Fixpoint string_of_nat_bin (n: nat): string :=
     match n with
     | O => ""
@@ -418,10 +416,6 @@ From Coq Require Import
 Import ListNotations.
 
 Set Implicit Arguments.
-
-
-(* Monads ------------------------------------------------------------------- *)
-(* TODO: Add to ExtLib *)
 
 Require Import ExtLib.Structures.Monads.
 Import MonadNotation.
@@ -496,16 +490,12 @@ Proof.
     reflexivity.
 Qed.
 
-(* Arithmetic --------------------------------------------------------------- *)
-
 
 Lemma pred_minus_S : forall m n,
   pred m - n = m - S n.
 Proof.
   induction m; auto.
 Qed.
-
-(* Relations ---------------------------------------------------------------- *)
 
 Inductive rtc {A} (R:A -> A -> Prop) : A -> A -> Prop :=
 | rtc_refl : forall a, rtc R a a
@@ -520,9 +510,6 @@ Qed.
 Arguments rtc [_] _ _ _.
 
 Notation "R ^*" := (rtc R) (at level 1, format "R ^*").
-
-
-(* Lists -------------------------------------------------------------------- *)
 
 Lemma Forall_map_impl {A B} : forall (P:A -> Prop) (Q:B -> Prop) (f:A -> B),
     (forall a, P a -> Q (f a)) ->
@@ -696,9 +683,6 @@ Proof.
   rewrite IHl; auto; omega.
 Qed.
 
-
-(* replicate ---------------------------------------------------------------- *)
-
 Fixpoint replicate {A} (a:A) (n:nat) : list A :=
   match n with
   | O => nil
@@ -715,9 +699,6 @@ Proof.
   destruct n'; auto.
   simpl; apply IHn; omega.
 Qed.
-
-
-(* Intervals ---------------------------------------------------------------- *)
 
 Fixpoint interval n m := 
   match m with
@@ -1038,10 +1019,6 @@ Proof.
 Qed.
 
 End REMOVE.
-
-
-
-(* util *)
 Lemma rev_nil_rev : forall A (l:list A),
   [] = rev l ->
   l = [].
@@ -1067,8 +1044,6 @@ Fixpoint trim {A} (lo:list (option A)) : list A :=
   | [] | None::_ => []
   | Some a::lo' => a::trim lo'
   end.
-
-(* alternate definition of nth to appease termination checker *)
 Definition nth_f {A B} (d:B) (f:A->B) (n:nat) (l:list A) : B :=
   let fix loop n l {struct l} :=
       match n, l with
@@ -1085,10 +1060,7 @@ Lemma nth_f_nth_error : forall A B (d:B) (f:A->B) l n,
                  end.
 Proof.
   induction l; intros; destruct n; simpl; auto.
-Qed.    
-
-
-(* to appease termination checker *)
+Qed.
 Definition assoc_f {A B C} (a_dec:forall a b:A, {a = b} + {a <> b})
            (d:C) (f:B -> C) (a:A) (l:list (A * B)) : C :=
   let fix rec l :=
@@ -1185,18 +1157,6 @@ Proof.
     apply IHl; destruct H; auto.
     contradiction n; auto.
 Qed.
-
-(*
-Theorem assoc_map :
-  forall A B C eq_dec (x : A) (f : B -> C) l,
-    assoc eq_dec x (map (fun p => (fst p, f (snd p))) l) =
-    'v <- assoc eq_dec x l; Some (f v).
-Proof.
-  intros; induction l; eauto.
-  simpl. destruct a; simpl. rewrite IHl.
-  destruct (eq_dec x a); simpl; eauto.
-Qed.
-*)
 
 
 Lemma map_nth_error_none :
@@ -1297,15 +1257,6 @@ Proof.
     inversion H; subst.
     simpl; rewrite IHl; auto.
 Qed.
-
-(*
-Definition map_option_snd {A B C} (f : B -> option C) (p:A * B) : option (A * C) :=
-  let '(x,y) := p in
-  'z <- f y;
-    Some (x,z).
-
-
-*)
 
 Fixpoint find_map {A B} (f : A -> option B) (l : list A) : option B :=
   match l with
@@ -1440,17 +1391,9 @@ Tactic Notation "inv_bind" hyp(H) :=
       destruct o eqn:hy; [|discriminate]; simpl in H
     end.
 
-(* This should find another place, ideally should be part of itree library. *)
-(* Explicit application of a state to a [stateT] computation: convenient to ease some rewriting,
-     but semantically equivalent to simply applying the state. *)
-
 From ITree Require Import
      ITree
      Eq.Eq.
-(* Definition runState {E A env} (R : Monads.stateT env (itree E) A) (st: env) : itree E (env * A) := R st. *)
-
-(* This should move to the library. It's just a specialization of [eqit_bind'], but I like the much more
- informative name. *)
 From ExtLib Require Import
      Structures.Monads.
 Import MonadNotation.

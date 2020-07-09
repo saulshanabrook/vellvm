@@ -63,9 +63,6 @@ Module PC <: UsualDecidableTypeFull.
 
 End PC.
 Instance eq_dec_pc : RelDec (@eq pc) := RelDec_from_dec (@eq pc) PC.eq_dec.
-
-
-(* control flow graphs (CFGs) ----------------------------------------------- *)
 Section CFG.
   Variable (T:Set).
 
@@ -73,20 +70,12 @@ Inductive cmd : Set :=
 | Inst (i:instr T)
 | Term (t:terminator T)
 .
-
-(* each function definition corresponds to a control-flow graph
-   - init is the entry block
-   - blks is a list of labeled blocks
-   - args is the list of identifiers brought into scope by this function
-   *)
   Record cfg := mkCFG
                   {
                     init : block_id;
                     blks : list (block T);
                     args : list ident;
                   }.
-
-(* An mcfg is a module where each function body has been converted to a cfg *)
 Definition mcfg : Set := modul T cfg.
 
 Definition find_defn {X:Set} (fid:function_id) (d:definition T X) : option (definition T X) :=
@@ -180,6 +169,4 @@ Definition mcfg_of_modul (m:modul T (block T * list (block T))) : mcfg :=
     m_declarations := m_declarations m;
     m_definitions := defns
   |}.
-
-(*  ------------------------------------------------------------------------- *)
 End CFG.

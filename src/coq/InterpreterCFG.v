@@ -30,10 +30,6 @@ Section InterpreterCFG.
    This gives us a _vertical_ notion of compositionality.
    *)
 
-  (**
-   NOTE: Can we avoid this duplication w.r.t. [interp_to_Li]?
-   *)
-
   Definition interp_cfg_to_L1 {R} user_intrinsics (t: itree instr_E R) (g: global_env) :=
     let L0_trace       := interp_intrinsics user_intrinsics t in
     let L1_trace       := interp_global L0_trace g in
@@ -145,8 +141,6 @@ Section InterpreterCFG.
     subst; rewrite H.
     reflexivity.
   Qed.
-
-  (* NOTEYZ: This can probably be refined to [eqit eq] instead of [eutt eq], but I don't think it matters to us *)
   Lemma interp_cfg_to_L3_vis (defs: IS.intrinsic_definitions):
     forall T R (e : instr_E T) (k : T -> itree instr_E R) g l m,
       interp_cfg_to_L3 defs (Vis e k) g l m ≈ 
@@ -346,35 +340,5 @@ Section InterpreterCFG.
     rewrite interp_memory_ret.
     reflexivity.
   Qed.
-
-  (**
-     YZ : Should be obsolete. Keeping it around for a bit
-   *)
-  (*
-  Lemma interp_cfg_to_L3_LM : forall defs t a size offset g l m v bytes concrete_id,
-      get_logical_block m a = Some (LBlock size bytes concrete_id) ->
-      deserialize_sbytes (lookup_all_index offset (sizeof_dtyp t) bytes SUndef) t = v ->
-      interp_cfg_to_L3 defs (trigger (Load t (DVALUE_Addr (a, offset)))) g l m ≈ Ret (m,(l,(g,v))).
-  Proof.
-    intros * LUL EQ.
-    unfold interp_cfg_to_L3.
-    rewrite interp_intrinsics_trigger.
-    cbn.
-    unfold Intrinsics.F_trigger.
-    rewrite interp_global_trigger.
-    cbn.
-    rewrite interp_local_bind, interp_local_trigger.
-    cbn; rewrite bind_bind.
-    rewrite interp_memory_bind, interp_memory_trigger.
-    cbn.
-    destruct m as [mem memstack]. cbn.
-    cbn in LUL. unfold read.
-    cbn; rewrite LUL.
-    rewrite 2 bind_ret_l, interp_local_ret, interp_memory_ret.
-    unfold read_in_mem_block.
-    rewrite EQ.
-    reflexivity.
-  Qed.
-   *)
 
 End InterpreterCFG.

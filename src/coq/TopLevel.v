@@ -232,11 +232,5 @@ Import D IS.
              (prog: list (toplevel_entity typ (block typ * list (block typ))))
     : PropT L5 (memory_stack * (local_env * lstack * (global_env * uvalue))) :=
     let t := denote_vir ret_typ entry args (mcfg_of_tle prog) in
-    interp_to_L5 Logic.eq user_intrinsics t [] ([],[]) empty_memory_stack. 
-
-  (**
-     Finally, the reference interpreter assumes no user-defined intrinsics.
-   *)
+    interp_to_L5 Logic.eq user_intrinsics t [] ([],[]) empty_memory_stack.
   Definition model := model_user (DTYPE_I 32%Z) "main" main_args [].
-
-(* End TopLevelEnv. *)

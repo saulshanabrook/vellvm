@@ -41,9 +41,6 @@ let parse_file filename =
   read_file filename
   |> Lexing.from_string
   |> Llvm_lexer.parse
-
-
-(* Todo add line count information *)
 let parse_tests filename =
   let assertions = ref [] in
   let channel = open_in filename in
@@ -75,10 +72,7 @@ let string_of_file (f:in_channel) : string =
     with
       | End_of_file -> stream
   in
-    String.concat "\n" (List.rev (_string_of_file [] f))
-
-
-(* file processing ---------------------------------------------------------- *)
+  String.concat "\n" (List.rev (_string_of_file [] f))
 let link_files : (string list) ref = ref []
 let add_link_file path =
   link_files := path :: (!link_files)
@@ -115,9 +109,6 @@ let process_file path =
 
 let process_files files =
   List.iter process_file files
-
-(* file running ---------------------------------------------------------- *)
-(* Parses and runs the ll file at the given path, returning the dvalue produced. *)
 let run_ll_file path =
   let _ = Platform.verb @@ Printf.sprintf "* running file: %s\n" path in
   let ll_ast = parse_file path in

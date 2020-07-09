@@ -1,4 +1,4 @@
-(** Debug utilities **)
+
 
 Definition debug_hom {E} (R : Type) (e : DebugE R) : itree E R :=
   match e with

@@ -31,7 +31,7 @@ Open Scope string_scope.
 Open Scope list_scope.
 
 Definition int := Z.
-Definition float := Floats.float.  (* 64-bit floating point value *)
+Definition float := Floats.float.
 Definition float32 := Floats.float32.
 
 Inductive linkage : Set :=
@@ -112,8 +112,8 @@ Inductive fn_attr : Set :=
 | FNATTR_Sspreq
 | FNATTR_Sspstrong
 | FNATTR_Uwtable
-| FNATTR_String (s:string) (* "no-see" *)
-| FNATTR_Key_value (kv : string * string) (* "unsafe-fp-math"="false" *)
+| FNATTR_String (s:string)
+| FNATTR_Key_value (kv : string * string)
 | FNATTR_Attr_grp (g:int)
 .
 
@@ -126,17 +126,15 @@ Inductive thread_local_storage : Set :=
 
 
 Inductive raw_id : Set :=
-| Name (s:string)     (* Named identifiers are strings: %argc, %val, %x, @foo, @bar etc. *)
-| Anon (n:int)        (* Anonymous identifiers must be sequentially numbered %0, %1, %2, etc. *)
-| Raw  (n:int)        (* Used for code generation -- serializes as %_RAW_0 %_RAW_1 etc. *)
+| Name (s:string)
+| Anon (n:int)
+| Raw  (n:int)
 .
 
 Inductive ident : Set :=
-| ID_Global (id:raw_id)   (* @id *)
-| ID_Local  (id:raw_id)   (* %id *)
+| ID_Global (id:raw_id)
+| ID_Local  (id:raw_id)
 .
-
-(* auxiliary definitions for when we know which case we're in already *)
 Definition local_id  := raw_id.
 Definition global_id := raw_id.
 Definition block_id := raw_id.
@@ -153,8 +151,6 @@ Inductive typ : Set :=
 | TYPE_X86_fp80
 | TYPE_Fp128
 | TYPE_Ppc_fp128
-(* | TYPE_Label  label is not really a type *)
-(* | TYPE_Token -- used with exceptions *)
 | TYPE_Metadata
 | TYPE_X86_mmx
 | TYPE_Array (sz:int) (t:typ)
@@ -162,7 +158,7 @@ Inductive typ : Set :=
 | TYPE_Struct (fields:list typ)
 | TYPE_Packed_struct (fields:list typ)
 | TYPE_Opaque
-| TYPE_Vector (sz:int) (t:typ)     (* t must be integer, floating point, or pointer type *)
+| TYPE_Vector (sz:int) (t:typ)
 | TYPE_Identified (id:ident)
 .
 
@@ -197,37 +193,12 @@ Section TypedSyntax.
   Context {T:Set}.
 
   Definition tident : Set := (T * ident)%type.
-
-
-(* NOTES:
-  This datatype is more permissive than legal in LLVM:
-     - it allows identifiers to appear nested inside of "constant expressions"
-       that is OK as long as we validate the syntax as "well-formed" before
-       trying to give it semantics
-
-  NOTES:
-   - Integer expressions: llc parses large integer exps and converts them to some
-     internal form (based on integer size?)
-
-   - Float constants: these are always parsed as 64-bit representable floats
-     using ocamls float_of_string function. The parser converts float literals
-     to 32-bit values using the type information available in the syntax.
-
-     -- TODO: 128-bit, 16-bit, other float formats?
-
-   - Hex constants: these are always parsed as 0x<16-digit> 64-bit exps and
-     bit-converted to ocaml's 64-bit float representation.  If they are
-     evaluated at 32-bit float types, they are converted during evaluation.
-
-   - EXP_ prefix denotes syntax that LLVM calls a "value"
-   - OP_  prefix denotes syntax that requires further evaluation
- *)
 Inductive exp : Set :=
 | EXP_Ident   (id:ident)
 | EXP_Integer (x:int)
-| EXP_Float   (f:float32)  (* 32-bit floating point values *)
-| EXP_Double  (f:float)    (* 64-bit floating point values *)
-| EXP_Hex     (f:float)    (* See LLVM documentation about hex float constants. *)
+| EXP_Float   (f:float32)
+| EXP_Double  (f:float)
+| EXP_Hex     (f:float)
 | EXP_Bool    (b:bool)
 | EXP_Null
 | EXP_Zero_initializer
@@ -248,16 +219,15 @@ Inductive exp : Set :=
 | OP_ShuffleVector    (vec1:(T * exp)) (vec2:(T * exp)) (idxmask:(T * exp))
 | OP_ExtractValue     (vec:(T * exp)) (idxs:list int)
 | OP_InsertValue      (vec:(T * exp)) (elt:(T * exp)) (idxs:list int)
-| OP_Select           (cnd:(T * exp)) (v1:(T * exp)) (v2:(T * exp)) (* if * then * else *)
+| OP_Select           (cnd:(T * exp)) (v1:(T * exp)) (v2:(T * exp))
 | OP_Freeze           (v:(T * exp))
 .
 
 Definition texp : Set := T * exp.
 
 Inductive instr_id : Set :=
-| IId   (id:raw_id)    (* "Anonymous" or explicitly named instructions *)
-| IVoid (n:int)        (* "Void" return type, for "store",  "void call", and terminators.
-                           Each with unique number (NOTE: these are distinct from Anon raw_id) *)
+| IId   (id:raw_id)
+| IVoid (n:int)
 .
 
 Inductive phi : Set :=
@@ -266,8 +236,8 @@ Inductive phi : Set :=
 
 Inductive instr : Set :=
 | INSTR_Comment (msg:string)
-| INSTR_Op   (op:exp)                        (* INVARIANT: op must be of the form SV (OP_ ...) *)
-| INSTR_Call (fn:texp) (args:list texp)      (* CORNER CASE: return type is void treated specially *)
+| INSTR_Op   (op:exp)
+| INSTR_Call (fn:texp) (args:list texp)
 | INSTR_Alloca (t:T) (nb: option texp) (align:option int)
 | INSTR_Load  (volatile:bool) (t:T) (ptr:texp) (align:option int)
 | INSTR_Store (volatile:bool) (val:texp) (ptr:texp) (align:option int)
@@ -280,14 +250,12 @@ Inductive instr : Set :=
 .
 
 Inductive terminator : Set :=
-(* Terminators *)
-(* Types in branches are TYPE_Label constant *)
 | TERM_Ret        (v:texp)
 | TERM_Ret_void
 | TERM_Br         (v:texp) (br1:block_id) (br2:block_id)
 | TERM_Br_1       (br:block_id)
 | TERM_Switch     (v:texp) (default_dest:block_id) (brs: list (texp * block_id))
-| TERM_IndirectBr (v:texp) (brs:list block_id) (* address * possible addresses (labels) *)
+| TERM_IndirectBr (v:texp) (brs:list block_id)
 | TERM_Resume     (v:texp)
 | TERM_Invoke     (fnptrval:tident) (args:list texp) (to_label:block_id) (unwind_label:block_id)
 .
@@ -314,8 +282,8 @@ Record declaration : Set :=
   mk_declaration
   {
     dc_name        : function_id;
-    dc_type        : T;    (* INVARIANT: should be TYPE_Function (ret_t * args_t) *)
-    dc_param_attrs : list param_attr * list (list param_attr); (* ret_attrs * args_attrs *)
+    dc_type        : T;
+    dc_param_attrs : list param_attr * list (list param_attr);
     dc_linkage     : option linkage;
     dc_visibility  : option visibility;
     dc_dll_storage : option dll_storage;
@@ -335,7 +303,6 @@ Record block : Set :=
       blk_id    : block_id;
       blk_phis  : list (local_id * phi);
       blk_code  : code;
-      (* SAZ: TODO: remove the instr_id from this syntax -- it's not needed anymore *)
       blk_term  : instr_id * terminator;
       blk_comments : option (list string)
     }.
@@ -351,7 +318,7 @@ Record definition {FnBody:Set} :=
 Inductive metadata : Set :=
   | METADATA_Const  (tv:texp)
   | METADATA_Null
-  | METADATA_Id     (id:raw_id)  (* local or global? *)
+  | METADATA_Id     (id:raw_id)
   | METADATA_String (str:string)
   | METADATA_Named  (strs:list string)
   | METADATA_Node   (mds:list metadata)

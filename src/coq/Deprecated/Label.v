@@ -32,10 +32,6 @@ Section FinSets.
   Global Instance Cat_FinC : Cat FinC :=
     fun n m p (f: FinSet n -> FinSet m) (g: FinSet m -> FinSet p) => cat f g: FinSet n -> FinSet p.
 
-  (** ** The [sum] coproduct. *)
-
-  (** Coproduct elimination *)
-
   Global Instance Case_FinC : CoprodCase FinC app :=
     fun {n m p} (k : FinC n p) (k' : FinC m p) (x : FinSet (n ++ m)) =>
       match n with
@@ -44,8 +40,6 @@ Section FinSets.
       | inl x => k x
       | inr x => k' x
       end.
-
-  (** Injections *)
   Global Instance Inl_FinC : CoprodInl FinC plus :=
     fun n m x => L _ x.
   Global Instance Inr_FinC : CoprodInr FinC plus :=
@@ -123,65 +117,6 @@ Section FinSets.
   Qed.
 
 
-  (* Fact __arith_fact: *)
-  (*   forall p n m,  *)
-  (*     p < n + m -> *)
-  (*     n <= p -> *)
-  (*     p - n < m. *)
-  (* Proof. *)
-  (*   intros; lia. *)
-  (* Qed. *)
- 
-  (* Fixpoint foo (n m: nat) (k: Fin (n + m)) : (Fin n) + (Fin m) := *)
-  (*   match n with *)
-  (*   | O => inr k *)
-  (*   | S n => match k with *)
-  (*           | F1 => inl F1 *)
-  (*           | FS k => foo n m k *)
-  (*           end *)
-  (*   end. *)
-  (*   refine (let (p, LT) := to_nat k in _). *)
-  (*   destruct (Nat.ltb p n) eqn:H. *)
-  (*   - refine (inl (of_nat_lt (proj1 (PeanoNat.Nat.ltb_lt _ _) H))). *)
-  (*   - refine (inr (of_nat_lt (p := p - n) _)). *)
-  (*     refine (__arith_fact _ _ _ LT (proj1 (PeanoNat.Nat.ltb_ge _ _) H)). *)
-  (* Defined. *)
-
-
-  (* Definition split_fin_sum {n m: nat} (k: Fin (n + m)): (Fin n) + (Fin m). *)
-  (*   refine (let (p, LT) := to_nat k in _). *)
-  (*   destruct (Nat.ltb p n) eqn:H. *)
-  (*   - refine (inl (of_nat_lt (proj1 (PeanoNat.Nat.ltb_lt _ _) H))). *)
-  (*   - refine (inr (of_nat_lt (p := p - n) _)). *)
-  (*     refine (__arith_fact _ _ _ LT (proj1 (PeanoNat.Nat.ltb_ge _ _) H)). *)
-  (* Defined. *)
-
-  (* Lemma split_fin_sum_left: *)
-  (*   forall {n m} (k: Fin (n + m)) k', *)
-  (*     split_fin_sum k = inl k' -> *)
-  (*     proj1_sig (to_nat k) = proj1_sig (to_nat k'). *)
-  (* Proof. *)
-  (*   intros. *)
-  (*   unfold split_fin_sum in H. *)
-  (*   destruct (to_nat k) as [p LT]; simpl. *)
-  (*   dep_destruct (Nat.ltb p n). *)
-
-  (*   destruct (Nat.ltb p n) eqn:EQb. *)
-  (*   -  *)
-  (*     rewrite EQ in H. *)
-  (*     rewrite EQb in H. *)
-  (*     dependent destruction b. *)
-  (*   revert H. *)
-    
-    
-
-  (* Lemma foo: *)
-  (*   forall {m n: nat} (k: Fin.t (m + n)) k', *)
-  (*     split_fin_sum k = inr k' -> k = R _ k'. *)
-  (* Proof. *)
-  (*   intros. *)
-
-
 End Fin.
 
 Arguments split_fin_sum {m n}.
@@ -192,8 +127,6 @@ Section Label.
   Notation Fin := Fin.t.
 
   Definition Label (n: nat) (m: nat) := ktree E (Fin n) (Fin m).
-
-  (* Actually probably need eutt (fun k k' => to_nat' k = to_nat' k') rather than eutt eq *)
   Global Instance Eq_Label : Eq2 Label :=
     fun n m k k' => forall l, k l ≈ k' l.
 
@@ -206,18 +139,12 @@ Section Label.
   Global Instance Initial_Label : Initial Label 0 :=
     fun _ v => match v with end.
 
-  (** ** The [sum] coproduct. *)
-
-  (** Coproduct elimination *)
-
   Global Instance Case_Label : CoprodCase Label plus :=
     fun {n m p} (k : Label n p) (k' : Label m p) (x : Fin (n + m)) =>
       match split_fin_sum x with
       | inl x => k x
       | inr x => k' x
       end.
-
-  (** Injections *)
   Global Instance Inl_Label : CoprodInl Label plus :=
     fun n m x => Ret (L _ x).
   Global Instance Inr_Label : CoprodInr Label plus :=

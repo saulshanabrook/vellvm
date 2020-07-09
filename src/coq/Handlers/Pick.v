@@ -36,40 +36,6 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
   Import LLVMIO.
 
   Section PickPropositional.
-
-    (*  Semantics with the Pick + Predicates:
-        expr = div 1 undef 
-           intepreter: "evaluate"   div 1 0   ==> trigger UBE   ==> interpret UBE as trigger Fail
-           model:  trigger UBE ==> all Trees  (including trigger Fail)
-
-       expr = div 1 (1 - undef)
-           interpreter:  div 1 1 ==> ret 1
-           model:  trigger UBE ==> all Trees  (including ret 1)
-
-
-       Four cases:
-       C   exists dv, concretize_uvalue uv = ret dv  => easy by relation between concretize and 
-       C   concretize_uvalue uv = trigger UBE        => in this case, later interpretation of UBE
-       C   concretize_uvalue uv = trigger fail 
-      ~C   --> pick UBE
-    
-       Lemma: concretize_uvalue uv = Ret dv  ->  concretize uv dv
-
-
-
-       Semantics without the predicates in Pick:
-        expr = div 1 undef 
-           intepreter: "evaluate"   div 1 0      ==> trigger UB   ==> interpret UBE as trigger Fail
-           model: after Pick_handler:  {trigger UBE, ret (1/n) | n }  ==> 
-                  after UBE_handler :  { all trees }    (including trigger Fail)
-
-       expr = div 1 (1 - undef)
-           interpreter:  div 1 1 ==> ret 1
-           model: after Pick_handler:  {trigger UBE, ret (1/n) | n }  ==> 
-                  after UBE_handler :  { all trees }    (including ret 1)
-    *)
-    (* YZ: TODO: better UB error message *)
-    (* SAZ: For now, leaving the "C" parameter, but just ignoring it here *)
     
     
     Inductive Pick_handler {E} `{FE:FailureE -< E} `{FO:UBE -< E}: PickE ~> PropT E :=
@@ -102,33 +68,28 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
             else if (sz =? 8) then ret (DVALUE_I8 (repr 0))
                   else if (sz =? 1) then ret (DVALUE_I1 (repr 0))
                        else failwith
-              "Illegal size for generating default dvalue of DTYPE_I").
-
-
-    (* Handler for PickE which concretizes everything to 0 *)
+                              "Illegal size for generating default dvalue of DTYPE_I").
     Fixpoint default_dvalue_of_dtyp (dt : dtyp) : err dvalue :=
       match dt with
       | DTYPE_I sz => default_dvalue_of_dtyp_i sz
       | DTYPE_Pointer => ret (DVALUE_Addr A.null)
       | DTYPE_Void => ret DVALUE_None
-      | DTYPE_Half => ret (DVALUE_Float Float32.zero) (* ??? *)
+      | DTYPE_Half => ret (DVALUE_Float Float32.zero)
       | DTYPE_Float => ret (DVALUE_Float Float32.zero)
       | DTYPE_Double => ret (DVALUE_Double (Float32.to_double Float32.zero))
-      | DTYPE_X86_fp80 => ret (DVALUE_Float Float32.zero) (* ??? *)
-      | DTYPE_Fp128 => ret (DVALUE_Float Float32.zero) (* ??? *)
-      | DTYPE_Ppc_fp128 => ret (DVALUE_Float Float32.zero) (* ??? *)
-      | DTYPE_Metadata => ret DVALUE_None (* ??? *)
-      | DTYPE_X86_mmx => ret DVALUE_None (* ??? *)
-      | DTYPE_Opaque => ret DVALUE_None (* ??? *)
+      | DTYPE_X86_fp80 => ret (DVALUE_Float Float32.zero)
+      | DTYPE_Fp128 => ret (DVALUE_Float Float32.zero)
+      | DTYPE_Ppc_fp128 => ret (DVALUE_Float Float32.zero)
+      | DTYPE_Metadata => ret DVALUE_None
+      | DTYPE_X86_mmx => ret DVALUE_None
+      | DTYPE_Opaque => ret DVALUE_None
       | DTYPE_Array sz t =>
         if (0 <=? sz) then
           v <- default_dvalue_of_dtyp t ;;
           (ret (DVALUE_Array (repeat v (Z.to_nat sz))))
         else
           failwith ("Negative array length for generating default value" ++
-          "of DTYPE_Array or DTYPE_Vector")
-
-      (* Matching valid Vector types... *)
+                                                                         "of DTYPE_Array or DTYPE_Vector")
       | DTYPE_Vector sz (DTYPE_Half) =>
         if (0 <=? sz) then
           (ret (DVALUE_Vector
@@ -216,16 +177,6 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
                                                   dv2 <- concretize_uvalue v2 ;;
                                                   eval_fcmp cmp dv1 dv2
       | _ => (lift (failwith "Attempting to convert a partially non-reduced uvalue to dvalue. Should not happen"))
-      (*
-  | UVALUE_Conversion conv v t_to          =>
-  | UVALUE_GetElementPtr t ptrval idxs     => _
-  | UVALUE_ExtractElement vec idx          => _
-  | UVALUE_InsertElement vec elt idx       => _
-  | UVALUE_ShuffleVector vec1 vec2 idxmask => _
-  | UVALUE_ExtractValue vec idxs           => _
-  | UVALUE_InsertValue vec elt idxs        => _
-  | UVALUE_Select cnd v1 v2                => _
-       *)
       end.
 
     Ltac do_it := constructor; cbn; auto; fail.
@@ -280,7 +231,6 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
           { intros. apply H. apply in_cons. auto. auto. }
           specialize (IHfields H1). clear H1.
           Opaque map_monad.
-          (* Reduce H0 *)
           cbn in H0.
           rewrite list_cons_app in H0.
           rewrite map_monad_app in H0. cbn in H0.
@@ -304,7 +254,6 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
           { intros. apply H. apply in_cons. auto. auto. }
           specialize (IHfields H1). clear H1.
           Opaque map_monad.
-          (* Reduce H0 *)
           cbn in H0.
           rewrite list_cons_app in H0.
           rewrite map_monad_app in H0. cbn in H0.

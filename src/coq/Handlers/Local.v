@@ -148,13 +148,6 @@ From ExtLib Require Import
 From Vir Require Import
      LLVMAst
      MemoryAddress.
-
-(* YZ TODO : Undecided about the status of this over-generalization of these events over domains of keys and values.
-   The interface needs to be specialized anyway in [LLVMEvents].
-   We want to have access to the specialized type both in [InterpreterMCFG] and [InterpreterCFG] so we cannot delay
-   it until [TopLevel] either.
-   So exposing the specialization here, but it is awkward.
- *)
 Module Make (A : ADDRESS) (LLVMEvents : LLVM_INTERACTIONS(A)).
   Definition local_env := FMapAList.alist raw_id LLVMEvents.DV.uvalue.
 End Make.

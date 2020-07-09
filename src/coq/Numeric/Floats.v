@@ -1,23 +1,6 @@
-(* *********************************************************************)
-(*                                                                     *)
-(*              The Compcert verified compiler                         *)
-(*                                                                     *)
-(*          Xavier Leroy, INRIA Paris-Rocquencourt                     *)
-(*          Jacques-Henri Jourdan, INRIA Paris-Rocquencourt            *)
-(*                                                                     *)
-(*  Copyright Institut National de Recherche en Informatique et en     *)
-(*  Automatique.  All rights reserved.  This file is distributed       *)
-(*  under the terms of the GNU General Public License as published by  *)
-(*  the Free Software Foundation, either version 2 of the License, or  *)
-(*  (at your option) any later version.  This file is also distributed *)
-(*  under the terms of the INRIA Non-Commercial License Agreement.     *)
-(*                                                                     *)
-(* *********************************************************************)
 
-(** Formalization of floating-point numbers, using the Flocq library. *)
 
 Require Import Coqlib Zbits Integers.
-(*From Flocq*)
 From Flocq Require Import Binary Bits Core.
 Require Import IEEE754_extra.
 Require Import Program.
@@ -26,10 +9,8 @@ Require Archi.
 Close Scope R_scope.
 Open Scope Z_scope.
 
-Definition float := binary64. (**r the type of IEE754 double-precision FP numbers *)
-Definition float32 := binary32. (**r the type of IEE754 single-precision FP numbers *)
-
-(** Boolean-valued comparisons *)
+Definition float := binary64.
+Definition float32 := binary32.
 
 Definition cmp_of_comparison (c: comparison) (x: option Datatypes.comparison) : bool :=
   match c with
@@ -94,8 +75,6 @@ Proof.
   destruct x as [[]|]; simpl; intros; discriminate.
 Qed.
 
-(** Normalization of NaN payloads *)
-
 Lemma normalized_nan: forall prec n p,
   Z.of_nat n = prec - 1 -> 1 < prec ->
   nan_pl prec (Z.to_pos (P_mod_two_p p n)) = true.
@@ -110,8 +89,6 @@ Proof.
 - rewrite e. simpl; auto.
 - rewrite Z2Pos.id by omega. omega.
 Qed.
-
-(** Transform a Nan payload to a quiet Nan payload. *)
 
 Definition quiet_nan_64_payload (p: positive) :=
   Z.to_pos (P_mod_two_p (Pos.lor p ((iter_nat xO 51 1%positive))) 52%nat).
@@ -142,16 +119,7 @@ Local Notation __ := (eq_refl Datatypes.Lt).
 Local Hint Extern 1 (Prec_gt_0 _) => exact (eq_refl Datatypes.Lt) : core.
 Local Hint Extern 1 (_ < _) => exact (eq_refl Datatypes.Lt) : core.
 
-(** * Double-precision FP numbers *)
-
 Module Float.
-
-(** ** NaN payload manipulations *)
-
-(** The following definitions are not part of the IEEE754 standard but
-    apply to all architectures supported by CompCert. *)
-
-(** Nan payload operations for single <-> double conversions. *)
 
 Definition expand_nan_payload (p: positive) := Pos.shiftl_nat p 29.
 
@@ -179,10 +147,6 @@ Definition of_single_nan (f : float32) : { x : float | is_nan _ _ x = true } :=
   end.
 
 Definition reduce_nan_payload (p: positive) :=
-  (* The [quiet_nan_64_payload p] before the right shift is redundant with
-     the [quiet_nan_32_payload p] performed after, in [to_single_nan].
-     However the former ensures that the result of the right shift is
-     not 0 and therefore representable as a positive. *)
   Pos.shiftr_nat (quiet_nan_64_payload p) 29.
 
 Definition to_single_nan (f : float) : { x : float32 | is_nan _ _ x = true } :=
@@ -190,8 +154,6 @@ Definition to_single_nan (f : float) : { x : float32 | is_nan _ _ x = true } :=
   | B754_nan s p H => quiet_nan_32 (s, reduce_nan_payload p)
   | _ => default_nan_32
   end.
-
-(** NaN payload operations for opposite and absolute value. *)
 
 Definition neg_nan (f : float) : { x : float | is_nan _ _ x = true } :=
   match f with
@@ -205,20 +167,6 @@ Definition abs_nan (f : float) : { x : float | is_nan _ _ x = true } :=
   | _ => default_nan_64
   end.
 
-(** When an arithmetic operation returns a NaN, the sign and payload
-  of this NaN are not fully specified by the IEEE standard, and vary
-  among the architectures supported by CompCert.  However, the following
-  behavior applies to all the supported architectures: the payload is either
-- a default payload, independent of the arguments, or
-- the payload of one of the NaN arguments, if any.
-
-For each supported architecture, the functions [Archi.choose_nan_64]
-and [Archi.choose_nan_32] determine the payload of the result as a
-function of the payloads of the NaN arguments.
-
-Additionally, signaling NaNs are converted to quiet NaNs, as required by the standard.
-*)
-
 Definition cons_pl (x: float) (l: list (bool * positive)) :=
   match x with B754_nan s p _ => (s, p) :: l | _ => l end.
 
@@ -228,21 +176,9 @@ Definition unop_nan (x: float) : {x : float | is_nan _ _ x = true} :=
 Definition binop_nan (x y: float) : {x : float | is_nan _ _ x = true} :=
   quiet_nan_64 (Archi.choose_nan_64 (cons_pl x (cons_pl y []))).
 
-(** For fused multiply-add, the order in which arguments are examined
-  to select a NaN payload varies across platforms.  E.g. in [fma x y z],
-  x86 considers [x] first, then [y], then [z], while ARM considers [z] first,
-  then [x], then [y].  The corresponding permutation is defined
-  for each target, as function [Archi.fma_order]. *)
-
 Definition fma_nan_1 (x y z: float) : {x : float | is_nan _ _ x = true} :=
   let '(a, b, c) := Archi.fma_order x y z in
   quiet_nan_64 (Archi.choose_nan_64 (cons_pl a (cons_pl b (cons_pl c [])))).
-
-(** One last wrinkle for fused multiply-add: [fma zero infinity nan]
-  can return either the quiesced [nan], or the default NaN arising out
-  of the invalid operation [zero * infinity].  Of our target platforms,
-  only ARM honors the latter case.  The choice between the default NaN
-  and [nan] is done as in the case of two-argument arithmetic operations. *)
 
 Definition fma_nan (x y z: float) : {x : float | is_nan _ _ x = true} :=
   match x, y with
@@ -254,76 +190,60 @@ Definition fma_nan (x y z: float) : {x : float | is_nan _ _ x = true} :=
       fma_nan_1 x y z
   end.
 
-(** ** Operations over double-precision floats *)
-
-Definition zero: float := B754_zero _ _ false. (**r the float [+0.0] *)
+Definition zero: float := B754_zero _ _ false.
 
 Definition eq_dec: forall (f1 f2: float), {f1 = f2} + {f1 <> f2} := Beq_dec _ _.
 
-(** Arithmetic operations *)
-
-Definition neg: float -> float := Bopp _ _ neg_nan. (**r opposite (change sign) *)
-Definition abs: float -> float := Babs _ _ abs_nan. (**r absolute value (set sign to [+]) *)
+Definition neg: float -> float := Bopp _ _ neg_nan.
+Definition abs: float -> float := Babs _ _ abs_nan.
 Definition sqrt: float -> float :=
-  Bsqrt 53 1024 __ __ unop_nan mode_NE.  (**r square root *)
+  Bsqrt 53 1024 __ __ unop_nan mode_NE.
 Definition add: float -> float -> float :=
-  Bplus 53 1024 __ __ binop_nan mode_NE. (**r addition *)
+  Bplus 53 1024 __ __ binop_nan mode_NE.
 Definition sub: float -> float -> float :=
-  Bminus 53 1024 __ __ binop_nan mode_NE. (**r subtraction *)
+  Bminus 53 1024 __ __ binop_nan mode_NE.
 Definition mul: float -> float -> float :=
-  Bmult 53 1024 __ __ binop_nan mode_NE. (**r multiplication *)
+  Bmult 53 1024 __ __ binop_nan mode_NE.
 Definition div: float -> float -> float :=
-  Bdiv 53 1024 __ __ binop_nan mode_NE. (**r division *)
+  Bdiv 53 1024 __ __ binop_nan mode_NE.
 Definition fma: float -> float -> float -> float :=
-  Bfma 53 1024 __ __ fma_nan mode_NE. (**r fused multiply-add [x * y + z] *)
-Definition compare (f1 f2: float) : option Datatypes.comparison := (**r general comparison *)
+  Bfma 53 1024 __ __ fma_nan mode_NE.
+Definition compare (f1 f2: float) : option Datatypes.comparison :=
   Bcompare 53 1024 f1 f2.
-Definition cmp (c:comparison) (f1 f2: float) : bool := (**r Boolean comparison *)
+Definition cmp (c:comparison) (f1 f2: float) : bool :=
   cmp_of_comparison c (compare f1 f2).
 Definition ordered (f1 f2: float) : bool :=
   ordered_of_comparison (compare f1 f2).
 
-(** Conversions *)
-
 Definition of_single: float32 -> float := Bconv _ _ 53 1024 __ __ of_single_nan mode_NE.
 Definition to_single: float -> float32 := Bconv _ _ 24 128 __ __ to_single_nan mode_NE.
 
-Definition to_int (f:float): option int := (**r conversion to signed 32-bit int *)
+Definition to_int (f:float): option int :=
   option_map Int.repr (ZofB_range _ _ f Int.min_signed Int.max_signed).
-Definition to_intu (f:float): option int := (**r conversion to unsigned 32-bit int *)
+Definition to_intu (f:float): option int :=
   option_map Int.repr (ZofB_range _ _ f 0 Int.max_unsigned).
-Definition to_long (f:float): option int64 := (**r conversion to signed 64-bit int *)
+Definition to_long (f:float): option int64 :=
   option_map Int64.repr (ZofB_range _ _ f Int64.min_signed Int64.max_signed).
-Definition to_longu (f:float): option int64 := (**r conversion to unsigned 64-bit int *)
+Definition to_longu (f:float): option int64 :=
   option_map Int64.repr (ZofB_range _ _ f 0 Int64.max_unsigned).
 
-Definition of_int (n:int): float := (**r conversion from signed 32-bit int *)
+Definition of_int (n:int): float :=
   BofZ 53 1024 __ __ (Int.signed n).
-Definition of_intu (n:int): float:= (**r conversion from unsigned 32-bit int *)
+Definition of_intu (n:int): float:=
   BofZ 53 1024 __ __ (Int.unsigned n).
 
-Definition of_long (n:int64): float := (**r conversion from signed 64-bit int *)
+Definition of_long (n:int64): float :=
   BofZ 53 1024 __ __ (Int64.signed n).
-Definition of_longu (n:int64): float:= (**r conversion from unsigned 64-bit int *)
+Definition of_longu (n:int64): float:=
   BofZ 53 1024 __ __ (Int64.unsigned n).
 
 Definition from_parsed (base:positive) (intPart:positive) (expPart:Z) : float :=
   Bparse 53 1024 __ __ base intPart expPart.
 
-(** Conversions between floats and their concrete in-memory representation
-    as a sequence of 64 bits. *)
-
 Definition to_bits (f: float): int64 := Int64.repr (bits_of_b64 f).
 Definition of_bits (b: int64): float := b64_of_bits (Int64.unsigned b).
 
 Definition from_words (hi lo: int) : float := of_bits (Int64.ofwords hi lo).
-
-(** ** Properties *)
-
-(** Below are the only properties of floating-point arithmetic that we
-  rely on in the compiler proof. *)
-
-(** Some tactics **)
 
 Ltac compute_this val :=
   let x := fresh in set val as x in *; vm_compute in x; subst x.
@@ -337,8 +257,6 @@ Ltac smart_omega :=
   compute_this Int64.max_unsigned;
   compute_this (Z.pow_pos 2 1024); compute_this (Z.pow_pos 2 53); compute_this (Z.pow_pos 2 52); compute_this (Z.pow_pos 2 32);
   zify; omega.
-
-(** Commutativity properties of addition and multiplication. *)
 
 Theorem add_commut:
   forall x y, is_nan _ _ x = false \/ is_nan _ _ y = false -> add x y = add y x.
@@ -354,8 +272,6 @@ Proof.
   destruct x, y; try reflexivity; now destruct H.
 Qed.
 
-(** Multiplication by 2 is diagonal addition. *)
-
 Theorem mul2_add:
   forall f, add f f = mul f (of_int (Int.repr 2%Z)).
 Proof.
@@ -364,8 +280,6 @@ Proof.
   destruct x; try discriminate. simpl. rewrite Archi.choose_nan_64_idem. 
   destruct y; reflexivity || discriminate.
 Qed.
-
-(** Divisions that can be turned into multiplication by an inverse. *)
 
 Definition exact_inverse : float -> option float := Bexact_inverse 53 1024 __ __.
 
@@ -377,8 +291,6 @@ Proof.
   destruct x0; try discriminate.
   destruct y0, z0; reflexivity || discriminate.
 Qed.
-
-(** Properties of comparisons. *)
 
 Theorem cmp_swap:
   forall c x y, cmp (swap_comparison c) x y = cmp c y x.
@@ -423,9 +335,6 @@ Proof.
   intros f1 f2; apply cmp_of_comparison_lt_gt_false.
 Qed.
 
-(** Properties of conversions to/from in-memory representation.
-  The conversions are bijective (one-to-one). *)
-
 Theorem of_to_bits:
   forall f, of_bits (to_bits f) = f.
 Proof.
@@ -443,13 +352,8 @@ Proof.
   apply Int64.unsigned_range.
 Qed.
 
-(** Conversions between floats and unsigned ints can be defined
-  in terms of conversions between floats and signed ints.
-  (Most processors provide only the latter, forcing the compiler
-  to emulate the former.)   *)
-
-Definition ox8000_0000 := Int.repr Int.half_modulus.  (**r [0x8000_0000] *)
-Definition ox7FFF_FFFF := Int.repr Int.max_signed.    (**r [0x7FFF_FFFF] *)
+Definition ox8000_0000 := Int.repr Int.half_modulus.
+Definition ox7FFF_FFFF := Int.repr Int.max_signed.
 
 Theorem of_intu_of_int_1:
   forall x,
@@ -582,12 +486,7 @@ Proof.
   unfold to_int; rewrite EQ. simpl. unfold Int.sub. rewrite Int.unsigned_repr by omega. auto.
 Qed.
 
-(** Conversions from ints to floats can be defined as bitwise manipulations
-  over the in-memory representation.  This is what the PowerPC port does.
-  The trick is that [from_words 0x4330_0000 x] is the float
-  [2^52 + of_intu x]. *)
-
-Definition ox4330_0000 := Int.repr 1127219200.        (**r [0x4330_0000] *)
+Definition ox4330_0000 := Int.repr 1127219200.
 
 Lemma split_bits_or:
   forall x,
@@ -669,7 +568,7 @@ Proof.
   apply integer_representable_n; auto; smart_omega.
 Qed.
 
-Definition ox4530_0000 := Int.repr 1160773632.        (**r [0x4530_0000] *)
+Definition ox4530_0000 := Int.repr 1160773632.
 
 Lemma split_bits_or':
   forall x,
@@ -787,9 +686,6 @@ Proof.
   compute_this p; smart_omega. omega.
 Qed.
 
-(** Conversions from 64-bit integers can be expressed in terms of
-  conversions from their 32-bit halves. *)
-
 Theorem of_longu_decomp:
   forall l,
   of_longu l = add (mul (of_intu (Int64.hiword l)) (BofZ 53 1024 __ __ (2^32)))
@@ -835,10 +731,6 @@ Proof.
   apply integer_representable_n; auto. compute; intuition congruence.
   compute; auto.
 Qed.
-
-(** Conversions from unsigned longs can be expressed in terms of conversions from signed longs.
-    If the unsigned long is too big, a round-to-odd must be performed on it
-    to avoid double rounding. *)
 
 Theorem of_longu_of_long_1:
   forall x,
@@ -920,8 +812,6 @@ Proof.
 - omega.
 Qed.
 
-(** Conversions to/from 32-bit integers can be implemented by going through 64-bit integers. *)
-
 Remark ZofB_range_widen:
   forall (f: float) n min1 max1 min2 max2,
   ZofB_range _ _ f min1 max1 = Some n ->
@@ -991,8 +881,6 @@ Qed.
 
 End Float.
 
-(** * Single-precision FP numbers *)
-
 Module Float32.
 
 Definition neg_nan (f : float32) : { x : float32 | is_nan _ _ x = true } :=
@@ -1030,71 +918,58 @@ Definition fma_nan (x y z: float32) : {x : float32 | is_nan _ _ x = true} :=
       fma_nan_1 x y z
   end.
 
-(** ** Operations over single-precision floats *)
-
-Definition zero: float32 := B754_zero _ _ false. (**r the float [+0.0] *)
+Definition zero: float32 := B754_zero _ _ false.
 
 Definition eq_dec: forall (f1 f2: float32), {f1 = f2} + {f1 <> f2} := Beq_dec _ _.
 
-(** Arithmetic operations *)
-
-Definition neg: float32 -> float32 := Bopp _ _ neg_nan. (**r opposite (change sign) *)
-Definition abs: float32 -> float32 := Babs _ _ abs_nan. (**r absolute value (set sign to [+]) *)
+Definition neg: float32 -> float32 := Bopp _ _ neg_nan.
+Definition abs: float32 -> float32 := Babs _ _ abs_nan.
 Definition sqrt: float32 -> float32 :=
-  Bsqrt 24 128 __ __ unop_nan mode_NE.  (**r square root *)
+  Bsqrt 24 128 __ __ unop_nan mode_NE.
 Definition add: float32 -> float32 -> float32 :=
-  Bplus 24 128 __ __ binop_nan mode_NE. (**r addition *)
+  Bplus 24 128 __ __ binop_nan mode_NE.
 Definition sub: float32 -> float32 -> float32 :=
-  Bminus 24 128 __ __ binop_nan mode_NE. (**r subtraction *)
+  Bminus 24 128 __ __ binop_nan mode_NE.
 Definition mul: float32 -> float32 -> float32 :=
-  Bmult 24 128 __ __ binop_nan mode_NE. (**r multiplication *)
+  Bmult 24 128 __ __ binop_nan mode_NE.
 Definition div: float32 -> float32 -> float32 :=
-  Bdiv 24 128 __ __ binop_nan mode_NE. (**r division *)
+  Bdiv 24 128 __ __ binop_nan mode_NE.
 Definition fma: float32 -> float32 -> float32 -> float32 :=
-  Bfma 24 128 __ __ fma_nan mode_NE. (**r fused multiply-add [x * y + z] *)
-Definition compare (f1 f2: float32) : option Datatypes.comparison := (**r general comparison *)
+  Bfma 24 128 __ __ fma_nan mode_NE.
+Definition compare (f1 f2: float32) : option Datatypes.comparison :=
   Bcompare 24 128 f1 f2.
-Definition cmp (c:comparison) (f1 f2: float32) : bool := (**r comparison *)
+Definition cmp (c:comparison) (f1 f2: float32) : bool :=
   cmp_of_comparison c (compare f1 f2).
 Definition ordered (f1 f2: float32) : bool :=
   ordered_of_comparison (compare f1 f2).
 
-(** Conversions *)
-
 Definition of_double : float -> float32 := Float.to_single.
 Definition to_double : float32 -> float := Float.of_single.
 
-Definition to_int (f:float32): option int := (**r conversion to signed 32-bit int *)
+Definition to_int (f:float32): option int :=
   option_map Int.repr (ZofB_range _ _ f Int.min_signed Int.max_signed).
-Definition to_intu (f:float32): option int := (**r conversion to unsigned 32-bit int *)
+Definition to_intu (f:float32): option int :=
   option_map Int.repr (ZofB_range _ _ f 0 Int.max_unsigned).
-Definition to_long (f:float32): option int64 := (**r conversion to signed 64-bit int *)
+Definition to_long (f:float32): option int64 :=
   option_map Int64.repr (ZofB_range _ _ f Int64.min_signed Int64.max_signed).
-Definition to_longu (f:float32): option int64 := (**r conversion to unsigned 64-bit int *)
+Definition to_longu (f:float32): option int64 :=
   option_map Int64.repr (ZofB_range _ _ f 0 Int64.max_unsigned).
 
-Definition of_int (n:int): float32 := (**r conversion from signed 32-bit int to single-precision float *)
+Definition of_int (n:int): float32 :=
   BofZ 24 128 __ __ (Int.signed n).
-Definition of_intu (n:int): float32 := (**r conversion from unsigned 32-bit int to single-precision float *)
+Definition of_intu (n:int): float32 :=
   BofZ 24 128 __ __ (Int.unsigned n).
 
-Definition of_long (n:int64): float32 := (**r conversion from signed 64-bit int to single-precision float *)
+Definition of_long (n:int64): float32 :=
   BofZ 24 128 __ __ (Int64.signed n).
-Definition of_longu (n:int64): float32 := (**r conversion from unsigned 64-bit int to single-precision float *)
+Definition of_longu (n:int64): float32 :=
   BofZ 24 128 __ __ (Int64.unsigned n).
 
 Definition from_parsed (base:positive) (intPart:positive) (expPart:Z) : float32 :=
   Bparse 24 128 __ __ base intPart expPart.
 
-(** Conversions between floats and their concrete in-memory representation
-    as a sequence of 32 bits. *)
-
 Definition to_bits (f: float32) : int := Int.repr (bits_of_b32 f).
 Definition of_bits (b: int): float32 := b32_of_bits (Int.unsigned b).
-
-(** ** Properties *)
-
-(** Commutativity properties of addition and multiplication. *)
 
 Theorem add_commut:
   forall x y, is_nan _ _ x = false \/ is_nan _ _ y = false -> add x y = add y x.
@@ -1110,8 +985,6 @@ Proof.
   destruct x, y; try reflexivity; now destruct H.
 Qed.
 
-(** Multiplication by 2 is diagonal addition. *)
-
 Theorem mul2_add:
   forall f, add f f = mul f (of_int (Int.repr 2%Z)).
 Proof.
@@ -1120,8 +993,6 @@ Proof.
   destruct x; try discriminate. simpl. rewrite Archi.choose_nan_32_idem. 
   destruct y; reflexivity || discriminate.
 Qed.
-
-(** Divisions that can be turned into multiplication by an inverse. *)
 
 Definition exact_inverse : float32 -> option float32 := Bexact_inverse 24 128 __ __.
 
@@ -1133,8 +1004,6 @@ Proof.
   destruct x0; try discriminate.
   destruct y0, z0; reflexivity || discriminate.
 Qed.
-
-(** Properties of comparisons. *)
 
 Theorem cmp_swap:
   forall c x y, cmp (swap_comparison c) x y = cmp c y x.
@@ -1186,9 +1055,6 @@ Proof.
   red; omega. omega. omega.
 Qed.
 
-(** Properties of conversions to/from in-memory representation.
-  The conversions are bijective (one-to-one). *)
-
 Theorem of_to_bits:
   forall f, of_bits (to_bits f) = f.
 Proof.
@@ -1206,10 +1072,6 @@ Proof.
   apply Int.unsigned_range.
 Qed.
 
-(** Conversions from 32-bit integers to single-precision floats can
-  be decomposed into a conversion to a double-precision float,
-  followed by a [Float32.of_double] conversion.  No double rounding occurs. *)
-
 Theorem of_int_double:
   forall n, of_int n = of_double (Float.of_int n).
 Proof.
@@ -1223,10 +1085,6 @@ Proof.
   intros. symmetry. apply Bconv_BofZ.
   apply integer_representable_n; auto. generalize (Int.unsigned_range n); Float.smart_omega.
 Qed.
-
-(** Conversion of single-precision floats to integers can be decomposed
-  into a [Float32.to_double] extension, followed by a double-precision-to-int
-  conversion. *)
 
 Theorem to_int_double:
   forall f n, to_int f = Some n -> Float.to_int (to_double f) = Some n.
@@ -1267,11 +1125,6 @@ Proof.
   unfold Float.to_longu, to_double, Float.of_single.
   erewrite ZofB_range_Bconv; eauto. auto. omega. omega. omega. omega.
 Qed.
-
-(** Conversions from 64-bit integers to single-precision floats can be expressed
-  as conversion to a double-precision float followed by a [Float32.of_double] conversion.
-  To avoid double rounding when the integer is large (above [2^53]), a round
-  to odd must be performed on the integer before conversion to double-precision float. *)
 
 Lemma int_round_odd_plus:
   forall p n, 0 <= p ->

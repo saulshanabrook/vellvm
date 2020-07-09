@@ -13,8 +13,7 @@ Require Import Integers Floats.
 Require Import Vir.Util.
 Require Import Vir.LLVMAst Vir.AstLib Vir.CFG.
 Require Import Vir.DynamicValues Vir.StepSemantics Vir.Memory.
-Require Import List.
-(** ** Decidable Equality *) 
+Require Import List. 
 
 Instance eq_dec_int : eq_dec (BinNums.Z) := Z.eq_dec.
 
@@ -65,51 +64,6 @@ Ltac lift_decide_eq :=
     try (destruct (decide (x5 = y5));
          [subst; auto | right; discriminate_goal])
   end.
-
-(*
-Ltac lift_decide_eq_from_inside_dv :=
-  match goal with
-  | |- { DV (?C ?x) = DV (?C ?y)} + { ~(DV (?C ?x) = DV (?C ?y)) } =>
-    destruct (decide (x = y));
-    [subst; auto | right; discriminate_goal]
-  | |- { DV (?C ?x1 ?x2) = DV (?C ?y1 ?y2)} +
-      { ~(DV (?C ?x1 ?x2) = DV (?C ?y1 ?y2)) } =>
-    try (destruct (decide (x1 = y1));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x2 = y2));
-         [subst; auto | right; discriminate_goal])
-  | |- { DV (?C ?x1 ?x2 ?x3) = DV (?Cd ?y1 ?y2 ?y3)} +
-      { ~(DV (?C ?x1 ?x2 ?x3) = DV (?C ?y1 ?y2 ?y3)) } =>
-    try (destruct (decide (x1 = y1));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x2 = y2));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x3 = y3));
-         [subst; auto | right; discriminate_goal])
-  | |- { DV (?C ?x1 ?x2 ?x3 ?x4) = DV (?C ?y1 ?y2 ?y3 ?y4) }
-      + { ~(DV (?C ?x1 ?x2 ?x3 ?x4) = DV (?C ?y1 ?y2 ?y3 ?y4)) } =>
-    try (destruct (decide (x1 = y1));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x2 = y2));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x3 = y3));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x4 = y4));
-         [subst; auto | right; discriminate_goal])
-  | |- { DV (?C ?x1 ?x2 ?x3 ?x4 ?x5) = DV (?C ?y1 ?y2 ?y3 ?y4 ?y5) } +
-      { ~(DV (?C ?x1 ?x2 ?x3 ?x4 ?x5) = DV (?C ?y1 ?y2 ?y3 ?y4 ?y5)) } =>
-    try (destruct (decide (x1 = y1));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x2 = y2));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x3 = y3));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x4 = y4));
-         [subst; auto | right; discriminate_goal]);
-    try (destruct (decide (x5 = y5));
-         [subst; auto | right; discriminate_goal])
-  end.
- *)
 
 Instance eq_dec_global_id : eq_dec global_id.
 Proof. lift_decide_eq. Defined.
@@ -504,8 +458,6 @@ Proof.
   - destruct (Float.eq_dec h f).
     left; subst; reflexivity.
     right. injection. tauto.
-   
-  (* Case Exp_Struct *)
   - destruct fields; auto.
   - refine
       (match fields0 with
@@ -531,8 +483,6 @@ Proof.
     { intros H; inversion H; apply fields_neq; subst; auto. }
     { intros H; inversion H; apply exp_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* (EXP_Packed_struct ...) *)
   - destruct fields; auto.
   - refine
       (match fields0 with
@@ -557,8 +507,6 @@ Proof.
     { intros H; inversion H; apply fields_neq; subst; auto. }
     { intros H; inversion H; apply exp_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* (EXP_Array ...) *)
   - destruct elts; auto.
   - destruct elts as [| (t', x') arr']; auto.
     refine
@@ -578,8 +526,6 @@ Proof.
     { intros H; inversion H; apply rest_neq; subst; auto. }
     { intros H; inversion H; apply exp_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* DV (EXP_Vector *)
   - destruct elts; auto.
   - destruct elts as [| (t', x') vec']; auto.
     refine
@@ -599,9 +545,6 @@ Proof.
     { intros H; inversion H; apply rest_neq; subst; auto. }
     { intros H; inversion H; apply exp_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-
-    (* OP_GetElementPtr ... *)
   - destruct ptrval as (ptr_t', ptr_v');
       destruct idxs; try (right; intros H; inversion H; tauto).
     refine
@@ -650,8 +593,6 @@ Proof.
     { intros H; inversion H; apply idx_t_neq; subst; auto. }
     { intros H; inversion H; apply ptr_exp_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* (OP_ExtractElement ...), arity 2 *)
   - destruct vec as (vec_t', vec_v');
       destruct idx as (idx_t', idx_v');
       try (right; intros H; inversion H; tauto).
@@ -675,9 +616,6 @@ Proof.
     { intros H; inversion H; apply idx_t_neq; subst; auto. }
     { intros H; inversion H; apply vec_v_neq; subst; auto. }
     { intros H; inversion H; apply vec_t_neq; subst; auto. }
-
-
-    (* DV (OP_InsertElement ...), arity 3 *)
   - destruct vec as (vec_t', vec_v');
       destruct elt as (elt_t', elt_v');      
       destruct idx as (idx_t', idx_v');
@@ -712,8 +650,6 @@ Proof.
     { intros H; inversion H; apply elt_t_neq; subst; auto. }
     { intros H; inversion H; apply vec_v_neq; subst; auto. }
     { intros H; inversion H; apply vec_t_neq; subst; auto. }
-
-    (* (OP_ShuffleVector ...) ; Same as (OP_InsertElement ...), with arity 3 *)
   - destruct vec1 as (vec1_t', vec1_v');
       destruct vec2 as (vec2_t', vec2_v');      
       destruct idxmask as (idxmask_t', idxmask_v');
@@ -748,8 +684,6 @@ Proof.
     { intros H; inversion H; apply vec2_t_neq; subst; auto. }
     { intros H; inversion H; apply vec1_v_neq; subst; auto. }
     { intros H; inversion H; apply vec1_t_neq; subst; auto. }
-
-    (* OP_ExtractValue ... ; Same as OP_ *)
   - destruct vec as (vec_t', vec_v');
       try (right; intros H; inversion H; tauto).
     refine
@@ -763,8 +697,6 @@ Proof.
        end); subst; auto.
     { intros H; inversion H; apply v_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* OP_InsertValue ... *)
   - destruct vec as (vec_t', vec_v');
       destruct elt as (elt_t', elt_v');
       try (right; intros H; inversion H; tauto).
@@ -788,8 +720,6 @@ Proof.
     { intros H; inversion H; apply elt_t_neq; subst; auto. }
     { intros H; inversion H; apply vec_v_neq; subst; auto. }
     { intros H; inversion H; apply vec_t_neq; subst; auto. }
-
-    (* OP_Select ... *)
   - destruct cnd as (cnd_t', cnd_v');
       destruct v1 as (v1_t', v1_v');
       destruct v2 as (v2_t', v2_v');
@@ -911,8 +841,6 @@ Proof.
       try (right; intro H; inversion H; tauto);
       try solve [left; auto];
       try solve [lift_decide_eq].
-
-  (* DVALUE_Struct *)
   - destruct fields;auto.
   - refine
       (match fields0 with
@@ -937,8 +865,6 @@ Proof.
     { intros H; inversion H; apply fields_neq; subst; auto. }
     { intros H; inversion H; apply value_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* DVALUE_Packed_struct ... *)
   - destruct fields; auto.
   - refine
       (match fields0 with
@@ -963,8 +889,6 @@ Proof.
     { intros H; inversion H; apply fields_neq; subst; auto. }
     { intros H; inversion H; apply value_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* DVALUE_Array ... *)
   - destruct elts; auto.
   - destruct elts0 as [| (t', x') elts']; auto.
     refine
@@ -984,8 +908,6 @@ Proof.
     { intros H; inversion H; apply rest_neq; subst; auto. }
     { intros H; inversion H; apply value_neq; subst; auto. }
     { intros H; inversion H; apply t_neq; subst; auto. }
-
-    (* DV (VALUE_Vector *)
   - destruct elts; auto.
   - destruct elts0 as [| (t', x') elts']; auto.
     refine
@@ -1030,24 +952,7 @@ Instance eq_dec_block : eq_dec block.
 Proof. lift_decide_eq. Defined.
 
 Instance eq_dec_pc : eq_dec pc.
-Proof. lift_decide_eq. Defined.
-
-(*
-Instance eq_dec_frame : eq_dec frame.
-Proof. lift_decide_eq. Defined.
-
-Instance eq_dec_SS_state : eq_dec SS.state.
-Proof. lift_decide_eq. Defined.
- *)
-
-(*
-The following are not true. 
-Instance eq_dec_effects `{eq_dec D} : eq_dec (effects D).
-Instance eq_dec_transition `{eq_dec X} : eq_dec (transition X).
-*)
-
-
-(** ** Basic Propositions *) 
+Proof. lift_decide_eq. Defined. 
 
 Inductive prefix_of {A : Type}: list A -> list A -> Prop :=
 | prefix_nil : forall l : list A, prefix_of [] l

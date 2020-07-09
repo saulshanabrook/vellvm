@@ -9,11 +9,6 @@ type raw_assertion_string =
 type test =
   | EQTest of DV.uvalue * DynamicTypes.dtyp * string * DV.uvalue list
 
-
-(*  Directly converts a piece of syntax to a uvalue without going through semantic interpretation.
-    Only works on literals.
-*)
-
 let rec texp_to_uvalue ((typ, exp) : LLVMAst.typ * LLVMAst.typ LLVMAst.exp) : DV.uvalue =
   match typ, exp with
   | TYPE_I i, EXP_Integer x ->
@@ -48,8 +43,6 @@ let texp_to_function_name (_, exp) : string =
   match exp with
   | EXP_Ident (ID_Global (Name x)) -> Camlcoq.camlstring_of_coqstring x
   | _ -> failwith "found non-function name"
-
-(* | INSTR_Call of 't texp * 't texp list *)
 let instr_to_call_data instr =
   match instr with
   | INSTR_Call (fn, args) ->
@@ -57,26 +50,17 @@ let instr_to_call_data instr =
      List.map texp_to_uvalue args)
     
   | _ -> failwith "Assertion include unsupported RHS (must be a call)"
-
-
-(* ws* "ASSERT" ws+ "EQ" ws* ':' ws* (anything+ as l) ws* '=' ws* (anything+ as r)  *)
 let parse_assertion (line:string) =
   let regex = "^[ \t]*;[ \t]*ASSERT[ \t]+EQ[ \t]*:[ \t]*\\(.*\\)=\\(.*\\)" in 
   if not (Str.string_match (Str.regexp regex) line 0) then
     begin
-      (* let _ = print_endline ("NO MATCH: " ^ line) in *)
       None
     end
   else
-    (* let _ = print_endline ("MATCH: " ^ line) in *)
     let lhs = Str.matched_group 1 line in
-    (* let _ = print_endline ("LHS: " ^ lhs) in     *)
     let rhs = Str.matched_group 2 line in
-    (* let _ = print_endline ("RHS: " ^ rhs) in         *)
     let l = Llvm_lexer.parse_texp (Lexing.from_string lhs) in
-    (* let _ = print_endline "PARSED LHS" in         *)
     let r = Llvm_lexer.parse_test_call (Lexing.from_string rhs) in
-    (* let _ = print_endline "PARSED RHS" in         *)
     let uv = texp_to_uvalue l in
     let dt = typ_to_dtyp (fst l) in
     let (fn, args) = instr_to_call_data r in

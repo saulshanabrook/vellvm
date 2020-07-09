@@ -1,33 +1,16 @@
-(* *********************************************************************)
-(*                                                                     *)
-(*              The Compcert verified compiler                         *)
-(*                                                                     *)
-(*          Xavier Leroy, INRIA Paris-Rocquencourt                     *)
-(*                                                                     *)
-(*  Copyright Institut National de Recherche en Informatique et en     *)
-(*  Automatique.  All rights reserved.  This file is distributed       *)
-(*  under the terms of the GNU General Public License as published by  *)
-(*  the Free Software Foundation, either version 2 of the License, or  *)
-(*  (at your option) any later version.  This file is also distributed *)
-(*  under the terms of the INRIA Non-Commercial License Agreement.     *)
-(*                                                                     *)
-(* *********************************************************************)
 
-(** Formalizations of machine integers modulo $2^N$ #2<sup>N</sup>#. *)
 
 Require Import Eqdep_dec Zquot Zwf.
 Require Import Coqlib.
 Require Archi.
 
-(** * Comparisons *)
-
 Inductive comparison : Type :=
-  | Ceq : comparison               (**r same *)
-  | Cne : comparison               (**r different *)
-  | Clt : comparison               (**r less than *)
-  | Cle : comparison               (**r less than or equal *)
-  | Cgt : comparison               (**r greater than *)
-  | Cge : comparison.              (**r greater than or equal *)
+| Ceq : comparison
+| Cne : comparison
+| Clt : comparison
+| Cle : comparison
+| Cgt : comparison
+| Cge : comparison.
 
 Definition negate_comparison (c: comparison): comparison :=
   match c with
@@ -49,14 +32,10 @@ Definition swap_comparison (c: comparison): comparison :=
   | Cge => Cle
   end.
 
-(** * Parameterization by the word size, in bits. *)
-
 Module Type WORDSIZE.
   Parameter wordsize: nat.
   Axiom wordsize_not_zero: wordsize <> 0%nat.
 End WORDSIZE.
-
-(* To avoid useless definitions of inductors in extracted code. *)
 Local Unset Elimination Schemes.
 Local Unset Case Analysis Schemes.
 
@@ -85,15 +64,7 @@ Proof.
   rewrite modulus_power. apply two_p_gt_ZERO. generalize wordsize_pos; omega.
 Qed.
 
-(** * Representation of machine integers *)
-
-(** A machine integer (type [int]) is represented as a Coq arbitrary-precision
-  integer (type [Z]) plus a proof that it is in the range 0 (included) to
-  [modulus] (excluded). *)
-
 Record int: Type := mkint { intval: Z; intrange: -1 < intval < modulus }.
-
-(** Fast normalization modulo [2^wordsize] *)
 
 Fixpoint P_mod_two_p (p: positive) (n: nat) {struct n} : Z :=
   match n with
@@ -184,18 +155,11 @@ Proof.
       omega.
 Qed.
 
-(** The [unsigned] and [signed] functions return the Coq integer corresponding
-  to the given machine integer, interpreted as unsigned or signed
-  respectively. *)
-
 Definition unsigned (n: int) : Z := intval n.
 
 Definition signed (n: int) : Z :=
   let x := unsigned n in
   if zlt x half_modulus then x else x - modulus.
-
-(** Conversely, [repr] takes a Coq integer and returns the corresponding
-  machine integer.  The argument is treated modulo [modulus]. *)
 
 Definition repr (x: Z) : int :=
   mkint (Z_mod_modulus x) (Z_mod_modulus_range' x).
@@ -228,8 +192,6 @@ Proof.
   right. red; intro. injection H. exact n.
 Defined.
 
-(** * Arithmetic and logical operations over machine integers *)
-
 Definition eq (x y: int) : bool :=
   if zeq (unsigned x) (unsigned y) then true else false.
 Definition lt (x y: int) : bool :=
@@ -256,15 +218,11 @@ Definition divu (x y: int) : int :=
 Definition modu (x y: int) : int :=
   repr ((unsigned x) mod (unsigned y)).
 
-(** Bitwise boolean operations. *)
-
 Definition and (x y: int): int := repr (Z.land (unsigned x) (unsigned y)).
 Definition or (x y: int): int := repr (Z.lor (unsigned x) (unsigned y)).
 Definition xor (x y: int) : int := repr (Z.lxor (unsigned x) (unsigned y)).
 
 Definition not (x: int) : int := xor x mone.
-
-(** Shifts and rotates. *)
 
 Definition shl (x y: int): int := repr (Z.shiftl (unsigned x) (unsigned y)).
 Definition shru (x y: int): int := repr (Z.shiftr (unsigned x) (unsigned y)).
@@ -279,18 +237,11 @@ Definition ror (x y: int) : int :=
 
 Definition rolm (x a m: int): int := and (rol x a) m.
 
-(** Viewed as signed divisions by powers of two, [shrx] rounds towards
-  zero, while [shr] rounds towards minus infinity. *)
-
 Definition shrx (x y: int): int :=
   divs x (shl one y).
 
-(** High half of full multiply. *)
-
 Definition mulhu (x y: int): int := repr ((unsigned x * unsigned y) / modulus).
 Definition mulhs (x y: int): int := repr ((signed x * signed y) / modulus).
-
-(** Condition flags *)
 
 Definition negative (x: int): int :=
   if lt x zero then one else zero.
@@ -309,34 +260,12 @@ Definition sub_overflow (x y bin: int): int :=
   let s := signed x - signed y - signed bin in
   if zle min_signed s && zle s max_signed then zero else one.
 
-(** [shr_carry x y] is 1 if [x] is negative and at least one 1 bit is shifted away. *)
-
 Definition shr_carry (x y: int) : int :=
   if lt x zero && negb (eq (and x (sub (shl one y) one)) zero)
   then one else zero.
 
-(** Zero and sign extensions *)
-
 Definition Zshiftin (b: bool) (x: Z) : Z :=
   if b then Z.succ_double x else Z.double x.
-
-(** In pseudo-code:
-<<
-    Fixpoint Zzero_ext (n: Z) (x: Z) : Z :=
-      if zle n 0 then
-        0
-      else
-        Zshiftin (Z.odd x) (Zzero_ext (Z.pred n) (Z.div2 x)).
-    Fixpoint Zsign_ext (n: Z) (x: Z) : Z :=
-      if zle n 1 then
-        if Z.odd x then -1 else 0
-      else
-        Zshiftin (Z.odd x) (Zzero_ext (Z.pred n) (Z.div2 x)).
->>
-  We encode this [nat]-like recursion using the [Z.iter] iteration
-  function, in order to make the [Zzero_ext] and [Zsign_ext]
-  functions efficiently executable within Coq.
-*)
 
 Definition Zzero_ext (n: Z) (x: Z) : Z :=
   Z.iter n
@@ -354,8 +283,6 @@ Definition zero_ext (n: Z) (x: int) : int := repr (Zzero_ext n (unsigned x)).
 
 Definition sign_ext (n: Z) (x: int) : int := repr (Zsign_ext n (unsigned x)).
 
-(** Decomposition of a number as a sum of powers of two. *)
-
 Fixpoint Z_one_bits (n: nat) (x: Z) (i: Z) {struct n}: list Z :=
   match n with
   | O => nil
@@ -368,15 +295,11 @@ Fixpoint Z_one_bits (n: nat) (x: Z) (i: Z) {struct n}: list Z :=
 Definition one_bits (x: int) : list int :=
   List.map repr (Z_one_bits wordsize (unsigned x) 0).
 
-(** Recognition of powers of two. *)
-
 Definition is_power2 (x: int) : option int :=
   match Z_one_bits wordsize (unsigned x) 0 with
   | i :: nil => Some (repr i)
   | _ => None
   end.
-
-(** Comparisons. *)
 
 Definition cmp (c: comparison) (x y: int) : bool :=
   match c with
@@ -402,8 +325,6 @@ Definition is_false (x: int) : Prop := x = zero.
 Definition is_true  (x: int) : Prop := x <> zero.
 Definition notbool  (x: int) : int  := if eq x zero then one else zero.
 
-(** x86-style extended division and modulus *)
-
 Definition divmodu2 (nhi nlo: int) (d: int) : option (int * int) :=
   if eq_dec d zero then None else
    (let (q, r) := Z.div_eucl (unsigned nhi * modulus + unsigned nlo) (unsigned d) in
@@ -413,10 +334,6 @@ Definition divmods2 (nhi nlo: int) (d: int) : option (int * int) :=
   if eq_dec d zero then None else
    (let (q, r) := Z.quotrem (signed nhi * modulus + unsigned nlo) (signed d) in
     if zle min_signed q && zle q max_signed then Some(repr q, repr r) else None).
-
-(** * Properties of integers and integer arithmetic *)
-
-(** ** Properties of [modulus], [max_unsigned], etc. *)
 
 Remark half_modulus_power:
   half_modulus = two_p (zwordsize - 1).
@@ -435,17 +352,6 @@ Proof.
   rewrite <- two_p_S. apply f_equal. omega.
   generalize wordsize_pos; omega.
 Qed.
-
-(** Relative positions, from greatest to smallest:
-<<
-      max_unsigned
-      max_signed
-      2*wordsize-1
-      wordsize
-      0
-      min_signed
->>
-*)
 
 Remark half_modulus_pos: half_modulus > 0.
 Proof.
@@ -494,11 +400,6 @@ Lemma signed_repr_eq:
 Proof.
   intros. unfold signed. rewrite unsigned_repr_eq. auto.
 Qed.
-
-(** ** Modulo arithmetic *)
-
-(** We define and state properties of equality and arithmetic modulo a
-  positive integer. *)
 
 Section EQ_MODULO.
 
@@ -588,9 +489,6 @@ Proof.
   exists (k1*k2). rewrite <- Z.mul_assoc. rewrite <- EQ2. auto.
 Qed.
 
-(** We then specialize these definitions to equality modulo
-  $2^{wordsize}$ #2<sup>wordsize</sup>#. *)
-
 Hint Resolve modulus_pos: ints.
 
 Definition eqm := eqmod modulus.
@@ -636,8 +534,6 @@ Lemma eqm_mult:
   forall a b c d, eqm a c -> eqm b d -> eqm (a * b) (c * d).
 Proof (eqmod_mult modulus).
 Hint Resolve eqm_mult: ints.
-
-(** ** Properties of the coercions between [Z] and [int] *)
 
 Lemma eqm_samerepr: forall x y, eqm x y -> repr x = repr y.
 Proof.
@@ -767,8 +663,6 @@ Proof.
   destruct (zlt (unsigned x) half_modulus); omega.
 Qed.
 
-(** ** Properties of zero, one, minus one *)
-
 Theorem unsigned_zero: unsigned zero = 0.
 Proof.
   unfold zero; rewrite unsigned_repr_eq. apply Zmod_0_l.
@@ -823,8 +717,6 @@ Proof.
   generalize wordsize_pos wordsize_max_unsigned; unfold max_unsigned; omega.
 Qed.
 
-(** ** Properties of equality *)
-
 Theorem eq_sym:
   forall x y, eq x y = eq y x.
 Proof.
@@ -860,8 +752,6 @@ Proof.
   destruct (zeq (signed x) (signed y)); auto.
   elim H. rewrite <- (repr_signed x). rewrite <- (repr_signed y). congruence.
 Qed.
-
-(** ** Properties of addition *)
 
 Theorem add_unsigned: forall x y, add x y = repr (unsigned x + unsigned y).
 Proof. intros; reflexivity.
@@ -936,8 +826,6 @@ Proof.
   rewrite unsigned_one. right; omega.
 Qed.
 
-(** ** Properties of negation *)
-
 Theorem neg_repr: forall z, neg (repr z) = repr (-z).
 Proof.
   intros; unfold neg. apply eqm_samerepr. auto with ints.
@@ -964,8 +852,6 @@ Proof.
      with ((- unsigned x) + (- unsigned y)).
   auto with ints. omega.
 Qed.
-
-(** ** Properties of subtraction *)
 
 Theorem sub_zero_l: forall x, sub x zero = x.
 Proof.
@@ -1032,8 +918,6 @@ Proof.
   rewrite unsigned_one. apply Zmod_unique with (-1). omega. omega.
   rewrite unsigned_zero. apply Zmod_unique with 0. omega. omega.
 Qed.
-
-(** ** Properties of multiplication *)
 
 Theorem mul_commut: forall x y, mul x y = mul y x.
 Proof.
@@ -1119,8 +1003,6 @@ Proof.
   intros; unfold mul. apply eqm_samerepr.
   apply eqm_mult; apply eqm_sym; apply eqm_signed_unsigned.
 Qed.
-
-(** ** Properties of division and modulus *)
 
 Lemma modu_divu_Euclid:
   forall x y, y <> zero -> x = add (mul (divu x y) y) (modu x y).
@@ -1272,9 +1154,9 @@ Proof.
   assert (min_signed <= N <= max_signed) by (rewrite H2; apply signed_range).
   assert (min_signed <= Q <= max_signed).
   { unfold Q. destruct (zeq D 1); [ | destruct (zeq D (-1))].
-  - (* D = 1 *)
+    -
     rewrite e. rewrite Z.quot_1_r; auto.
-  - (* D = -1 *)
+    -
     rewrite e. change (-1) with (Z.opp 1). rewrite Z.quot_opp_r by omega.
     rewrite Z.quot_1_r.
     assert (N <> min_signed).
@@ -1282,7 +1164,7 @@ Proof.
     + elim H0. rewrite <- (repr_signed n). rewrite <- H2. rewrite H4. auto.
     + elim H0. rewrite <- (repr_signed d). unfold D in e; rewrite e; auto. }
     unfold min_signed, max_signed in *. omega.
-  - (* |D| > 1 *)
+    -
     assert (Z.abs (Z.quot N D) < half_modulus).
     { rewrite <- Z.quot_abs by omega. apply Zquot_lt_upper_bound.
       xomega. xomega.
@@ -1295,10 +1177,6 @@ Proof.
   unfold proj_sumbool; rewrite ! zle_true by omega; simpl.
   unfold Q, R; rewrite H2; auto.
 Qed.
-
-(** ** Bit-level properties *)
-
-(** ** Properties of bit-level operations over [Z] *)
 
 Remark Ztestbit_0: forall n, Z.testbit 0 n = false.
 Proof Z.testbit_0_l.
@@ -1588,8 +1466,6 @@ Proof.
     rewrite Ztestbit_shiftin_base. congruence.
 Qed.
 
-(** ** Bit-level reasoning over type [int] *)
-
 Definition testbit (x: int) (i: Z) : bool := Z.testbit (unsigned x) i.
 
 Lemma testbit_repr:
@@ -1677,8 +1553,6 @@ Proof.
   apply H. omega. auto.
   fold (testbit x i) in H1. rewrite bits_above in H1; auto. congruence.
 Qed.
-
-(** ** Properties of bitwise and, or, xor *)
 
 Lemma bits_and:
   forall x y i, 0 <= i < zwordsize ->
@@ -1888,8 +1762,6 @@ Proof.
   rewrite bits_or; auto. rewrite H0; auto.
 Qed.
 
-(** Properties of bitwise complement.*)
-
 Theorem not_involutive:
   forall (x: int), not (not x) = x.
 Proof.
@@ -2007,8 +1879,6 @@ Proof.
   rewrite xor_idem. rewrite unsigned_one, unsigned_zero; auto.
 Qed.
 
-(** Connections between [add] and bitwise logical operations. *)
-
 Lemma Z_add_is_or:
   forall i, 0 <= i ->
   forall x y,
@@ -2075,8 +1945,6 @@ Proof.
   rewrite <- and_assoc.
   rewrite H. rewrite and_commut. apply and_zero.
 Qed.
-
-(** ** Properties of shifts *)
 
 Lemma bits_shl:
   forall x y i,
@@ -2386,8 +2254,6 @@ Proof.
   generalize wordsize_max_unsigned; omega.
 Qed.
 
-(** ** Properties of rotations *)
-
 Lemma bits_rol:
   forall x y i,
   0 <= i < zwordsize ->
@@ -2620,8 +2486,6 @@ Proof.
     apply Zmod_small; auto.
 Qed.
 
-(** ** Properties of [Z_one_bits] and [is_power2]. *)
-
 Fixpoint powerserie (l: list Z): Z :=
   match l with
   | nil => 0
@@ -2758,10 +2622,6 @@ Proof.
   apply two_p_range. auto.
 Qed.
 
-(** ** Relation between bitwise operations and multiplications / divisions by powers of 2 *)
-
-(** Left shifts and multiplications by powers of 2. *)
-
 Lemma Zshiftl_mul_two_p:
   forall x n, 0 <= n -> Z.shiftl x n = x * two_p n.
 Proof.
@@ -2832,8 +2692,6 @@ Proof.
     + generalize wordsize_max_unsigned; omega.
 Qed.
 
-(** Unsigned right shifts and unsigned divisions by powers of 2. *)
-
 Lemma Zshiftr_div_two_p:
   forall x n, 0 <= n -> Z.shiftr x n = x / two_p n.
 Proof.
@@ -2867,8 +2725,6 @@ Proof.
   symmetry. unfold divu. rewrite H0. apply shru_div_two_p.
 Qed.
 
-(** Signed right shifts and signed divisions by powers of 2. *)
-
 Lemma shr_div_two_p:
   forall x y,
   shr x y = repr (signed x / two_p (unsigned y)).
@@ -2888,8 +2744,6 @@ Proof.
   rewrite mul_commut. rewrite mul_one.
   rewrite <- H0. rewrite repr_unsigned. auto.
 Qed.
-
-(** Unsigned modulus over [2^n] is masking with [2^n-1]. *)
 
 Lemma Ztestbit_mod_two_p:
   forall n x i,
@@ -2946,8 +2800,6 @@ Proof.
   rewrite andb_false_r; auto.
   tauto. tauto. tauto. tauto.
 Qed.
-
-(** ** Properties of [shrx] (signed division by a power of 2) *)
 
 Lemma Zquot_Zdiv:
   forall x y,
@@ -3107,8 +2959,6 @@ Proof.
   generalize min_signed_neg. unfold max_signed. omega.
 Qed.
 
-(** Connections between [shr] and [shru]. *)
-
 Lemma shr_shru_positive:
   forall x y,
   signed x >= 0 ->
@@ -3140,8 +2990,6 @@ Proof.
   intros. apply shr_shru_positive. apply and_positive.
   unfold lt in H. rewrite signed_zero in H. destruct (zlt (signed y) 0). congruence. auto.
 Qed.
-
-(** ** Properties of integer zero extension and sign extension. *)
 
 Lemma Ziter_base:
   forall (A: Type) n (f: A -> A) x, n <= 0 -> Z.iter n f x = x.
@@ -3425,9 +3273,6 @@ Proof.
   omega. omega. omega. omega. omega.
 Qed.
 
-(** [zero_ext n x] is the unique integer congruent to [x] modulo [2^n]
-    in the range [0...2^n-1]. *)
-
 Lemma zero_ext_range:
   forall n x, 0 <= n < zwordsize -> 0 <= unsigned (zero_ext n x) < two_p n.
 Proof.
@@ -3440,9 +3285,6 @@ Proof.
   intros. rewrite zero_ext_mod; auto. apply eqmod_sym. apply eqmod_mod.
   apply two_p_gt_ZERO. omega.
 Qed.
-
-(** [sign_ext n x] is the unique integer congruent to [x] modulo [2^n]
-    in the range [-2^(n-1)...2^(n-1) - 1]. *)
 
 Lemma sign_ext_range:
   forall n x, 0 < n < zwordsize -> -two_p (n-1) <= signed (sign_ext n x) < two_p (n-1).
@@ -3497,8 +3339,6 @@ Proof.
   apply eqmod_sign_ext'; auto.
 Qed.
 
-(** ** Properties of [one_bits] (decomposition in sum of powers of two) *)
-
 Theorem one_bits_range:
   forall x i, In i (one_bits x) -> ltu i iwordsize = true.
 Proof.
@@ -3539,8 +3379,6 @@ Proof.
   auto with ints.
   intros; apply H; auto with coqlib.
 Qed.
-
-(** ** Properties of comparisons *)
 
 Theorem negate_cmp:
   forall c x y, cmp (negate_comparison c) x y = negb (cmp c x y).
@@ -3735,9 +3573,6 @@ Proof.
   intros. rewrite <- negb_orb. rewrite <- not_ltu. rewrite negb_involutive. auto.
 Qed.
 
-
-(** Non-overlapping test *)
-
 Definition no_overlap (ofs1: int) (sz1: Z) (ofs2: int) (sz2: Z) : bool :=
   let x1 := unsigned ofs1 in let x2 := unsigned ofs2 in
      zlt (x1 + sz1) modulus && zlt (x2 + sz2) modulus
@@ -3761,8 +3596,6 @@ Proof.
   generalize (unsigned_add_either base ofs1) (unsigned_add_either base ofs2).
   intros [C|C] [D|D]; omega.
 Qed.
-
-(** Size of integers, in bits. *)
 
 Definition Zsize (x: Z) : Z :=
   match x with
@@ -3994,8 +3827,6 @@ Qed.
 
 End Make.
 
-(** * Specialization to integers of size 8, 32, and 64 bits *)
-
 Module Wordsize_32.
   Definition wordsize := 32%nat.
   Remark wordsize_not_zero: wordsize <> 0%nat.
@@ -4040,9 +3871,7 @@ Strategy opaque [Wordsize_64.wordsize].
 
 Module Int64.
 
-Include Make(Wordsize_64).
-
-(** Shifts with amount given as a 32-bit integer *)
+  Include Make(Wordsize_64).
 
 Definition iwordsize': Int.int := Int.repr zwordsize.
 
@@ -4299,8 +4128,6 @@ Proof.
   unfold shr, shr'; rewrite <- A; auto.
 Qed.
 
-(** Powers of two with exponents given as 32-bit ints *)
-
 Definition one_bits' (x: int) : list Int.int :=
   List.map Int.repr (Z_one_bits wordsize (unsigned x) 0).
 
@@ -4400,8 +4227,6 @@ Proof.
   symmetry. unfold divu. rewrite H0. unfold shru'. rewrite Zshiftr_div_two_p. auto.
   eapply is_power2'_rng; eauto.
 Qed.
-
-(** Decomposing 64-bit ints as pairs of 32-bit ints *)
 
 Definition loword (n: int) : Int.int := Int.repr (unsigned n).
 
@@ -4517,8 +4342,6 @@ Proof.
   omega.
   apply eqm_samerepr. apply eqm_add. apply eqm_mul_2p32. apply Int.eqm_signed_unsigned. apply eqm_refl.
 Qed.
-
-(** Expressing 64-bit operations in terms of 32-bit operations *)
 
 Lemma decompose_bitwise_binop:
   forall f f64 f32 xh xl yh yl,
@@ -4915,8 +4738,6 @@ Proof.
   rewrite zlt_true by omega; auto.
 Qed.
 
-(** Utility proofs for mixed 32bit and 64bit arithmetic *)
-
 Remark int_unsigned_range:
   forall x, 0 <= Int.unsigned x <= max_unsigned.
 Proof.
@@ -4959,8 +4780,6 @@ Strategy 0 [Wordsize_64.wordsize].
 Notation int64 := Int64.int.
 
 Global Opaque Int.repr Int64.repr Byte.repr.
-
-(** * Specialization to offsets in pointer values *)
 
 Module Wordsize_Ptrofs.
   Definition wordsize := if Archi.ptr64 then 64%nat else 32%nat.

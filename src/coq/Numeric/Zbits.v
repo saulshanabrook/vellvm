@@ -1,28 +1,7 @@
-(* *********************************************************************)
-(*                                                                     *)
-(*              The Compcert verified compiler                         *)
-(*                                                                     *)
-(*          Xavier Leroy, Collège de France and Inria Paris            *)
-(*                                                                     *)
-(*  Copyright Institut National de Recherche en Informatique et en     *)
-(*  Automatique.  All rights reserved.  This file is distributed       *)
-(*  under the terms of the GNU General Public License as published by  *)
-(*  the Free Software Foundation, either version 2 of the License, or  *)
-(*  (at your option) any later version.  This file is also distributed *)
-(*  under the terms of the INRIA Non-Commercial License Agreement.     *)
-(*                                                                     *)
-(* *********************************************************************)
 
-(** Additional operations and proofs about binary integers,
-    on top of the ZArith standard library. *)
 
 Require Import Psatz Zquot.
 Require Import Coqlib.
-
-(** ** Modulo arithmetic *)
-
-(** We define and state properties of equality and arithmetic modulo a
-  positive integer. *)
 
 Section EQ_MODULO.
 
@@ -112,8 +91,6 @@ Proof.
   exists (k1*k2). rewrite <- Z.mul_assoc. rewrite <- EQ2. auto.
 Qed.
 
-(** ** Fast normalization modulo [2^n] *)
-
 Fixpoint P_mod_two_p (p: positive) (n: nat) {struct n} : Z :=
   match n with
   | O => 0
@@ -196,10 +173,6 @@ Proof.
     + symmetry. apply Zmod_unique with (-q - 1). rewrite C. Psatz.lia.
       intuition.
 Qed.
-
-(** ** Bit-level operations and properties *)
-
-(** Shift [x] left by one and insert [b] as the low bit of the result. *)
 
 Definition Zshiftin (b: bool) (x: Z) : Z :=
   if b then Z.succ_double x else Z.double x.
@@ -303,8 +276,6 @@ Proof.
     + change (P (Zshiftin false (Z.pos p))). auto.
     + auto.
 Qed.
-
-(** ** Bit-wise decomposition ([Z.testbit]) *)
 
 Remark Ztestbit_eq:
   forall n x, 0 <= n ->
@@ -528,26 +499,6 @@ Opaque Z.mul.
       omega. omega.
 Qed.
 
-(** ** Zero and sign extensions *)
-
-(** In pseudo-code:
-<<
-    Fixpoint Zzero_ext (n: Z) (x: Z) : Z :=
-      if zle n 0 then
-        0
-      else
-        Zshiftin (Z.odd x) (Zzero_ext (Z.pred n) (Z.div2 x)).
-    Fixpoint Zsign_ext (n: Z) (x: Z) : Z :=
-      if zle n 1 then
-        if Z.odd x then -1 else 0
-      else
-        Zshiftin (Z.odd x) (Zzero_ext (Z.pred n) (Z.div2 x)).
->>
-  We encode this [nat]-like recursion using the [Z.iter] iteration
-  function, in order to make the [Zzero_ext] and [Zsign_ext]
-  functions efficiently executable within Coq.
-*)
-
 Definition Zzero_ext (n: Z) (x: Z) : Z :=
   Z.iter n
     (fun rec x => Zshiftin (Z.odd x) (rec (Z.div2 x)))
@@ -634,16 +585,12 @@ Proof.
   - omega.
 Qed.
 
-(** [Zzero_ext n x] is [x modulo 2^n] *)
-
 Lemma Zzero_ext_mod:
   forall n x, 0 <= n -> Zzero_ext n x = x mod (two_p n).
 Proof.
   intros. apply equal_same_bits; intros.
   rewrite Zzero_ext_spec, Ztestbit_mod_two_p by auto. auto.
 Qed.
-
-(** [Zzero_ext n x] is the unique integer congruent to [x] modulo [2^n] in the range [0...2^n-1]. *)
 
 Lemma Zzero_ext_range:
   forall n x, 0 <= n -> 0 <= Zzero_ext n x < two_p n.
@@ -657,8 +604,6 @@ Proof.
   intros. rewrite Zzero_ext_mod; auto. apply eqmod_sym. apply eqmod_mod.
   apply two_p_gt_ZERO. omega.
 Qed.
-
-(** Relation between [Zsign_ext n x] and (Zzero_ext n x] *)
 
 Lemma Zsign_ext_zero_ext:
   forall n, 0 < n -> forall x,
@@ -678,9 +623,6 @@ Proof.
   rewrite Zzero_ext_spec by auto.
   destruct (zlt i n); auto.
 Qed.
-
-(** [Zsign_ext n x] is the unique integer congruent to [x] modulo [2^n]
-    in the range [-2^(n-1)...2^(n-1) - 1]. *)
 
 Lemma Zsign_ext_range:
   forall n x, 0 < n -> -two_p (n-1) <= Zsign_ext n x < two_p (n-1).
@@ -713,8 +655,6 @@ Proof.
   exists (if Z.testbit x (n - 1) then 1 else 0). destruct (Z.testbit x (n - 1)); ring.
   apply eqmod_refl2; omega.
 Qed.
-
-(** ** Decomposition of a number as a sum of powers of two. *)
 
 Fixpoint Z_one_bits (n: nat) (x: Z) (i: Z) {struct n}: list Z :=
   match n with
@@ -795,8 +735,6 @@ Proof.
   destruct H1 as [A B]; rewrite A; rewrite B.
   rewrite IHn. f_equal; omega. omega.
 Qed.
-
-(** ** Recognition of powers of two *)
 
 Fixpoint P_is_power2 (p: positive) : bool :=
   match p with
@@ -879,10 +817,6 @@ Proof.
 - unfold Z_is_power2m1 in H1. apply (Z_is_power2_range n (Z.succ x) i) in H1; omega.
 Qed.
 
-(** ** Relation between bitwise operations and multiplications / divisions by powers of 2 *)
-
-(** Left shifts and multiplications by powers of 2. *)
-
 Lemma Zshiftl_mul_two_p:
   forall x n, 0 <= n -> Z.shiftl x n = x * two_p n.
 Proof.
@@ -895,8 +829,6 @@ Proof.
       change (two_power_pos 1) with 2. ring.
   - compute in H. congruence.
 Qed.
-
-(** Right shifts and divisions by powers of 2. *)
 
 Lemma Zshiftr_div_two_p:
   forall x n, 0 <= n -> Z.shiftr x n = x / two_p n.
@@ -912,8 +844,6 @@ Proof.
       rewrite two_power_pos_nat. apply two_power_nat_pos. omega.
   - compute in H. congruence.
 Qed.
-
-(** ** Properties of [shrx] (signed division by a power of 2) *)
 
 Lemma Zquot_Zdiv:
   forall x y,
@@ -940,8 +870,6 @@ Proof.
   apply Zdiv_unique with (y - 1). rewrite H1. rewrite e. ring. omega.
   apply Zdiv_unique with (r - 1). rewrite H1. ring. omega.
 Qed.
-
-(** ** Size of integers, in bits. *)
 
 Definition Zsize (x: Z) : Z :=
   match x with

@@ -150,15 +150,6 @@ Module BoundedSet(Import S:FSetInterface.WS) <: LATTICE.
 
 End BoundedSet.
 
-
-
-(** ** GRAPH *)
-(** Interface for a nonempty graph [t] with: 
-     - a set of _vertices_ of type [V]
-     - a distinguished _entry vertex_
-     - an _edge relation_ [edge]
-*)
-
 Module Type GRAPH.
   Parameter Inline t V : Type.
   Parameter Inline eq_dec_V : forall (v1 v2:V), {v1 = v2} + {v1 <> v2}.  
@@ -167,11 +158,7 @@ Module Type GRAPH.
   Parameter Inline mem : t -> V -> Prop.
 End GRAPH.
 
-(** ** Specification of Dominators *)
-
 Module Spec (Import G:GRAPH).
-
-(** Defines a path in the graph. *)
 
   Inductive Path (g:G.t) : V -> V -> list V -> Prop :=
   | path_nil : forall v, 
@@ -180,9 +167,7 @@ Module Spec (Import G:GRAPH).
       Path g v1 v2 vs -> mem g v3 -> edge g v2 v3 
       -> Path g v1 v3 (v3::vs).
 
-Hint Constructors Path: core.
-  
-(** *** Definition of domination *)
+  Hint Constructors Path: core.
 
   Definition Dom (g:G.t) (v1 v2: V) : Prop :=
     forall vs, Path g (entry g) v2 vs -> In v1 vs.
@@ -315,8 +300,6 @@ Hint Constructors Path: core.
   Qed.
 
 End Spec.
-
-(** *** Relate an algorithm to the specification *)
 Module Type Algdom (Import G:GRAPH).
   Module Import GS := Spec G.
 

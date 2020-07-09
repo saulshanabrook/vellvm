@@ -19,7 +19,6 @@ Section Pure.
       
       (p1,q1){{R}} ->
       (p2,q2){{Q}} ->
-      (* --------------- *)
       (p1;;p2,q1;;q2){{Q}}. 
 
   Proof.
@@ -34,7 +33,6 @@ Section Pure.
       
       (p1,q1){{R}} ->
       (forall a b, R a b -> (p2 a,q2 b){{Q}}) ->
-      (* ----------------------------- *)
       (x <- p1;;p2 x, x <- q1;;q2 x){{Q}}. 
 
   Proof.
@@ -48,7 +46,6 @@ End Pure.
 Section State.
 
   Import ITree.Basics.Basics.Monads.
-  (* Domains of states *)
   Variable σ1 σ2: Type.
   Variable E: Type -> Type.
   Notation rel A B := (A -> B -> Prop).
@@ -70,7 +67,6 @@ Section State.
 
       {{↑R}} (p1,q1) {{Q}} ->
       {{Q}}  (p2,q2) {{S}} ->
-   (* ---------------------------------- *)
       {{↑R}}
         (fun s1 => '(s2,_) <- p1 s1;; p2 s2,
          fun s1 => '(s2,_) <- q1 s1;; q2 s2)
@@ -83,8 +79,6 @@ Section State.
     intros [s1' ?] [s2' ?] PRE'.
     apply (H2 _ _ PRE').
   Qed.
-
-  (* SAZ: Need a better name for this *)
   Definition REL {A B} (Q : rel (σ1 * A) (σ2 * B)) (a:A) (b:B) : rel (σ1 * A) (σ2 * B) :=
     fun '(s1, a') '(s2, b') => a = a' /\ b = b' /\ Q (s1, a) (s2, b).
   
@@ -109,8 +103,6 @@ Section State.
     specialize (H2 a b (s1', a) (s2', b)). cbn in H2.
     apply H2. repeat split; auto.
   Qed.
-
-  (* Alternative solution for the general bind case. Looks needlessly more complex at first glance *)
   Notation "'[[' P ']]' '(' p ',' q ')' '[[' Q ']]'" :=
     (forall s1 s2, P s1 s2 -> eutt Q (p (snd s1) (fst s1)) (q (snd s2) (fst s2))).
   
@@ -122,7 +114,6 @@ Section State.
       (p1: prog σ1 A1) (p2: A1 -> prog σ1 A2) (q1: prog σ2 B1) (q2: B1 -> prog σ2 B2),
       [[↑ R]] (fun _ => p1, fun _ => q1) [[Q]] ->
       [[ Q ]] (p2, q2) [[S]] ->
-      (* ---------------------------------- *)
       [[↑R]]
         (fun _ s1 => '(s2,a) <- p1 s1 ;; p2 a s2,
                   fun _ s1 => '(s2,b) <- q1 s1 ;; q2 b s2)

@@ -1020,7 +1020,6 @@ Class VInt I : Type :=
      *)
     Definition eval_int_op {Int} `{VInt Int} (iop:ibinop) (x y: Int) : undef dvalue :=
       match iop with
-      (* Following to cases are probably right since they use CompCert *)
       | Add nuw nsw =>
         ret (if orb (andb nuw (eq (add_carry x y zero) one))
                     (andb nsw (eq (add_overflow x y zero) one))
@@ -1032,7 +1031,6 @@ Class VInt I : Type :=
            then DVALUE_Poison else to_dvalue (sub x y))
 
     | Mul nuw nsw =>
-      (* I1 mul can't overflow, just based on the 4 possible multiplications. *)
       if (bitwidth ~=? 1)%nat then ret (to_dvalue (mul x y))
       else
         let res := mul x y in
@@ -1048,8 +1046,6 @@ Class VInt I : Type :=
       let res := shl x y in
       let res_u := unsigned res in
       let res_u' := Z.shiftl (unsigned x) (unsigned y) in
-      (* Unsigned shift x right by bitwidth - y. If shifted x != sign bit * (2^y - 1),
-         then there is overflow. *)
       if (unsigned y) >=? bz then ret DVALUE_Poison
       else if orb (andb nuw (res_u' >? res_u))
                   (andb nsw (negb (Z.shiftr (unsigned x)
@@ -1066,7 +1062,6 @@ Class VInt I : Type :=
            else ret (to_dvalue (divu x y))
 
     | SDiv ex =>
-      (* What does signed i1 mean? *)
       if (signed y =? 0)
       then failwith "Signed division by 0."
       else if andb ex (negb ((signed x) mod (signed y) =? 0))
@@ -1106,9 +1101,7 @@ Class VInt I : Type :=
     | Xor =>
       ret (to_dvalue (xor x y))
     end.
-  Arguments eval_int_op _ _ _ : simpl nomatch.
-
-  (* Evaluate the given iop on the given arguments according to the bitsize *)
+    Arguments eval_int_op _ _ _ : simpl nomatch.
   Definition integer_op (bits:Z) (iop:ibinop) (x y:inttyp bits) : undef_or_err dvalue :=
     match bits, x, y with
     | 1, x, y  => lift (eval_int_op iop x y)
@@ -1118,9 +1111,6 @@ Class VInt I : Type :=
     | _, _, _  => failwith "unsupported bitsize"
     end.
   Arguments integer_op _ _ _ _ : simpl nomatch.
-
-  (* Convert written integer constant to corresponding integer with bitsize bits.
-     Takes the integer modulo 2^bits. *)
   Definition coerce_integer_to_int (bits:Z) (i:Z) : undef_or_err dvalue :=
     match bits with
     | 1  => ret (DVALUE_I1 (repr i))
@@ -1131,8 +1121,6 @@ Class VInt I : Type :=
     end.
   Arguments coerce_integer_to_int _ _ : simpl nomatch.
 
-  (* Helper for looping 2 argument evaluation over vectors, producing a vector *)
-
   Definition vec_loop {A : Type} {M : Type -> Type} `{Monad M}
              (f : A -> A -> M A)
              (elts : list (A * A)) : M (list A) :=
@@ -1140,44 +1128,6 @@ Class VInt I : Type :=
                         val <- f e1 e2 ;;
                         ret (val :: acc)
                      ) elts [].
-
-
-  (* Integer iop evaluation, called from eval_iop.
-     Here the values must be integers. Helper defined
-     in order to prevent eval_iop from being recursive. *)
-  (* CB TODO: Should this do anything for undef? *)
-
-  (*
-    match iop with
-    | UDiv ex =>
-      if (unsigned y =? 0)
-      then raiseUB "Unsigned division by 0."
-      else if andb ex (negb ((unsigned x) mod (unsigned y) =? 0))
-           then ret DVALUE_Poison
-           else ret (to_dvalue (divu x y))
-
-    | SDiv ex =>
-      (* What does signed i1 mean? *)
-      if (signed y =? 0)
-      then raiseUB "Signed division by 0."
-      else if andb ex (negb ((signed x) mod (signed y) =? 0))
-           then ret DVALUE_Poison
-           else ret (to_dvalue (divs x y))
-
-    | URem =>
-      if unsigned y =? 0
-      then raiseUB "Unsigned mod 0."
-      else ret (to_dvalue (modu x y))
-
-    | SRem =>
-      if signed y =? 0
-      then raiseUB "Signed mod 0."
-      else ret (to_dvalue (mods x y))
-    | _ =>
- *)
-
-
-  (* TODO: make work with undef ??? Maybe this is all dvalues? *)
   Definition eval_iop_integer_h iop v1 v2 : undef_or_err dvalue :=
     match v1, v2 with
     | DVALUE_I1 i1, DVALUE_I1 i2    => lift (eval_int_op iop i1 i2)
@@ -1189,19 +1139,6 @@ Class VInt I : Type :=
     | _, _                          => failwith "ill_typed-iop"
     end.
   Arguments eval_iop_integer_h _ _ _ : simpl nomatch.
-
-  (* I split the definition between the vector and other evaluations because
-     otherwise eval_iop should be recursive to allow for vector calculations,
-     but coq can't find a fixpoint. *)
-  (* SAZ: Here is where we want to add the case distinction  for uvalues
-
-       - this should check for "determined" uvalues and then use eval_iop_integer_h
-         otherwise leave the op symbolic
-
-       - this should use the inclusion of dvalue into uvalue in the case that
-         eval_iop_integer_h is calle
-
-   *)
 
   Definition eval_iop iop v1 v2 : undef_or_err dvalue :=
     match v1, v2 with
@@ -1341,9 +1278,6 @@ Class VInt I : Type :=
     end.
 
   End ARITHMETIC.
-
-  (* Same deal as above with the helper *)
-  (* The pattern matching generates hundreds of subgoals, hence the factorization of the typeclass inference *)
   Definition eval_select_h (cnd : dvalue) (v1 v2 : uvalue) : undef_or_err uvalue :=
     let failwith_local := (@failwith _ undef_or_err (Monad_eitherT string Monad_err) (Exception_eitherT string Monad_err))
     in
@@ -1364,8 +1298,6 @@ Class VInt I : Type :=
   Definition eval_select cnd v1 v2 : undef_or_err uvalue :=
     match cnd, v1, v2 with
     | (DVALUE_Vector es), (UVALUE_Vector es1), (UVALUE_Vector es2) =>
-      (* vec needs to loop over es, es1, and es2. Is there a way to
-         generalize vec_loop to cover this? (make v1,v2 generic?) *)
       let fix loop elts :=
           match elts with
           | [] => ret []
@@ -1379,9 +1311,6 @@ Class VInt I : Type :=
     | _, _, _ => eval_select_h cnd v1 v2
     end.
   Arguments eval_select _ _ _ : simpl nomatch.
-
-  (* Helper function for indexing into a structured datatype
-     for extractvalue and insertvalue *)
   Definition index_into_str (v:uvalue) (idx:LLVMAst.int) : undef_or_err uvalue :=
     let fix loop elts i :=
         match elts with
@@ -1395,8 +1324,6 @@ Class VInt I : Type :=
     | _ => failwith "invalid aggregate data"
     end.
   Arguments index_into_str _ _ : simpl nomatch.
-
-  (* Helper function for inserting into a structured datatype for insertvalue *)
   Definition insert_into_str (str:dvalue) (v:dvalue) (idx:LLVMAst.int) : undef_or_err dvalue :=
     let fix loop (acc elts:list dvalue) (i:LLVMAst.int) :=
         match elts with
@@ -1417,16 +1344,6 @@ Class VInt I : Type :=
     | _ => failwith "invalid aggregate data"
     end.
   Arguments insert_into_str _ _ _ : simpl nomatch.
-
-(*  ------------------------------------------------------------------------- *)
-
-  (* Interpretation of [uvalue] in terms of sets of [dvalue].
-     Essentially used to implemenmt the handler for [pick], but also required to
-     define some predicates passed as arguments to the [pick] events, hence why
-     it's defined here.
-   *)
-
-  (* Poison not included because of concretize *)
   Inductive dvalue_has_dtyp : dvalue -> dtyp -> Prop :=
   | DVALUE_Addr_typ   : forall a, dvalue_has_dtyp (DVALUE_Addr a) DTYPE_Pointer
   | DVALUE_I1_typ     : forall x, dvalue_has_dtyp (DVALUE_I1 x) (DTYPE_I 1)
@@ -1436,13 +1353,13 @@ Class VInt I : Type :=
   | DVALUE_IX_typ     : forall x, ~IX_supported x -> dvalue_has_dtyp DVALUE_None (DTYPE_I x)
   | DVALUE_Double_typ : forall x, dvalue_has_dtyp (DVALUE_Double x) DTYPE_Double
   | DVALUE_Float_typ  : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Float
-  | DVALUE_Half_typ   : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Half (* ??? *)
-  | DVALUE_X86_fp80   : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_X86_fp80 (* ??? *)
-  | DVALUE_Fp128      : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Fp128 (* ??? *)
-  | DVALUE_Ppc_fp128  : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Ppc_fp128 (* ??? *)
-  | DVALUE_Metadata   : dvalue_has_dtyp DVALUE_None DTYPE_Metadata (* ??? *)
-  | DVALUE_X86_mmx    : dvalue_has_dtyp DVALUE_None DTYPE_X86_mmx (* ??? *)
-  | DVALUE_Opaque     : dvalue_has_dtyp DVALUE_None DTYPE_Opaque (* ??? *)
+  | DVALUE_Half_typ   : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Half
+  | DVALUE_X86_fp80   : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_X86_fp80
+  | DVALUE_Fp128      : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Fp128
+  | DVALUE_Ppc_fp128  : forall x, dvalue_has_dtyp (DVALUE_Float x) DTYPE_Ppc_fp128
+  | DVALUE_Metadata   : dvalue_has_dtyp DVALUE_None DTYPE_Metadata
+  | DVALUE_X86_mmx    : dvalue_has_dtyp DVALUE_None DTYPE_X86_mmx
+  | DVALUE_Opaque     : dvalue_has_dtyp DVALUE_None DTYPE_Opaque
   | DVALUE_None_typ   : dvalue_has_dtyp DVALUE_None DTYPE_Void
 
   | DVALUE_Struct_Nil_typ  : dvalue_has_dtyp (DVALUE_Struct []) (DTYPE_Struct [])
@@ -1458,8 +1375,6 @@ Class VInt I : Type :=
         dvalue_has_dtyp f dt ->
         dvalue_has_dtyp (DVALUE_Packed_struct fields) (DTYPE_Packed_struct dts) ->
         dvalue_has_dtyp (DVALUE_Packed_struct (f :: fields)) (DTYPE_Packed_struct (dt :: dts))
-
-  (* CB TODO: Do we have to exclude mmx? "There are no arrays, vectors or constants of this type" *)
   | DVALUE_Array_typ :
       forall xs sz dt,
         Forall (fun x => dvalue_has_dtyp x dt) xs ->
@@ -1484,13 +1399,13 @@ Class VInt I : Type :=
     Hypothesis IH_IX             : forall x, ~IX_supported x -> P DVALUE_None (DTYPE_I x).
     Hypothesis IH_Double         : forall x, P (DVALUE_Double x) DTYPE_Double.
     Hypothesis IH_Float          : forall x, P (DVALUE_Float x) DTYPE_Float.
-    Hypothesis IH_Half           : forall x, P (DVALUE_Float x) DTYPE_Half. (* ??? *)
-    Hypothesis IH_X86_fp80       : forall x, P (DVALUE_Float x) DTYPE_X86_fp80. (* ??? *)
-    Hypothesis IH_Fp128          : forall x, P (DVALUE_Float x) DTYPE_Fp128. (* ??? *)
-    Hypothesis IH_Ppc_fp128      : forall x, P (DVALUE_Float x) DTYPE_Ppc_fp128. (* ??? *)
-    Hypothesis IH_Metadata       : P DVALUE_None DTYPE_Metadata. (* ??? *)
-    Hypothesis IH_X86_mmx        : P DVALUE_None DTYPE_X86_mmx. (* ??? *)
-    Hypothesis IH_Opaque         : P DVALUE_None DTYPE_Opaque. (* ??? *)
+    Hypothesis IH_Half           : forall x, P (DVALUE_Float x) DTYPE_Half.
+    Hypothesis IH_X86_fp80       : forall x, P (DVALUE_Float x) DTYPE_X86_fp80.
+    Hypothesis IH_Fp128          : forall x, P (DVALUE_Float x) DTYPE_Fp128.
+    Hypothesis IH_Ppc_fp128      : forall x, P (DVALUE_Float x) DTYPE_Ppc_fp128.
+    Hypothesis IH_Metadata       : P DVALUE_None DTYPE_Metadata.
+    Hypothesis IH_X86_mmx        : P DVALUE_None DTYPE_X86_mmx.
+    Hypothesis IH_Opaque         : P DVALUE_None DTYPE_Opaque.
     Hypothesis IH_None           : P DVALUE_None DTYPE_Void.
     Hypothesis IH_Struct_nil     : P (DVALUE_Struct []) (DTYPE_Struct []).
     Hypothesis IH_Struct_cons    : forall (f : dvalue) (dt : dtyp) (fields : list dvalue) (dts : list dtyp),
@@ -1579,16 +1494,12 @@ Class VInt I : Type :=
     Qed.
   End dvalue_has_dtyp_ind.
 
-  Inductive concretize_u : uvalue -> undef_or_err dvalue -> Prop := 
-  (* Concrete uvalue are contretized into their singleton *)
+  Inductive concretize_u : uvalue -> undef_or_err dvalue -> Prop :=
   | Pick_concrete             : forall uv (dv : dvalue), uvalue_to_dvalue uv = inr dv -> concretize_u uv (ret dv)
   | Pick_fail                 : forall uv v s, ~ (uvalue_to_dvalue uv = inr v)  -> concretize_u uv (lift (failwith s))
-  (* Undef relates to all dvalue of the type *)
   | Concretize_Undef          : forall dt dv,
       dvalue_has_dtyp dv dt ->
       concretize_u (UVALUE_Undef dt) (ret dv)
-
-  (* The other operations proceed non-deterministically *)
   | Concretize_IBinop : forall iop uv1 e1 uv2 e2,
       concretize_u uv1 e1 ->
       concretize_u uv2 e2 ->
@@ -1676,20 +1587,6 @@ Class VInt I : Type :=
   .
 
   Definition concretize (uv: uvalue) (dv : dvalue) := concretize_u uv (ret dv).
-
-  
-  (*
-    YZ TODO: Not sure whether those can be uvalues, to figure out
-  | Concretize_Conversion     : pickU (UVALUE_Conversion       _) (DVALUE_Conversion       _)
-  | Concretize_GetElementPtr  : pickU (UVALUE_GetElementPtr    _) (DVALUE_GetElementPtr    _)
-  | Concretize_ExtractElement : pickU (UVALUE_ExtractElement   _) (DVALUE_ExtractElement   _)
-  | Concretize_InsertElement  : pickU (UVALUE_InsertElement    _) (DVALUE_InsertElement    _)
-  | Concretize_ShuffleVector  : pickU (UVALUE_ShuffleVector    _) (DVALUE_ShuffleVector    _)
-  | Concretize_ExtractValue   : pickU (UVALUE_ExtractValue     _) (DVALUE_ExtractValue     _)
-  | Concretize_InsertValue    : pickU (UVALUE_InsertValue      _) (DVALUE_InsertValue      _)
-  | Concretize_Select         : pickU (UVALUE_Select           _) (DVALUE_Select           _)
-  .
-   *)
 
 
 End DVALUE.

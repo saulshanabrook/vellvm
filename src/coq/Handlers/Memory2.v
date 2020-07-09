@@ -41,28 +41,23 @@ Definition mem_step {X} (e:IO X) (m:memory) : (IO X) + (list dvalue * X) :=
     inr (
         match a with
         | DVALUE_Addr (Ptr n) => replace m n v
-        | _ => m   (* TODO: should fail! *)
+        | _ => m
         end,
         ())
 
-  | GEP t a vs => inl (GEP t a vs) (* TODO: GEP semantics *)
+  | GEP t a vs => inl (GEP t a vs)
 
-  | ItoP t i => inl (ItoP t i) (* TODO: ItoP semantics *)
+  | ItoP t i => inl (ItoP t i)
 
-  | PtoI t a => inl (PtoI t a) (* TODO: ItoP semantics *)                     
+  | PtoI t a => inl (PtoI t a)                     
                        
   | Call t f args  => inl (Call t f args)
 
                          
   | DeclareFun f =>
-    (* TODO: should check for re-declarations and maintain that state in the memory *)
     inr (m,
          DVALUE_FunPtr f)
   end.
-
-(*
- memory -> Trace () -> Trace () -> Prop
-*)
 
 CoFixpoint memD {X} (m:memory) (d:Trace X) : Trace X :=
   match d with
@@ -87,42 +82,3 @@ Definition run_with_memory prog : option (Trace dvalue) :=
       ('s <- SS.init_state mcfg "main";
          SS.step_sem mcfg (SS.Step s)))
   end.
-
-
-
-(*
-Fixpoint MemDFin (m:memory) (d:Trace ()) (steps:nat) : option memory :=
-  match steps with
-  | O => None
-  | S x =>
-    match d with
-    | Vis (Fin d) => Some m
-    | Vis (Err s) => None
-    | Tau _ d' => MemDFin m d' x
-    | Vis (Eff e)  =>
-      match mem_step e m with
-      | inr (m', v, k) => MemDFin m' (k v) x
-      | inl _ => None
-      end
-    end
-  end%N.
-*)
-
-(*
-Previous bug: 
-Fixpoint MemDFin {A} (memory:mtype) (d:Obs A) (steps:nat) : option mtype :=
-  match steps with
-  | O => None
-  | S x =>
-    match d with
-    | Ret a => None
-    | Fin d => Some memory
-    | Err s => None
-    | Tau d' => MemDFin memory d' x
-    | Eff (Alloca t k)  => MemDFin (memory ++ [undef])%list (k (DVALUE_Addr (pred (List.length memory)))) x
-    | Eff (Load a k)    => MemDFin memory (k (nth_default undef memory a)) x
-    | Eff (Store a v k) => MemDFin (replace memory a v) k x
-    | Eff (Call d ds k)    => None
-    end
-  end%N.
-*)

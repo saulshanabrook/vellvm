@@ -1,20 +1,4 @@
-(* *********************************************************************)
-(*                                                                     *)
-(*              The Compcert verified compiler                         *)
-(*                                                                     *)
-(*          Xavier Leroy, INRIA Paris-Rocquencourt                     *)
-(*          Jacques-Henri Jourdan, INRIA Paris-Rocquencourt            *)
-(*                                                                     *)
-(*  Copyright Institut National de Recherche en Informatique et en     *)
-(*  Automatique.  All rights reserved.  This file is distributed       *)
-(*  under the terms of the GNU General Public License as published by  *)
-(*  the Free Software Foundation, either version 2 of the License, or  *)
-(*  (at your option) any later version.  This file is also distributed *)
-(*  under the terms of the INRIA Non-Commercial License Agreement.     *)
-(*                                                                     *)
-(* *********************************************************************)
 
-(** Architecture-dependent parameters for PowerPC *)
 
 Require Import ZArith List.
 From Flocq Require Import Binary Bits.
@@ -25,8 +9,6 @@ Definition big_endian := true.
 
 Definition align_int64 := 8%Z.
 Definition align_float64 := 8%Z.
-
-(** Can we use the 64-bit extensions to the PowerPC architecture? *)
 Parameter ppc64 : bool.
 
 Definition splitlong := negb ppc64.
@@ -38,8 +20,6 @@ Qed.
 
 Definition default_nan_64 := (false, iter_nat 51 _ xO xH).
 Definition default_nan_32 := (false, iter_nat 22 _ xO xH).
-
-(* Always choose the first NaN argument, if any *)
 
 Definition choose_nan_64 (l: list (bool * positive)) : bool * positive :=
   match l with nil => default_nan_64 | n :: _ => n end.

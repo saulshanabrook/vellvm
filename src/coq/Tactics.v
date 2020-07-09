@@ -17,8 +17,6 @@ Ltac flatten_all :=
 Ltac inv H := inversion H; try subst; clear H.
 
 Global Tactic Notation "intros !" := repeat intro.
-
-(* inv by name of the Inductive relation *)
 Ltac invn f :=
     match goal with
     | [ id: f |- _ ] => inv id
@@ -31,8 +29,6 @@ Ltac invn f :=
     | [ id: f _ _ _ _ _ _ _ |- _ ] => inv id
     | [ id: f _ _ _ _ _ _ _ _ |- _ ] => inv id
     end.
-
-(* destruct by name of the Inductive relation *)
 Ltac destructn f :=
     match goal with
     | [ id: f |- _ ] => destruct id
@@ -45,8 +41,6 @@ Ltac destructn f :=
     | [ id: f _ _ _ _ _ _ _ |- _ ] => destruct id
     | [ id: f _ _ _ _ _ _ _ _ |- _ ] => destruct id
     end.
-
-(* apply by name of the Inductive relation *)
 Ltac appn f :=
     match goal with
     | [ id: f |- _ ] => apply id
@@ -59,8 +53,6 @@ Ltac appn f :=
     | [ id: f _ _ _ _ _ _ _ |- _ ] => apply id
     | [ id: f _ _ _ _ _ _ _ _ |- _ ] => apply id
     end.
-
-(* eapply by name of the Inductive relation *)
 Ltac eappn f :=
     match goal with
     | [ id: f |- _ ] => eapply id
@@ -73,11 +65,6 @@ Ltac eappn f :=
     | [ id: f _ _ _ _ _ _ _ |- _ ] => eapply id
     | [ id: f _ _ _ _ _ _ _ _ |- _ ] => eapply id
     end.
-
-(** [break_match_hyp] looks for a [match] construct in some
-    hypothesis, and destructs the discriminee, while retaining the
-    information about the discriminee's value leading to the branch
-    being taken. *)
 Ltac break_match_hyp :=
   match goal with
     | [ H : context [ match ?X with _ => _ end ] |- _] =>
@@ -86,10 +73,6 @@ Ltac break_match_hyp :=
         | _ => destruct X eqn:?
       end
   end.
-
-(** [break_match_goal] looks for a [match] construct in your goal, and
-    destructs the discriminee, while retaining the information about
-    the discriminee's value leading to the branch being taken. *)
 Ltac break_match_goal :=
   match goal with
     | [ |- context [ match ?X with _ => _ end ] ] =>
@@ -98,9 +81,6 @@ Ltac break_match_goal :=
         | _ => destruct X eqn:?
       end
   end.
-
-(** [break_match] breaks a match, either in a hypothesis or in your
-    goal. *)
 Ltac break_match := break_match_goal || break_match_hyp.
 
 Ltac inv_option :=

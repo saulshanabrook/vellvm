@@ -150,15 +150,9 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
       | [DVALUE_Double d] => ret (DVALUE_Double (Float.abs d))
       | _ => failwith "llvm_fabs_f64 got incorrect / ill-typed intputs"
       end.
-
-  (* Clients of Vir can register the names of their own intrinsics
-     definitions here. *)
   Definition defined_intrinsics : intrinsic_definitions :=
     [ (fabs_32_decl, llvm_fabs_f32) ;
-      (fabs_64_decl, llvm_fabs_f64) ].
-
-  (* SAZ: TODO: it could be nice to provide a more general/modular way to "lift"
-     primitive functions into intrinsics. *)
+    (fabs_64_decl, llvm_fabs_f64) ].
 
 
 End Make.

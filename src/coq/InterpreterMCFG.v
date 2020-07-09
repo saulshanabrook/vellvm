@@ -16,14 +16,6 @@ From Vir Require Import
 
 Section InterpreterMCFG.
 
-  (**
-   Partial interpretations of the trees produced by the denotation of _VIR_ programs.
-   The intent is to allow us to only interpret as many layers as needed
-   to perform the required semantic reasoning, and lift for free the
-   equivalence down the pipe.
-   This gives us a _vertical_ notion of compositionality.
-   *)
-
   Definition interp_to_L1 {R} user_intrinsics (t: itree L0 R) g :=
     let uvalue_trace       := interp_intrinsics user_intrinsics t in
     let L1_trace           := interp_global uvalue_trace g in
@@ -57,8 +49,6 @@ Section InterpreterMCFG.
     let L3_trace       := interp_memory L2_trace m in
     let L4_trace       := model_undef RR L3_trace in
     model_UB RR L4_trace.
-
-  (* The interpreter stray away from the model starting from the fourth layer: we pick an arbitrary valid path of execution *)
   Definition interp_to_L4_exec {R} user_intrinsics (t: itree L0 R) g l m :=
     let uvalue_trace   := interp_intrinsics user_intrinsics t in
     let L1_trace       := interp_global uvalue_trace g in
@@ -154,8 +144,6 @@ Section InterpreterMCFG.
       subst; rewrite H.
       reflexivity.
     Qed.
-
-    (* NOTEYZ: This can probably be refined to [eqit eq] instead of [eutt eq], but I don't think it matters to us *)
     Lemma interp_to_L3_vis (defs: IS.intrinsic_definitions):
       forall T R (e : L0 T) (k : T -> itree L0 R) g l m,
         interp_to_L3 defs (Vis e k) g l m ≈ 

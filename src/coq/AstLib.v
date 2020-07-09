@@ -168,8 +168,6 @@ Module RawIDOrd <: UsualOrderedType.
   Definition eq_refl := @eq_refl t.
   Definition eq_sym := @eq_sym t.
   Definition eq_trans := @eq_trans t.
-
-  (* Anon < Name < Raw *)
   Definition lt (x:t) (y:t) : Prop :=
     match x,y with
     | Anon n1, Anon n2 => (n1 < n2)%Z
@@ -430,9 +428,6 @@ Section ExpInd.
     - apply IH_Freeze. apply IH.
   Qed.
 End ExpInd.
-
-
-(* Display *)
 Require Import Ceres.Ceres.
 
 Section hiding_notation.
@@ -593,11 +588,6 @@ Section hiding_notation.
 
         | INSTR_Alloca t nb align =>
           [Atom "alloca" ; to_sexp t ; @serialize_opt _ serialize_int ", align" align]
-        (*
-           | INSTR_Call
-           | INSTR_Phi
-           | INSTR_Alloca
-         *)
         | _ => Atom "string_of_instr todo"
         end.
 
@@ -687,8 +677,6 @@ Section WithType.
       m_declarations := flat_map declarations_of tles;
       m_definitions := flat_map definitions_of tles;
     |}.
-
-  (* Identifiers ----------------------------------------------------------- *)
   Class Ident (X:Set) := ident_of : X -> ident.
 
   Global Instance ident_of_block : Ident (block T) := fun (b:block T) => ID_Local (@blk_id T b).

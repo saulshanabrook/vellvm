@@ -223,12 +223,6 @@ Definition model_to_L4 (prog: mcfg dtyp) :=
 Definition model_to_L5 (prog: mcfg dtyp) :=
   let L0_trace := denote_vir_init prog in
   interp_to_L5 (refine_res3) user_intrinsics L0_trace [] ([],[]) empty_memory_stack.
-
-(**
-   Which leads to five notion of equivalence of [mcfg]s.
-   Note that all reasoning is conducted after conversion to [mcfg] and
-   normalization of types.
- *)
 Definition refine_mcfg_L1 (p1 p2: mcfg dtyp): Prop :=
   R.refine_L1 (model_to_L1 p1) (model_to_L1 p2).
 
@@ -243,11 +237,6 @@ Definition refine_mcfg_L4 (p1 p2: mcfg dtyp): Prop :=
 
 Definition refine_mcfg  (p1 p2: mcfg dtyp): Prop :=
   R.refine_L5 (model_to_L5 p1) (model_to_L5 p2).
-
-(**
-   The chain of refinements is monotone, legitimating the ability to
-   conduct reasoning before interpretation when suitable.
- *)
 Lemma refine_mcfg_L1_correct: forall p1 p2,
     refine_mcfg_L1 p1 p2 -> refine_mcfg p1 p2.
 Proof.
@@ -275,8 +264,6 @@ Proof.
   intros p1 p2 HR.
   apply refine_45, HR.
 Qed.
-
-(* MOVE *)
 Ltac flatten_goal :=
   match goal with
   | |- context[match ?x with | _ => _ end] => let Heq := fresh "Heq" in destruct x eqn:Heq
@@ -351,10 +338,6 @@ Proof.
   unfold handler_correct. intros. reflexivity.
   assumption. reflexivity.
 Qed.
-
-(**
-   We prove that the interpreter belongs to the model.
- *)
 Theorem interpreter_sound: forall p, model p (interpreter p).
 Proof.
   intros p.
@@ -367,12 +350,6 @@ Proof.
 Qed.
 
 End REFINEMENT.
-
-(**
-   Each interpreter commutes with [bind] and [ret].
- **)
-
-(** We hence can also commute them at the various levels of interpretation *)
 
 Lemma interp_to_L2_bind:
   forall ui {R S} (t: itree L0 R) (k: R -> itree L0 S) s1 s2,
@@ -406,11 +383,6 @@ Definition model_to_L5_cfg (prog: cfg dtyp) :=
 
 Definition refine_cfg_ret: relation (PropT L5 (memory_stack * (local_env * (global_env * uvalue)))) :=
   fun ts ts' => forall t, ts t -> exists t', ts' t' /\ eutt  (TT × (TT × (TT × refine_uvalue))) t t'.
-
-(* Definition refine_cfg  (p1 p2: cfg dtyp): Prop := *)
-(*   refine_cfg_ret (model_to_L5_cfg p1) (model_to_L5_cfg p2). *)
-
-(* Reasoning lemmas for [denote_bks] *)
 
 Section Denotation.
 Import CatNotations.

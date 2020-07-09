@@ -1,21 +1,4 @@
-(* *********************************************************************)
-(*                                                                     *)
-(*              The Compcert verified compiler                         *)
-(*                                                                     *)
-(*          Xavier Leroy, INRIA Paris-Rocquencourt                     *)
-(*                                                                     *)
-(*  Copyright Institut National de Recherche en Informatique et en     *)
-(*  Automatique.  All rights reserved.  This file is distributed       *)
-(*  under the terms of the GNU General Public License as published by  *)
-(*  the Free Software Foundation, either version 2 of the License, or  *)
-(*  (at your option) any later version.  This file is also distributed *)
-(*  under the terms of the INRIA Non-Commercial License Agreement.     *)
-(*                                                                     *)
-(* *********************************************************************)
 
-(** This file collects a number of definitions and theorems that are
-    used throughout the development.  It complements the Coq standard
-    library. *)
 
 Require Export String.
 Require Export ZArith.
@@ -24,8 +7,6 @@ Require Export List.
 Require Export Bool.
 
 Global Set Asymmetric Patterns.
-
-(** * Useful tactics *)
 
 Ltac inv H := inversion H; clear H; subst.
 
@@ -89,9 +70,7 @@ Ltac exploit x :=
  || refine (modusponens _ _ (x _ _ _ _) _)
  || refine (modusponens _ _ (x _ _ _) _)
  || refine (modusponens _ _ (x _ _) _)
- || refine (modusponens _ _ (x _) _).
-
-(** * Definitions and theorems over the type [positive] *)
+    || refine (modusponens _ _ (x _) _).
 
 Definition peq: forall (x y: positive), {x = y} + {x <> y} := Pos.eq_dec.
 Global Opaque peq.
@@ -183,8 +162,6 @@ Hint Resolve Ple_refl Plt_Ple Ple_succ Plt_strict: coqlib.
 Ltac xomega := unfold Plt, Ple in *; zify; omega.
 Ltac xomegaContradiction := exfalso; xomega.
 
-(** Peano recursion over positive numbers. *)
-
 Section POSITIVE_ITERATION.
 
 Lemma Plt_wf: well_founded Plt.
@@ -254,8 +231,6 @@ Qed.
 
 End POSITIVE_ITERATION.
 
-(** * Definitions and theorems over the type [Z] *)
-
 Definition zeq: forall (x y: Z), {x = y} + {x <> y} := Z.eq_dec.
 
 Lemma zeq_true:
@@ -316,8 +291,6 @@ Proof.
   auto.
 Qed.
 
-(** Properties of powers of two. *)
-
 Lemma two_power_nat_O : two_power_nat O = 1.
 Proof. reflexivity. Qed.
 
@@ -373,8 +346,6 @@ Proof.
   rewrite <- two_p_S. decEq. omega. omega.
 Qed.
 
-(** Properties of [Zmin] and [Zmax] *)
-
 Lemma Zmin_spec:
   forall x y, Z.min x y = if zlt x y then x else y.
 Proof.
@@ -408,8 +379,6 @@ Lemma Zmax_bound_r:
 Proof.
   intros. generalize (Z.le_max_r y z). omega.
 Qed.
-
-(** Properties of Euclidean division and modulus. *)
 
 Lemma Zdiv_small:
   forall x y, 0 <= x < y -> x / y = 0.
@@ -545,8 +514,6 @@ Proof.
   omega.
 Qed.
 
-(** Properties of divisibility. *)
-
 Lemma Zdivides_trans:
   forall x y z, (x | y) -> (y | z) -> (x | z).
 Proof.
@@ -574,8 +541,6 @@ Proof.
   replace (y * c - c) with ((y - 1) * c) by ring.
   apply Zmult_le_compat_r; omega.
 Qed.
-
-(** Conversion from [Z] to [nat]. *)
 
 Definition nat_of_Z: Z -> nat := Z.to_nat.
 
@@ -613,10 +578,6 @@ Proof.
   unfold nat_of_Z; intros. apply Z2Nat.inj_add; omega.
 Qed.
 
-
-(** Alignment: [align n amount] returns the smallest multiple of [amount]
-  greater than or equal to [n]. *)
-
 Definition align (n: Z) (amount: Z) :=
   ((n + amount - 1) / amount) * amount.
 
@@ -635,24 +596,16 @@ Proof.
   intros. unfold align. apply Z.divide_factor_r.
 Qed.
 
-(** * Definitions and theorems on the data types [option], [sum] and [list] *)
-
 Set Implicit Arguments.
-
-(** Comparing option types. *)
 
 Definition option_eq (A: Type) (eqA: forall (x y: A), {x=y} + {x<>y}):
   forall (x y: option A), {x=y} + {x<>y}.
 Proof. decide equality. Defined.
 Global Opaque option_eq.
 
-(** Lifting a relation to an option type. *)
-
 Inductive option_rel (A B: Type) (R: A -> B -> Prop) : option A -> option B -> Prop :=
   | option_rel_none: option_rel R None None
   | option_rel_some: forall x y, R x y -> option_rel R (Some x) (Some y).
-
-(** Mapping a function over an option type. *)
 
 Definition option_map (A B: Type) (f: A -> B) (x: option A) : option B :=
   match x with
@@ -660,15 +613,11 @@ Definition option_map (A B: Type) (f: A -> B) (x: option A) : option B :=
   | Some y => Some (f y)
   end.
 
-(** Mapping a function over a sum type. *)
-
 Definition sum_left_map (A B C: Type) (f: A -> B) (x: A + C) : B + C :=
   match x with
   | inl y => inl C (f y)
   | inr z => inr B z
   end.
-
-(** Properties of [List.nth] (n-th element of a list). *)
 
 Hint Resolve in_eq in_cons: coqlib.
 
@@ -692,8 +641,6 @@ Proof.
   induction idx; simpl; intros; reflexivity.
 Qed.
 Hint Resolve nth_error_nil: coqlib.
-
-(** Compute the length of a list, with result in [Z]. *)
 
 Fixpoint list_length_z_aux (A: Type) (l: list A) (acc: Z) {struct l}: Z :=
   match l with
@@ -736,9 +683,6 @@ Proof.
   induction l. reflexivity. simpl. repeat rewrite list_length_z_cons. congruence.
 Qed.
 
-(** Extract the n-th element of a list, as [List.nth_error] does,
-    but the index [n] is of type [Z]. *)
-
 Fixpoint list_nth_z (A: Type) (l: list A) (n: Z) {struct l}: option A :=
   match l with
   | nil => None
@@ -774,8 +718,6 @@ Proof.
   exploit IHl; eauto. omega.
 Qed.
 
-(** Properties of [List.incl] (list inclusion). *)
-
 Lemma incl_cons_inv:
   forall (A: Type) (a: A) (b c: list A),
   incl (a :: b) c -> incl b c.
@@ -806,8 +748,6 @@ Lemma incl_same_head:
 Proof.
   intros; red; simpl; intros. intuition.
 Qed.
-
-(** Properties of [List.map] (mapping a function over a list). *)
 
 Lemma list_map_exten:
   forall (A B: Type) (f f': A -> B) (l: list A),
@@ -883,21 +823,13 @@ Proof.
   exists (a0 :: l1); exists l2; intuition. simpl; congruence.
 Qed.
 
-(** Folding a function over a list *)
-
 Section LIST_FOLD.
 
 Variables A B: Type.
 Variable f: A -> B -> B.
 
-(** This is exactly [List.fold_left] from Coq's standard library,
-  with [f] taking arguments in a different order. *)
-
 Fixpoint list_fold_left (accu: B) (l: list A) : B :=
   match l with nil => accu | x :: l' => list_fold_left (f x accu) l' end.
-
-(** This is exactly [List.fold_right] from Coq's standard library,
-  except that it runs in constant stack space. *)
 
 Definition list_fold_right (l: list A) (base: B) : B :=
   list_fold_left base (List.rev' l).
@@ -931,8 +863,6 @@ Qed.
 
 End LIST_FOLD.
 
-(** Properties of list membership. *)
-
 Lemma in_cns:
   forall (A: Type) (x y: A) (l: list A), In x (y :: l) <-> y = x \/ In x l.
 Proof.
@@ -951,9 +881,6 @@ Lemma list_in_insert:
 Proof.
   intros. apply in_or_app; simpl. elim (in_app_or _ _ _ H); intro; auto.
 Qed.
-
-(** [list_disjoint l1 l2] holds iff [l1] and [l2] have no elements
-  in common. *)
 
 Definition list_disjoint (A: Type) (l1 l2: list A) : Prop :=
   forall (x y: A), In x l1 -> In y l2 -> x <> y.
@@ -1017,13 +944,8 @@ Proof.
   right; red; intros. elim n0. eapply list_disjoint_cons_left; eauto.
 Defined.
 
-(** [list_equiv l1 l2] holds iff the lists [l1] and [l2] contain the same elements. *)
-
 Definition list_equiv (A : Type) (l1 l2: list A) : Prop :=
   forall x, In x l1 <-> In x l2.
-
-(** [list_norepet l] holds iff the list [l] contains no repetitions,
-  i.e. no element occurs twice. *)
 
 Inductive list_norepet (A: Type) : list A -> Prop :=
   | list_norepet_nil:
@@ -1122,8 +1044,6 @@ Proof.
   generalize list_norepet_app; firstorder.
 Qed.
 
-(** [is_tail l1 l2] holds iff [l2] is of the form [l ++ l1] for some [l]. *)
-
 Inductive is_tail (A: Type): list A -> list A -> Prop :=
   | is_tail_refl:
       forall c, is_tail c c
@@ -1159,9 +1079,6 @@ Lemma is_tail_trans:
 Proof.
   induction 1; intros. auto. apply IHis_tail. eapply is_tail_cons_left; eauto.
 Qed.
-
-(** [list_forall2 P [x1 ... xN] [y1 ... yM]] holds iff [N = M] and
-  [P xi yi] holds for all [i]. *)
 
 Section FORALL2.
 
@@ -1226,8 +1143,6 @@ Proof.
   intros. auto with coqlib.
 Qed.
 
-(** Dropping the first N elements of a list. *)
-
 Fixpoint list_drop (A: Type) (n: nat) (x: list A) {struct n} : list A :=
   match n with
   | O => x
@@ -1256,8 +1171,6 @@ Proof.
   destruct l; simpl; auto.
 Qed.
 
-(** A list of [n] elements, all equal to [x]. *)
-
 Fixpoint list_repeat {A: Type} (n: nat) (x: A) {struct n} :=
   match n with
   | O => nil
@@ -1275,8 +1188,6 @@ Lemma in_list_repeat:
 Proof.
   induction n; simpl; intros. elim H. destruct H; auto.
 Qed.
-
-(** * Definitions and theorems over boolean types *)
 
 Definition proj_sumbool {P Q: Prop} (a: {P} + {Q}) : bool :=
   if a then true else false.
@@ -1358,11 +1269,7 @@ Qed.
 
 End DECIDABLE_PREDICATE.
 
-(** * Well-founded orderings *)
-
 Require Import Relations.
-
-(** A non-dependent version of lexicographic ordering. *)
 
 Section LEX_ORDER.
 
@@ -1400,8 +1307,6 @@ Proof.
 Qed.
 
 End LEX_ORDER.
-
-(** * Nonempty lists *)
 
 Inductive nlist (A: Type) : Type :=
   | nbase: A -> nlist A

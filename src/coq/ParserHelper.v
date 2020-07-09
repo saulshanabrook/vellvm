@@ -5,49 +5,31 @@ Require Import Floats.
 
 
 Open Scope Z.
-
-(* a basic float - a pair of two integers - mantissa and exponent *)
 Definition bfloat := Flocq.Core.Defs.float radix2.
 Definition BFloat := Flocq.Core.Defs.Float radix2.
-
-(** * converting between floats in the same cohort *)
-
-(* increase a given float's exponent by [de] *)
 Definition inc_e (f : bfloat) (de : positive) : option bfloat :=
   let '(m, e) := (Fnum f, Fexp f) in
   let rm := two_power_pos de in
   if (Zmod m rm =? 0)
   then Some (BFloat (m / two_power_pos de) (e + Z.pos de))
   else None.
-
-(* decrese a given float's exponent by [de] *)
 Definition dec_e (f : bfloat) (de : positive) : bfloat :=
   let '(m, e) := (Fnum f, Fexp f) in
   let rm := two_power_pos de in
   BFloat (m * two_power_pos de) (e - Z.pos de).
-
-(* shift (up or down) the exponent by [de] *)
 Definition shift_e (f : bfloat) (de : Z) : option bfloat :=
   match de with
   | Z0 => Some f
   | Z.pos pde => inc_e f pde
   | Z.neg nde => Some (dec_e f nde)
   end.
-
-(* set exponent to a given one *)
 Definition set_e (f : bfloat) (e : Z) : option bfloat :=
   shift_e f (e - Fexp f).
-
-(* binary length of a number *)
 Definition Zdigits (m : Z) := Z.log2 (Z.abs m) + 1.
-
-(* shifting the binary length of the mantissa - *)
 Definition inc_digits_m := dec_e.
 Definition dec_digits_m := inc_e.
 Definition shift_digits_m (f : bfloat) (ddm : Z) := shift_e f (- ddm).
 Definition set_digits_m (f : bfloat) (dm : Z) := shift_digits_m f (dm - Zdigits (Fnum f)).
-
-(** * normalization *)
 Definition normalize_float (prec emax : Z) (f : bfloat)
   : option bfloat :=
   let emin := 3 - emax - prec in
@@ -64,8 +46,6 @@ Definition normalize_float (prec emax : Z) (f : bfloat)
                                   else None
                      end
   end.
-
-(* check if a mantissa-exponent pair is represntable in a format given by prec, emax *)
 Definition can_convert_exactly (prec__target emax__target : Z) (m : positive) (e : Z) : bool :=
   let f := BFloat (Z.pos m) e in
   match normalize_float prec__target emax__target f with
@@ -86,15 +66,6 @@ Definition can_convert_float_to_float64 (v : float) : bool :=
   end.
 
 Section Correctness.
-
-  (*
-   * Inspired by StructTact
-   * Source: github.com/uwplse/StructTact
-   *
-   * [break_match] looks for a [match] construct in the goal or some hypothesis,
-   * and destructs the discriminee, while retaining the information about
-   * the discriminee's value leading to the branch being taken. 
-   *)
   Ltac break_match :=
     match goal with
       | [ |- context [ match ?X with _ => _ end ] ] =>
@@ -108,11 +79,7 @@ Section Correctness.
           | _ => destruct X eqn:?
         end
     end.
-
-  (* binary length of a positive number *)
   Let digits (p: positive) := Z.succ (Z.log2 (Zpos p)).
-
-  (* closed form for Flocq's [digits2_pos] *)
   Lemma digits2_pos_digits (m : positive) :
     Z.pos (Digits.digits2_pos m) = digits m.
   Proof.
@@ -124,8 +91,6 @@ Section Correctness.
       reflexivity.
     auto.
   Qed.
-
-  (** ** Flocq's Binary.bounded rewritten in a form close to IEEE-754 *)
   Lemma bounded_closed_form (prec emax : Z)
         (prec_gt_0 : Flocq.Core.FLX.Prec_gt_0 prec) (Hmax : (prec < emax)%Z)
         (m : positive) (e : Z) :
@@ -151,8 +116,6 @@ Section Correctness.
     | Z.pos m => bounded prec emax m (Fexp f)
     | Z.neg m => bounded prec emax m (Fexp f)
     end.
-  
-  (** ** equality on floats with no jumps to Real *)
   Definition float_eq (f1 : bfloat) (f2 : bfloat) : Prop :=
     let '(m1, e1) := (Fnum f1, Fexp f1) in
     let '(m2, e2) := (Fnum f2, Fexp f2) in
@@ -201,13 +164,13 @@ Section Correctness.
       replace (ex - ey + (ey - ez)) with (ex - ez) by lia.
       reflexivity.
     - destruct (Z.eq_dec ex ez); subst.
-      + (* ex = ez *)
+      +
         apply Z.mul_reg_r in MYZ.
         subst; left; split; [lia |].
         rewrite Z.sub_diag; lia.
         generalize (Z.pow_pos_nonneg 2 (ez - ey)); lia.
       + destruct (Z_lt_le_dec ex ez).
-        * (* ex < ez *)
+        *
           rename MYZ into H.
           assert (H1 : ey <= ex < ez) by lia; clear EXY EYZ n l.
           right; split; [lia |].
@@ -221,7 +184,7 @@ Section Correctness.
           rewrite Z.pow_add_r by lia.
           rewrite Z.div_mul by (apply Z.pow_nonzero; lia).
           reflexivity.
-        * (* ez < ex *)
+        *
           rename MYZ into H.
           assert (H1: ey <= ez < ex) by lia; clear EXY EYZ n l.
           left; split; [lia |].
@@ -236,18 +199,18 @@ Section Correctness.
           rewrite Z.div_mul by (apply Z.pow_nonzero; lia).
           reflexivity.
     - destruct (Z.eq_dec ex ez); subst.
-      + (* ex = ez *)
+      +
         left; split; [lia |].
         rewrite Z.sub_diag; lia.
       + destruct (Z_lt_le_dec ex ez).
-        * (* ex < ez *)
+        *
           assert (H : ex < ez <= ey) by lia; clear EXY EYZ n l.
           right; split; [lia |].
           rewrite <-Z.mul_assoc.
           rewrite <-Z.pow_add_r by lia.
           replace (ey - ez + (ez - ex)) with (ey - ex) by lia.
           reflexivity.
-        * (* ez < ex *)
+        *
           assert (H: ez < ex <= ey) by lia; clear EXY EYZ n l.
           left; split; [lia |].
           rewrite <-Z.mul_assoc.
@@ -285,8 +248,6 @@ Section Correctness.
     - intros H; contradict NZ1.
       subst; reflexivity.
   Qed.
-
-  (** shifting the exponent results in a shifted exponent as expected *)
   Lemma inc_e_correct (f1 : bfloat) (de : positive) {f2 : bfloat} :
     inc_e f1 de = Some f2 ->
     Fexp f2 = Fexp f1 + Z.pos de.
@@ -319,8 +280,6 @@ Section Correctness.
     apply shift_e_correct in H.
     lia.
   Qed.
-
-  (** shifting the exponent preserves the float's value *)
   Lemma inc_e_eq (f1 : bfloat) (de : positive) {f2 : bfloat} :
     inc_e f1 de = Some f2 ->
     float_eq f1 f2.
@@ -431,15 +390,13 @@ Section Correctness.
     rewrite Z.log2_mul_pow2.
     all: subst.
     all: try lia.
-    all: try (destruct (Z.eq_dec (2 ^ Z.pos d) 0); [ rewrite e in M; lia | assumption ]). (* For backward compatibility *)
+    all: try (destruct (Z.eq_dec (2 ^ Z.pos d) 0); [ rewrite e in M; lia | assumption ]).
     destruct (Z.eq_dec x 0); subst; lia.
     assert (m mod 2 ^ Z.pos d < 2 ^ Z.pos d); try lia.
     apply Zmod_pos_bound.
     apply Z.pow_pos_nonneg; lia.
     rewrite two_power_pos_equiv; generalize (Z.pow_pos_nonneg 2 (Z.pos d)); lia.
   Qed.
-
-  (** changing the mantissa's binary length results in an expected number of digits *)
   Lemma inc_digits_m_correct (f : bfloat) (ddm : positive) :
     not_zero f ->
     Zdigits (Fnum (inc_digits_m f ddm)) = Zdigits (Fnum f) + Z.pos ddm.
@@ -489,8 +446,6 @@ Section Correctness.
     rewrite H.
     lia.
   Qed.
-
-  (** changing the binary length of the mantissa preserves the float's value *)
   Lemma inc_digits_m_eq (f : bfloat) (ddm : positive) :
     float_eq f (inc_digits_m f ddm).
   Proof.
@@ -521,8 +476,6 @@ Section Correctness.
     unfold set_digits_m.
     apply shift_digits_m_eq.
   Qed.
-
-  (** two equal floats with the same exponent are exactly the same *)
   Lemma exponent_unique_fnum (f1 f2 : bfloat) :
     float_eq f1 f2 ->
     Fexp f1 = Fexp f2 ->
@@ -544,8 +497,6 @@ Section Correctness.
     destruct f1, f2; simpl in *.
     subst; reflexivity.
   Qed.
-
-  (** two equal floats with the same mantissa length are exactly the same *)
   Lemma Zdigits_m_unique_fexp (f1 f2 : bfloat) :
     not_zero f1 ->
     float_eq f1 f2 ->
@@ -598,8 +549,6 @@ Section Correctness.
     unfold Zdigits, Z.abs.
     reflexivity.
   Qed.
-
-  (* similar to [bounded_closed_form] *)
   Lemma valid_float_closed_form (prec emax : Z) (f : bfloat) (NZ : not_zero f)
         (prec_gt_0 : FLX.Prec_gt_0 prec) (Hmax : prec < emax) :
     let emin := 3 - emax - prec in
@@ -616,16 +565,16 @@ Section Correctness.
     unfold valid_float.
     simpl.
     destruct m.
-    - (* Z0 *)
+    -
       unfold not_zero in NZ; simpl in NZ.
       contradict NZ.
       reflexivity.
-    - (* Zpos *)
+    -
       rewrite bounded_closed_form by assumption;
         rewrite Zdigits_Zpos_log_inf;
         unfold compose.
       split; intros H; destruct H; auto.
-    - (* Zneg *)
+    -
       rewrite bounded_closed_form by assumption.
         rewrite Zdigits_Zneg_log_inf;
         unfold compose.
@@ -659,13 +608,13 @@ Section Correctness.
   Proof.
     intro.
     destruct set_e as [f |] eqn:SE.
-    - (* if successful, then equal *)
+    -
       pose proof set_e_eq f1 (Fexp f2) SE; rename H0 into H1.
       apply set_e_correct in SE.
       apply (float_eq_trans_l f1 f f2 H1) in H.
       apply (exponent_unique f f2 H) in SE.
       subst; reflexivity.
-    - (* always successful *)
+    -
       exfalso.
       unfold float_eq, set_e, shift_e, inc_e, dec_e in *.
       destruct f1 as [m1 e1], f2 as [m2 e2]; simpl in *.
@@ -686,14 +635,14 @@ Section Correctness.
     intros NZ1 H.
     assert (NZ2 : not_zero f2) by apply (not_zero_eq f1 f2 NZ1 H).
     destruct set_digits_m as [f |] eqn:SDM.
-    - (* if successful, then equal *)
+    -
       pose proof set_digits_m_eq f1 (Zdigits (Fnum f2)) SDM; rename H0 into H1.
       apply set_digits_m_correct in SDM; auto.
       apply (float_eq_trans_l f1 f f2 H1) in H.
       assert (NZ: not_zero f) by (apply not_zero_eq with (f1 := f1); assumption).
       apply (Zdigits_m_unique f f2 NZ H) in SDM.
       subst; reflexivity.
-    - (* always successful *)
+    -
       exfalso.
       unfold float_eq, set_digits_m, shift_digits_m, shift_e, inc_e, dec_e in *.
       destruct f1 as [m1 e1], f2 as [m2 e2]; simpl in *.
@@ -727,8 +676,6 @@ Section Correctness.
         generalize (Z.pow_pos_nonneg 2 (Z.pos p)); lia.
         auto.
   Qed.
-
-  (** ** declarative definition of `set_e` *)
   Lemma set_e_definition (f1 : bfloat) (e : Z) {f2 : bfloat} :
     set_e f1 e = Some f2 <->
     float_eq f1 f2 /\ Fexp f2 = e.
@@ -740,8 +687,6 @@ Section Correctness.
       subst.
       apply (float_eq_set_e f1 f2 EQ).
   Qed.
-
-  (** ** declarative definition of `set_digits_m` *)
   Lemma set_digits_m_definition (f1 : bfloat) (dm : Z) {f2 : bfloat} :
     not_zero f1 ->
     set_digits_m f1 dm = Some f2 <->
@@ -767,15 +712,15 @@ Section Correctness.
   Proof.
     unfold FLX.Prec_gt_0 in prec_gt_0.
     break_match. rename b into nf.
-    - (* successful normalization - equal and valid? *)
+    -
       unfold normalize_float in Heqo.
       repeat break_match; inversion Heqo; subst.
-      + (* subnormal *)
+      +
         split.
-        * (* same float? *)
+        *
           apply set_e_eq with (e := 3 - emax - prec).
           assumption.
-        * (* valid float? *)
+        *
           apply Z.leb_le in Heqb0.
           rewrite valid_float_closed_form.
           apply set_e_correct in Heqo0.
@@ -784,12 +729,12 @@ Section Correctness.
           apply set_e_eq in Heqo0. assumption.
           unfold FLX.Prec_gt_0; lia.
           assumption.
-      + (* normal *)
+      +
         split.
-        * (* same float? *)
+        *
           apply set_digits_m_eq with (dm := prec).
           assumption.
-        * (* valid float? *)
+        *
           apply andb_prop in Heqb1; destruct Heqb1 as [H1 H2].
           apply Z.leb_le in H1; apply Z.leb_le in H2.
           rewrite valid_float_closed_form.
@@ -802,21 +747,21 @@ Section Correctness.
           apply set_digits_m_eq in Heqo1. assumption.
           unfold FLX.Prec_gt_0; lia.
           assumption.
-    - (* unsuccessful normalization - impossible to normalize? *)
+    -
       intros xf H.
       apply Bool.not_true_is_false.
       intros V.
       assert (XNZ: not_zero xf) by apply (not_zero_eq f xf NZ H).
       rewrite valid_float_closed_form in V by assumption.
       destruct V as [V | V]; destruct V as [D E].
-      + (* xf is subnormal *)
+      +
         unfold normalize_float in Heqo.
         repeat break_match; try discriminate; clear Heqo.
         all: rewrite <-E in Heqo0.
         all: rewrite float_eq_set_e in Heqo0 by assumption.
         all: inversion Heqo0; subst.
         all: rewrite Z.leb_gt in Heqb0; lia.
-      + (* xf is normal *)
+      +
         unfold normalize_float in Heqo.
         repeat break_match; try discriminate; clear Heqo.
         * rewrite <-D in Heqo1.

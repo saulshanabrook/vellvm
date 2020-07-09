@@ -1,2 +1,2 @@
 #!/bin/sh
-grep -Rif greplist .
+grep -I --exclude-dir={lib} --exclude=greplist --exclude="*~" -Rif greplist .

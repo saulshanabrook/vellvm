@@ -4,7 +4,7 @@ Import ListNotations.
 From ITree Require Import
      ITree.
 
-From Vellvm Require Import
+From Vir Require Import
      CFG
      LLVMAst.
 

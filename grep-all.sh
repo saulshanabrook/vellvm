@@ -1,3 +1,3 @@
 #!/bin/sh
-grep -I --exclude-dir={lib} --exclude=greplist --exclude="*#*" --exclude="*~" --exclude="*aux*" -Rif greplist .
-grep -I --exclude-dir={lib} --exclude=grepcaselist  --exclude="*#*" --exclude="*~" --exclude="*aux*" -Rf grepcaselist .
+grep -I --exclude-dir={lib,.git} --exclude=grepcaselist --exclude=greplist --exclude={"*#*", "*~", "*aux*"} -Rif greplist .
+grep -I --exclude-dir={lib,.git} --exclude=grepcaselist --exclude=greplist --exclude={"*#*", "*~", "*aux*"} -Rf grepcaselist .

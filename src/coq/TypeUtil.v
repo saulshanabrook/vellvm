@@ -9,7 +9,7 @@ From Coq Require Import
      String
      Logic.FunctionalExtensionality.
 
-From Vellvm Require Import 
+From Vir Require Import 
      Util
      LLVMAst
      AstLib

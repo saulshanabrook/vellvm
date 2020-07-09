@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -10,8 +10,8 @@
 
 Require Import Equalities.
 From Coq Require Import ZArith List String Omega.
-Require Import Vellvm.AstLib Vellvm.LLVMAst.
-Require Import Vellvm.Util.
+Require Import Vir.AstLib Vir.LLVMAst.
+Require Import Vir.Util.
 From ExtLib Require Import
      Core.RelDec
      Programming.Eqv

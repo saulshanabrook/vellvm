@@ -18,7 +18,7 @@
    [bind], [vis] and [trigger], as well as the proof that they respect [eutt].
  *)
 
-From Vellvm.Handlers Require Export
+From Vir.Handlers Require Export
      Global
      Local
      Stack

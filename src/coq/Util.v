@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dmitri@sease.upenn.edu>            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
@@ -9,7 +9,7 @@
  *   3 of the License, or (at your option) any later version.                 *
  ---------------------------------------------------------------------------- *)
 
-From Vellvm Require Import Tactics.
+From Vir Require Import Tactics.
 
 From Coq Require Import
      Ascii

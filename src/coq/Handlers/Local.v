@@ -11,7 +11,7 @@ From ITree Require Import
      Events.State
      Events.StateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Util
      LLVMEvents
      Error.
@@ -145,7 +145,7 @@ End Locals.
 
 From ExtLib Require Import
      Data.Map.FMapAList.
-From Vellvm Require Import
+From Vir Require Import
      LLVMAst
      MemoryAddress.
 

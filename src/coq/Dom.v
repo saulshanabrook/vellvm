@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dgarbuzov@gmail.com>               *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
@@ -14,7 +14,7 @@
 Require Import List Equalities Orders RelationClasses Omega.
 Require Import FSets FMaps.
 Import ListNotations.
-Require Import Vellvm.Util.
+Require Import Vir.Util.
 
 
 Module Type LATTICE.

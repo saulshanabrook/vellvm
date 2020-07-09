@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -9,8 +9,8 @@
  ---------------------------------------------------------------------------- *)
 
 Require Import ZArith List String Omega.
-Require Import Vellvm.LLVMAst Vellvm.CFG Vellvm.Dom.
-Require Vellvm.AstLib.
+Require Import Vir.LLVMAst Vir.CFG Vir.Dom.
+Require Vir.AstLib.
 
 Import ListNotations.
 Open Scope list_scope.

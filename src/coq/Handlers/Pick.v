@@ -12,7 +12,7 @@ From ITree Require Import
      Eq
      Events.State.
 
-From Vellvm Require Import
+From Vir Require Import
      LLVMAst
      AstLib
      MemoryAddress

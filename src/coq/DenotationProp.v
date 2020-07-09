@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -11,9 +11,9 @@
 Require Import ZArith List String Omega.
 Require Import ExtLib.Structures.Monads.
 
-Require Import Vellvm.Util.
-Require Import Vellvm.LLVMAst Vellvm.AstLib Vellvm.CFG Vellvm.CFGProp.
-Require Import Vellvm.LLVMEvents Vellvm.Denotation.
+Require Import Vir.Util.
+Require Import Vir.LLVMAst Vir.AstLib Vir.CFG Vir.CFGProp.
+Require Import Vir.LLVMEvents Vir.Denotation.
 
 Import MonadNotation.
 Import ListNotations.

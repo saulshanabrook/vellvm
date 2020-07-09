@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -24,7 +24,7 @@ From ExtLib Require Import
      Data.Nat
      Data.List.
 
-From Vellvm Require Import
+From Vir Require Import
      LLVMAst
      AstLib
      MemoryAddress
@@ -160,7 +160,7 @@ Qed.
 Definition ll_float  := Floats.float32.
 Definition ll_double := Floats.float.
 
-Module DVALUE(A:Vellvm.MemoryAddress.ADDRESS).
+Module DVALUE(A:Vir.MemoryAddress.ADDRESS).
 
 (* The set of dynamic values manipulated by an LLVM program. *)
 Inductive dvalue : Set :=
@@ -1012,7 +1012,7 @@ Class VInt I : Type :=
 
     (* Evaluate integer opererations to get a dvalue.
 
-     These operations are between VInts, which are "vellvm"
+     These operations are between VInts, which are "vir"
      integers. This is a typeclass that wraps all of the integer
      operations that we use for integer types with different bitwidths.
 

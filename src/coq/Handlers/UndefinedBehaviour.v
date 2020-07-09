@@ -3,7 +3,7 @@ From Coq Require Import String.
 From ExtLib Require Import
      Structures.Monads.
 
-From Vellvm Require Import
+From Vir Require Import
      PropT
      LLVMEvents.
 

@@ -10,7 +10,7 @@ From Coq Require Import
      Psatz
      List.
 
-From Vellvm Require Import 
+From Vir Require Import 
      LLVMAst.
 
 Require Import Program.Equality.

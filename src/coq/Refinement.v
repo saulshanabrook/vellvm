@@ -3,7 +3,7 @@ From ITree Require Import
      Basics
      Eq.Eq.
 
-From Vellvm Require Import
+From Vir Require Import
      Util
      UndefinedBehaviour
      DynamicValues

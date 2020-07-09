@@ -4,7 +4,7 @@ Import ListNotations.
 Open Scope string_scope.
 Open Scope Z_scope.
 
-From Vellvm Require Import
+From Vir Require Import
      LLVMAst
      LLVMEvents
      UndefTests
@@ -16,7 +16,7 @@ From Vellvm Require Import
      PropT
      Transformations.Traversal.
 
-From Vellvm.Handlers Require Import
+From Vir.Handlers Require Import
      Stack
      Local
      Global.

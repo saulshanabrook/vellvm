@@ -8,7 +8,7 @@ From ITree Require Import
      Eq.Eq.
 
 (* YZ TODO : Revisit the dependency w.r.t. Refinement *)
-From Vellvm Require Import
+From Vir Require Import
      Util
      PropT
      DynamicTypes
@@ -57,7 +57,7 @@ Import R.
 
 
 (** The module _Refinement.Make_ defines a series of refinements between
-    [itree]s at the various signatures of events a Vellvm goes through during
+    [itree]s at the various signatures of events a Vir goes through during
     the chain of interpretations leading to the definition of the model.
     These refinements state set inclusion of the concretization of the
     returned under-defined values, but impose no constraints on the states.
@@ -197,7 +197,7 @@ Qed.
   Variable args : list uvalue.
   Variable user_intrinsics: IS.intrinsic_definitions.
 
-  Definition denote_vellvm_init := denote_vellvm ret_typ entry args.
+  Definition denote_vir_init := denote_vir ret_typ entry args.
   
 (**
    In particular, we can therefore define top-level models
@@ -205,23 +205,23 @@ Qed.
  *)
 
 Definition model_to_L1  (prog: mcfg dtyp) :=
-  let L0_trace := denote_vellvm_init prog in
+  let L0_trace := denote_vir_init prog in
   interp_to_L1 user_intrinsics L0_trace [].
 
 Definition model_to_L2 (prog: mcfg dtyp) :=
-  let L0_trace := denote_vellvm_init prog in
+  let L0_trace := denote_vir_init prog in
   interp_to_L2 user_intrinsics L0_trace [] ([],[]).
 
 Definition model_to_L3 (prog: mcfg dtyp) :=
-  let L0_trace := denote_vellvm_init prog in
+  let L0_trace := denote_vir_init prog in
   interp_to_L3 user_intrinsics L0_trace [] ([],[]) empty_memory_stack.
 
 Definition model_to_L4 (prog: mcfg dtyp) :=
-  let L0_trace := denote_vellvm_init prog in
+  let L0_trace := denote_vir_init prog in
   interp_to_L4 (refine_res3) user_intrinsics L0_trace [] ([],[]) empty_memory_stack.
 
 Definition model_to_L5 (prog: mcfg dtyp) :=
-  let L0_trace := denote_vellvm_init prog in
+  let L0_trace := denote_vir_init prog in
   interp_to_L5 (refine_res3) user_intrinsics L0_trace [] ([],[]) empty_memory_stack.
 
 (**

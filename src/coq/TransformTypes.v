@@ -9,7 +9,7 @@
 
 
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -27,7 +27,7 @@ From ExtLib Require Import
      Structures.Functor
      Data.Option.
 
-From Vellvm Require Import
+From Vir Require Import
      Error
      Util
      LLVMAst

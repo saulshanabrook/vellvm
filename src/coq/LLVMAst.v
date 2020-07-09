@@ -19,12 +19,12 @@
   * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.           *
    }}}                                                                       *)
 (*  ------------------------------------------------------------------------- *)
-(* Adapted for use in Vellvm by Steve Zdancewic (c) 2017                      *)
+(* Adapted for use in Vir by Steve Zdancewic (c) 2017                      *)
 (*  ------------------------------------------------------------------------- *)
 
 Require Import Floats.
 From Coq Require Import List String Ascii ZArith.
-Require Import Vellvm.Util.
+Require Import Vir.Util.
 
 Import ListNotations.
 Open Scope string_scope.

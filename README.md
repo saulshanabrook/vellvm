@@ -12,24 +12,35 @@ artifact will be submitted for review.
 
 # Helix
 
-“The formalization of a Helix front-end for VIR, of which we report in Section 7, being an ongoing work whose details are outside the scope of this submission, we have chosen not to include it as part of the artifact submitted. A public link will be made available after the end of the anonimization phase that will attest of any claim made in the paper” 
+The formalization of the Helix front-end for VIR, reported on in
+Section 7, is ongoing work, and since the details are outside of the
+scope of this submission, we have chosen not to include it as port of
+the artifact submission. A public link will be made available after
+the end of the anonimization phase, which should should support any
+claim made throughout the paper.
 
+# The Structure of this Repository
 
-# Structure of the repository
+The interesting files are all in the `src/` directory, with the bulk
+of the files that you might want to look at being in `src/coq/`
+specifically.
 
-TODO point out handlers.
-
-/src/coq  - Coq formalization (see Denotation.v and TopLevel.v most notably)
-
-/src/ml   - OCaml glue code for working with ollvm
-
-/src/ml/extracted - OCaml code extracted from the files in /src/coq directory
-
-/src/doc - coqdoq  [not useful yet]
-
-/lib  - for 3rd party libraries [as git submodules]
-
-/tests - various LLVM source code tests
+- `lib/InteractionTrees` contains the version of the ITrees library that we have used in our development (note that this is external to our submission).
+- `src/coq/` contains the bulk of the development in Coq.
+- `src/coq/LLVMAst.v` contains the full VIR AST.
+- `src/coq/DynamicValues.v` contains the code relating to dynamic values and underdefined values discussed in Section 2.2.
+- `src/coq/DynamicTypes.v` provides inductive types for representing LLVM types.
+- `src/coq/InterpreterMCFG.v` provides the layers of interpretation shown in Figure 6.
+- `src/coq/LLVMEvents.v` is the inventory of events seen in Section 4.1.
+- `src/coq/Denotation.v` provides the representation of VIR programs as ITrees from Section 4.2.
+- `src/coq/Handlers` includes the code for all of the handlers described in Section 4.3. They are broken up into files based on the type of event.
+- `src/coq/TopLevel.v` provides the full model / interpreter, the final result of Section 4.4.
+- `src/coq/Refinement.v` defines refinement relations between layers of interpretations.
+- `src/coq/TopLevelRefinements.v` proves the refinement relations between layers of interpretations, including the interpreter soundness proof from Section 5.
+- `src/ml/` contains OCaml glue for the Vir executable.
+- `src/ml/libvir/interpreter.ml` includes the OCaml driver for running the interpreter, the `step` function is what walks over the ITree.
+- `src/ml/libvir/llvm_parser.mly` contains the parser adapter from Vellvm, as discussed in Section 4.5.
+- `tests/` is our directory containing the test suite of LLVM IR programs discussed in Section 4.5
 
 # Installing / Compiling Vir
 
@@ -39,23 +50,19 @@ TODO point out handlers.
     - ext-lib    (installed via, e.g. opam install coq-ext-lib)
     - paco       (installed via, e.g. opam install coq-paco)
     - flocq      (installed via, e.g. opam install coq-flocq, see note below) 
-    - itree      ~~(installed via, e.g. opam install coq-itree)~~
-      - Currently you should actually just use the submodule (lib/InteractionTrees): see the instructions for compilation below.
+    - itree      (provided in lib/InteractionTrees)
     - ceres      (installed via, e.g. opam install coq-ceres)
 - ocamlc : version 4.04    (probably works with 4.03 or later)
   - OPAM packages: dune, menhir, [optional: llvm  (for llvm v. 3.8)]
 
 Compilation:
 
-1. clone the vir git repo with `--recurse-submodule` option (`git clone --recurse-submodules`)
-2. run `make` in the /src directory
+1. run `make` in the /src directory
 
 # Running
 
 Do `src/vir -help` from the command line.
-
 Try `src/vir -interpret tests/ll/factorial.ll`.
-
 
 # Notes
 

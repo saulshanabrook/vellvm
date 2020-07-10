@@ -42,14 +42,14 @@ specifically.
 # Installing / Compiling Vir
 
 ### Assumes: 
-  - coqc   : version 8.9.1 or 8.10.0 (and coqdep, etc.) 
+  - coqc   : version 8.11.2 (and coqdep, etc.)
   - Coq packages: 
     - ext-lib    (installed via, e.g. opam install coq-ext-lib)
     - paco       (installed via, e.g. opam install coq-paco)
     - flocq      (installed via, e.g. opam install coq-flocq, see note below) 
     - itree      (provided in lib/InteractionTrees)
     - ceres      (installed via, e.g. opam install coq-ceres)
-- ocamlc : version 4.04    (probably works with 4.03 or later)
+- ocamlc : version 4.09.1+flambda    (probably works with 4.03 or later)
   - OPAM packages: dune, menhir, [optional: llvm  (for llvm v. 3.8)]
 
 Compilation:

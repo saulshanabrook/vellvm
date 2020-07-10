@@ -1,7 +1,3 @@
-# TODO
-
-- Write a Readme that maps concepts from the paper to definitions from the development
-
 # Vir
 
 This contains the bulk of VIR, anonymized for submission. For the

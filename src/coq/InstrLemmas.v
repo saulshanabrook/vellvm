@@ -269,7 +269,7 @@ Qed.
 (** Lemmas about denote_instr *)
 
 Lemma denote_instr_load :
-  forall (i : raw_id) volatile τ τp ptr align defs g ρ ρ' m a uv,
+  forall (i : raw_id) volatile τ τp ptr align defs g ρ m ρ' a uv,
     interp_cfg_to_L3 defs (translate exp_E_to_instr_E (denote_exp (Some τp) ptr)) g ρ m ≈ Ret (m, (ρ', (g, UVALUE_Addr a))) ->
     read m a τ = inr uv ->
     interp_cfg_to_L3 defs (denote_instr (IId i, INSTR_Load volatile τ (τp, ptr) align)) g ρ m ≈ Ret (m, (Maps.add i uv ρ', (g, tt))).
@@ -370,7 +370,7 @@ Qed.
 
 
 Lemma denote_instr_op :
-  forall (i : raw_id) (op : exp dtyp) defs uv g ρ ρ' m,
+  forall (i : raw_id) (op : exp dtyp) defs g ρ m uv ρ',
     interp_cfg_to_L3 defs (translate exp_E_to_instr_E (denote_exp None op)) g ρ m ≈ Ret (m, (ρ', (g, uv))) ->
     interp_cfg_to_L3 defs (denote_instr (IId i, INSTR_Op op)) g ρ m ≈ Ret (m, (Maps.add i uv ρ', (g, tt))).
 Proof.

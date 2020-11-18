@@ -1,8 +1,8 @@
 Require Import List Equalities Orders RelationClasses Omega.
 Require Import FSets FMaps.
 Import ListNotations.
-Require Import Vir.Util.
-
+From Vir Require Import
+     Utils.Util.
 
 Module Type LATTICE.
   Include EqLe'.

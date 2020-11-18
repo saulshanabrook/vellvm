@@ -1,6 +1,6 @@
-Require Vir.TopLevel.
+Require Vir.Semantics.TopLevel.
 Require Vir.Transformations.Transform.
-Require Vir.ParserHelper.
+Require Vir.Utils.ParserHelper.
 
 Require ExtrOcamlBasic.
 Require ExtrOcamlString.

@@ -13,17 +13,17 @@ From ITree Require Import
      KTreeFacts
      Eq.Eq.
 
-From Vellvm Require Import
-     Util
-     PropT
-     DynamicTypes
-     CFG
-     LLVMAst
-     AstLib
-     LLVMEvents
-     TopLevel
-     Tactics
-     Traversal
+From Vir Require Import
+     Utils.Util
+     Utils.Tactics
+     Utils.PropT
+     Syntax.CFG
+     Syntax.LLVMAst
+     Syntax.AstLib
+     Semantics.TopLevel
+     Syntax.Traversal
+     Semantics.DynamicTypes
+     Semantics.LLVMEvents
      PostConditions.
 
 Remove Hints Eqv.EqvWF_Build : typeclass_instances.
@@ -34,7 +34,6 @@ Set Strict Implicit.
 Import ListNotations.
 Import D.
 Import Eq.
-(* Import CatNotations. *)
 
 Import MonadNotation.
 Open Scope monad_scope.
@@ -50,7 +49,7 @@ These equations are expressed in terms of [eutt eq] over uninterpreted trees.
 They derive from the [itree] combinators used to compute the uninterpreted
 representation VIR's syntax.
 
-In particular, notice that since [interp] is a iterative-monad morphism that respects
+In particular, notice that since [interp] is an iterative-monad morphism that respects
 [eutt eq], these equations get transported at all levels of interpretations.
 
 *)

@@ -12,9 +12,9 @@ From ExtLib Require Import
      Programming.Eqv.
 
 From Vir Require Import
-     Util
-     LLVMAst
-     Error.
+     Utils.Util
+     Utils.Error
+     Syntax.LLVMAst.
 
 Require Import Ceres.Ceres.
 

@@ -1,12 +1,16 @@
 Require Import Equalities.
 From Coq Require Import ZArith List String Omega.
-Require Import Vir.AstLib Vir.LLVMAst.
-Require Import Vir.Util.
+From Vir Require Import
+     Syntax.AstLib
+     Syntax.LLVMAst
+     Utils.Util.
+
 From ExtLib Require Import
      Core.RelDec
      Programming.Eqv
      Structures.Monads
      Data.Monads.OptionMonad.
+
 Require Import Ceres.Ceres.
 Import ListNotations.
 Import EqvNotation.

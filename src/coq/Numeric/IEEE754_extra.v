@@ -1,4 +1,21 @@
+(* *********************************************************************)
+(*                                                                     *)
+(*              The Compcert verified compiler                         *)
+(*                                                                     *)
+(*          Xavier Leroy, INRIA Paris-Rocquencourt                     *)
+(*          Jacques-Henri Jourdan, INRIA Paris-Rocquencourt            *)
+(*                                                                     *)
+(*  Copyright Institut National de Recherche en Informatique et en     *)
+(*  Automatique.  All rights reserved.  This file is distributed       *)
+(*  under the terms of the GNU General Public License as published by  *)
+(*  the Free Software Foundation, either version 2 of the License, or  *)
+(*  (at your option) any later version.  This file is also distributed *)
+(*  under the terms of the INRIA Non-Commercial License Agreement.     *)
+(*                                                                     *)
+(* *********************************************************************)
 
+(** Additional operations and proofs about IEEE-754 binary
+    floating-point numbers, on top of the Flocq library. *)
 
 Require Import Psatz.
 Require Import Bool.
@@ -10,12 +27,18 @@ Local Open Scope Z_scope.
 
 Section Extra_ops.
 
+(** [prec] is the number of bits of the mantissa including the implicit one.
+    [emax] is the exponent of the infinities.
+    Typically p=24 and emax = 128 in single precision. *)
+
 Variable prec emax : Z.
 Context (prec_gt_0_ : Prec_gt_0 prec).
 Let emin := (3 - emax - prec)%Z.
 Let fexp := FLT_exp emin prec.
 Hypothesis Hmax : (prec < emax)%Z.
 Let binary_float := binary_float prec emax.
+
+(** Remarks on [is_finite] *)
 
 Remark is_finite_not_is_nan:
   forall (f: binary_float), is_finite _ _ f = true -> is_nan _ _ f = false.
@@ -28,6 +51,8 @@ Remark is_finite_strict_finite:
 Proof.
   destruct f; reflexivity || discriminate.
 Qed.
+
+(** Digression on FP numbers that cannot be [-0.0]. *)
 
 Definition is_finite_pos0 (f: binary_float) : bool :=
   match f with
@@ -62,6 +87,8 @@ Proof.
   rewrite ! Bsign_pos0 by auto. rewrite H1; auto.
 Qed.
 
+(** ** Decidable equality *)
+
 Definition Beq_dec: forall (f1 f2: binary_float), {f1 = f2} + {f1 <> f2}.
 Proof.
   assert (UIP_bool: forall (b1 b2: bool) (e e': b1 = b2), e = e').
@@ -81,6 +108,10 @@ Proof.
   destruct (Z.eq_dec e1 e2); try solve [right; intro H; inversion H; congruence];
   subst; left; f_equal; apply UIP_bool.
 Defined.
+
+(** ** Conversion from an integer to a FP number *)
+
+(** Integers that can be represented exactly as FP numbers. *)
 
 Definition integer_representable (n: Z): Prop :=
   Z.abs n <= 2^emax - 2^(emax - prec) /\ generic_format radix2 fexp (IZR n).
@@ -185,6 +216,8 @@ Proof.
   apply fexp_correct. auto.
 Qed.
 
+(** Conversion from an integer.  Round to nearest. *)
+
 Definition BofZ (n: Z) : binary_float :=
   binary_normalize prec emax prec_gt_0_ Hmax mode_NE n 0 false.
 
@@ -281,6 +314,8 @@ Lemma BofZ_finite_equal:
 Proof.
   intros. apply B2R_inj_pos0; auto; apply BofZ_finite_pos0; auto.
 Qed.
+
+(** Commutation properties with addition, subtraction, multiplication. *)
 
 Theorem BofZ_plus:
   forall nan p q,
@@ -451,6 +486,8 @@ Proof.
 + intros P U.
   apply B2FF_inj. rewrite P, U. f_equal; auto.
 Qed.
+
+(** Rounding to odd the argument of [BofZ]. *)
 
 Lemma round_odd_flt:
   forall prec' emin' x choice,
@@ -643,6 +680,10 @@ Proof.
   f_equal; lia.
 Qed.
 
+(** ** Conversion from a FP number to an integer *)
+
+(** Always rounds toward zero. *)
+
 Definition ZofB (f: binary_float): option Z :=
   match f with
     | B754_finite _ _ s m (Zpos e) _ => Some (cond_Zopp s (Zpos m) * Z.pow_pos radix2 e)%Z
@@ -672,6 +713,8 @@ Proof.
     apply Rmult_le_pos. apply IZR_le. compute; congruence.
     apply Rlt_le. apply Rinv_0_lt_compat. apply IZR_lt. auto.
 Qed.
+
+(** Interval properties. *)
 
 Remark Ztrunc_range_pos:
   forall x, 0 < Ztrunc x -> (IZR (Ztrunc x) <= x < IZR (Ztrunc x + 1)%Z)%R.
@@ -739,12 +782,16 @@ Proof.
   apply Rle_trans with (IZR n); auto. apply IZR_le; auto.
 Qed.
 
+(** For representable integers, [ZofB] is left inverse of [BofZ]. *)
+
 Theorem ZofBofZ_exact:
   forall n, integer_representable n -> ZofB (BofZ n) = Some n.
 Proof.
   intros. destruct (BofZ_representable n H) as (A & B & C).
   rewrite ZofB_correct. rewrite A, B. f_equal. apply Ztrunc_IZR.
 Qed.
+
+(** Compatibility with subtraction *)
 
 Remark Zfloor_minus:
   forall x n, Zfloor (x - IZR n) = Zfloor x - n.
@@ -784,6 +831,8 @@ Proof.
   rewrite <- IZR_Zpower. apply IZR_le; auto. red in prec_gt_0_; lia.
   apply bpow_lt. auto.
 Qed.
+
+(** A variant of [ZofB] that bounds the range of representable integers. *)
 
 Definition ZofB_range (f: binary_float) (zmin zmax: Z): option Z :=
   match ZofB f with
@@ -828,6 +877,10 @@ Proof.
   { apply ZofB_minus. auto. lia. auto. auto. }
   unfold ZofB_range. rewrite D. rewrite Zle_bool_true by lia. rewrite Zle_bool_true by lia. auto.
 Qed.
+
+(** ** Algebraic identities *)
+
+(** Commutativity of addition and multiplication *)
 
 Theorem Bplus_commut:
   forall plus_nan mode (x y: binary_float),
@@ -898,6 +951,8 @@ Proof.
   + intros A B. apply B2FF_inj. etransitivity. eapply A. rewrite xorb_comm. auto.
 Qed.
 
+(** Multiplication by 2 is diagonal addition. *)
+
 Theorem Bmult2_Bplus:
   forall plus_nan mult_nan mode (f: binary_float),
   (forall (x y: binary_float),
@@ -934,6 +989,8 @@ Proof.
     auto.
   + unfold Bplus, Bmult. rewrite <- NAN by auto. auto.
 Qed.
+
+(** Divisions that can be turned into multiplications by an inverse *)
 
 Definition Bexact_inverse_mantissa := Z.iter (prec - 1) xO xH.
 
@@ -1048,6 +1105,10 @@ Proof.
   + erewrite NAN; eauto.
 Qed.
 
+(** ** Conversion from scientific notation *)
+
+(** Russian peasant exponentiation *)
+
 Fixpoint pos_pow (x y: positive) : positive :=
   match y with
   | xH => x
@@ -1068,6 +1129,12 @@ Proof.
   intros. simpl. rewrite <- Pos2Z.inj_pow_pos. unfold Pos.pow. rewrite REC. rewrite Pos.mul_1_r. auto.
 Qed.
 
+(** Given a base [base], a mantissa [m] and an exponent [e], the following function
+  computes the FP number closest to [m * base ^ e], using round to odd, ties break to even.
+  The algorithm is naive, computing [base ^ |e|] exactly before doing a multiplication or
+  division with [m].  However, we treat specially very large or very small values of [e],
+  when the result is known to be [+infinity] or [0.0] respectively. *)
+
 Definition Bparse (base: positive) (m: positive) (e: Z): binary_float :=
   match e with
   | Z0 =>
@@ -1082,6 +1149,8 @@ Definition Bparse (base: positive) (m: positive) (e: Z): binary_float :=
      else FF2B prec emax _ (proj1 (Bdiv_correct_aux prec emax prec_gt_0_ Hmax mode_NE
                                      false m Z0 false (pos_pow base p) Z0))
   end.
+
+(** Properties of [Z.log2] and [Z.log2_up]. *)
 
 Lemma Zpower_log:
   forall (base: radix) n,
@@ -1119,6 +1188,8 @@ Proof.
   apply bpow_gt_0.
   apply bpow_log_pos. unfold m; lia.
 Qed.
+
+(** Overflow and underflow conditions. *)
 
 Lemma round_integer_overflow:
   forall (base: radix) e m,
@@ -1187,6 +1258,8 @@ Proof.
 + apply bpow_le. lia.
 Qed.
 
+(** Correctness of Bparse *)
+
 Theorem Bparse_correct:
   forall b m e (BASE: 2 <= Zpos b),
   let base := {| radix_val := Zpos b; radix_prop := Zle_imp_le_bool _ _ BASE |} in
@@ -1202,10 +1275,10 @@ Proof.
   assert (A: forall x, @F2R radix2 {| Fnum := x; Fexp := 0 |} = IZR x).
   { intros. unfold F2R, Fnum; simpl. ring. }
   unfold Bparse, r. destruct e as [ | e | e].
-  -
+- (* e = Z0 *)
   change (bpow base 0) with 1%R. rewrite Rmult_1_r.
   exact (BofZ_correct (Z.pos m)).
-  -
+- (* e = Zpos e *)
   destruct (Z.ltb_spec (Z.pos e * Z.log2 (Z.pos b)) emax).
 + (* no overflow *)
   rewrite pos_pow_spec. rewrite <- IZR_Zpower by (zify; lia). rewrite <- mult_IZR.
@@ -1217,7 +1290,7 @@ Proof.
   apply (round_integer_overflow base). zify; lia. auto.
 - (* e = Zneg e *)
   destruct (Z.ltb_spec (Z.neg e * Z.log2 (Z.pos b) + Z.log2_up (Z.pos m)) emin).
-  +
++ (* undeflow *)
   rewrite round_integer_underflow; auto.
   rewrite Rlt_bool_true. auto.
   replace (Rabs 0)%R with 0%R. apply bpow_gt_0. apply (abs_IZR 0).
@@ -1244,6 +1317,8 @@ Proof.
 Qed.
 
 End Extra_ops.
+
+(** ** Conversions between two FP formats *)
 
 Section Conversions.
 
@@ -1291,6 +1366,8 @@ Proof.
     apply Rlt_bool_false. apply Rlt_le. apply Rgt_lt. apply F2R_gt_0. simpl. compute; auto.
 Qed.
 
+(** Converting a finite FP number to higher or equal precision preserves its value. *)
+
 Theorem Bconv_widen_exact:
   (prec2 >= prec1)%Z -> (emax2 >= emax1)%Z ->
   forall conv_nan m f,
@@ -1319,6 +1396,8 @@ Proof.
   rewrite EQ. rewrite Rlt_bool_true by auto. auto.
 Qed.
 
+(** Conversion from integers and change of format *)
+
 Theorem Bconv_BofZ:
   forall conv_nan n,
   integer_representable prec1 emax1 n ->
@@ -1343,6 +1422,8 @@ Proof.
 - unfold F2R; simpl. rewrite Rmult_1_r. auto.
 Qed.
 
+(** Change of format (to higher precision) and conversion to integer. *)
+
 Theorem ZofB_Bconv:
   prec2 >= prec1 -> emax2 >= emax1 ->
   forall conv_nan m f n,
@@ -1365,6 +1446,8 @@ Proof.
   unfold ZofB_range. erewrite ZofB_Bconv by eauto.
   rewrite ! Zle_bool_true by lia. auto.
 Qed.
+
+(** Change of format (to higher precision) and comparison. *)
 
 Theorem Bcompare_Bconv_widen:
   prec2 >= prec1 -> emax2 >= emax1 ->
@@ -1403,6 +1486,9 @@ Hypothesis Hmax1 : (prec1 < emax1)%Z.
 Hypothesis Hmax2 : (prec2 < emax2)%Z.
 Let binary_float1 := binary_float prec1 emax1.
 Let binary_float2 := binary_float prec2 emax2.
+
+(** Converting to a higher precision then down to the original format
+    is the identity. *)
 Theorem Bconv_narrow_widen:
   prec2 >= prec1 -> emax2 >= emax1 ->
   forall narrow_nan widen_nan m f,

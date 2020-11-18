@@ -16,14 +16,14 @@ From ITree Require Import
      Events.Exception.
 
 From Vir Require Import
-     Util
-     Error
-     LLVMAst
-     AstLib
-     CFG
-     DynamicTypes
-     MemoryAddress
-     LLVMEvents
+     Utils.Util
+     Utils.Error
+     Syntax.LLVMAst
+     Syntax.AstLib
+     Syntax.CFG
+     Semantics.DynamicTypes
+     Semantics.MemoryAddress
+     Semantics.LLVMEvents
      Handlers.Intrinsics.
 
 Require Import Ceres.Ceres.

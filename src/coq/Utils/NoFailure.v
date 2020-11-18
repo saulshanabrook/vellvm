@@ -4,7 +4,9 @@ From ITree Require Import
      FailFacts
      Events.Exception.
 
-From Vellvm Require Import PostConditions PropT.
+From Vir Require Import
+     Utils.PostConditions
+     Utils.PropT.
 
 From Paco Require Import paco.
 
@@ -53,7 +55,7 @@ Section No_Failure.
   (* We are often interested in assuming that a computation does not fail.
      This file develop ways to assert and reason about such a fact assuming that
      the tree has been interpreted into the [failT (itree E)] monad.
-     Note: nothing in this file is specific to Vellvm, it should eventually be
+     Note: nothing in this file is specific to Vir, it should eventually be
      moved to the itree library.
    *)
 

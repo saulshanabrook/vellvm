@@ -11,20 +11,20 @@ From ITree Require Import
      Eq.Eq
      TranslateFacts.
 
-From Vellvm Require Import
-     LLVMEvents
-     LLVMAst
-     Util
-     DynamicTypes
-     DynamicValues
+From Vir Require Import
+     Utils.Tactics
+     Utils.Util
+     Syntax.LLVMAst
+     Syntax.AstLib
+     Semantics.LLVMEvents
+     Semantics.DynamicTypes
+     Semantics.DynamicValues
+     Semantics.TypToDtyp
+     Semantics.TopLevel
      Handlers.Handlers
      Refinement
-     TopLevel
-     InterpreterCFG
-     Tactics
-     TypToDtyp
-     AstLib
-     ExpLemmas
+     Theory.InterpreterCFG
+     Theory.ExpLemmas
 .
 
 Import D.
@@ -306,13 +306,11 @@ Proof.
   reflexivity.
 Qed.
 
-(* TODO: something like this exists in tmp_aux_vellvm.v in Helix. Move these. *)
 Lemma exp_E_to_instr_E_subevent : forall {E} {X} `{E -< exp_E} (e : E X),
     exp_E_to_instr_E (subevent X e) = subevent X e.
 Proof.
   reflexivity.
 Qed.
-
 
 Lemma denote_instr_gep_array :
   forall i size τ defs e_ix ix ptr a val g ρ m,
@@ -630,65 +628,3 @@ Proof.
   reflexivity.
 Qed.
 
-
-(* Lemma wah : *)
-(*   forall m ptr τ val, *)
-(*     read m ptr τ = inr val -> *)
-(*     dtyp_fits m ptr τ. *)
-(* Proof. *)
-(*   intros m [ptr_blk ptr_idx] τ val READ. *)
-(*   unfold read in READ; cbn in READ. *)
-(*   destruct (get_logical_block m ptr_blk) eqn:GETBLOCK; inversion READ. *)
-(*   destruct l. *)
-
-(*   unfold dtyp_fits. *)
-(*   exists size. exists bytes. exists concrete_id. *)
-(*   cbn. *)
-(*   split; auto. *)
-
-(*   unfold get_logical_block in GETBLOCK. *)
-(*   unfold get_logical_block_mem in GETBLOCK. *)
-
-(*   destruct m. destruct m. cbn in *. *)
-
-(*   unfold read_in_mem_block in READ. *)
-(* Qed. *)
-
-(*
-
-interp_cfg_to_L3_intrinsic:
-  forall (defs : Intrinsics.intrinsic_definitions) (m : memory_stack) (τ : dtyp)
-    (g : global_env) (l : local_env) (fn : String.string) (args : list dvalue)
-    (df : Intrinsics.semantic_function) (res : dvalue),
-  assoc Strings.String.string_dec fn (defs_assoc defs) = Some df ->
-  df args = inr res ->
-  Monad.eqm (interp_cfg_to_L3 defs (trigger (Intrinsic τ fn args)) g l m) (ret (m, (l, (g, res))))
-
-*)
-
-(* Lemma denote_instr_call : *)
-(*   forall defs i τf f args uf uvs g ρ ρ' m t, *)
-(*     map_monad (fun '(t, op) => translate exp_E_to_instr_E (denote_exp (Some t) op)) args ≈ Ret uvs -> *)
-(*     interp_cfg_to_L3 defs (translate exp_E_to_instr_E (denote_exp None f)) g ρ m ≈ Ret (m, (ρ', (g, uf))) -> *)
-(*     intrinsic_exp f = None -> *)
-(*     interp_cfg_to_L3 defs (denote_instr (IId i, INSTR_Call (τf, f) args)) g ρ m ≈ t. (* interp_cfg_to_L3 defs (ITree.bind (trigger (LLVMEvents.Call τf uf uvs)) (fun x => trigger (LocalWrite i x)) g ρ' m). *) *)
-(* Proof. *)
-(*   intros defs i τf f args uf uvs g ρ ρ' m t MAP FEXP INT. *)
-(*   cbn. *)
-(*   rewrite MAP. rewrite bind_ret_l. *)
-(*   rewrite INT. rewrite bind_bind. *)
-
-(*   rewrite interp_cfg_to_L3_bind. *)
-(*   rewrite FEXP. rewrite bind_ret_l. *)
-
-(*   rewrite interp_cfg_to_L3_bind. *)
-(*   rewrite interp_cfg_to_L3_LW. *)
-(*   rewrite <- bind_trigger. *)
-
-(*   interp_cfg_to_L3 defs *)
-(*     (ITree.bind (trigger (LLVMEvents.Call τf uf uvs)) *)
-(*        (fun returned_value : uvalue => trigger (LocalWrite i returned_value))) g ρ' m ≈ t *)
-
-(*   rewrite bind_trigger *)
-
-(* Qed. *)

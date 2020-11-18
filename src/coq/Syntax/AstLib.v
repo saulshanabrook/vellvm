@@ -1,7 +1,11 @@
 From Coq Require Import
      ZArith.ZArith List
      String Omega.
-Require Import Vir.LLVMAst Vir.Util.
+
+From Vir Require Import
+     Syntax.LLVMAst
+     Utils.Util.
+
 Require Import Equalities OrderedType OrderedTypeEx Compare_dec.
 Require Import ExtLib.Core.RelDec ExtLib.Data.Z.
 Require Import ExtLib.Programming.Eqv.

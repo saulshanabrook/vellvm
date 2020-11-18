@@ -15,12 +15,12 @@ From ExtLib Require Import
      Data.List.
 
 From Vir Require Import
-     LLVMAst
-     AstLib
-     MemoryAddress
-     Error
-     DynamicTypes
-     Util.
+     Utils.Error
+     Utils.Util
+     Syntax.LLVMAst
+     Syntax.AstLib
+     Semantics.DynamicTypes
+     Semantics.MemoryAddress.
 
 Require Import Integers Floats.
 
@@ -151,7 +151,7 @@ Qed.
 Definition ll_float  := Floats.float32.
 Definition ll_double := Floats.float.
 
-Module DVALUE(A:Vir.MemoryAddress.ADDRESS).
+Module DVALUE(A:Vir.Semantics.MemoryAddress.ADDRESS).
 
   (* The set of dynamic values manipulated by an LLVM program. *)
   Unset Elimination Schemes.

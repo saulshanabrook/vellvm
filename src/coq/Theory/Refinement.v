@@ -5,12 +5,11 @@ From ITree Require Import
      Eq.Eq.
 
 From Vir Require Import
-     Util
-     UndefinedBehaviour
-     DynamicValues
-     MemoryAddress
-     LLVMEvents
-     LLVMAst
+     Utils.Util
+     Syntax.LLVMAst
+     Semantics.DynamicValues
+     Semantics.MemoryAddress
+     Semantics.LLVMEvents
      Handlers.Handlers.
 
 From ExtLib Require Import

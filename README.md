@@ -109,14 +109,13 @@ University of Pennsylvania as part of the DeepSpec project.
 # Installing / Compiling Vellvm
 
 ### Assumes: 
-  - coqc   : version 8.11.2 (and coqdep, etc.)
-  - Coq packages: 
+  - coqc   : version 8.12 (and coqdep, etc.)
+  - External dependencies: 
     - ext-lib    (installed via, e.g. opam install coq-ext-lib)
     - paco       (installed via, e.g. opam install coq-paco)
     - flocq      (installed via, e.g. opam install coq-flocq, see note below) 
-    - itree      (provided in lib/InteractionTrees)
     - ceres      (installed via, e.g. opam install coq-ceres)
-- ocamlc : version 4.09.1+flambda    (probably works with 4.03 or later)
+    - ocamlc : version 4.09.1+flambda    (probably works with 4.03 or later)
   - OPAM packages: dune, menhir, [optional: llvm  (for llvm v. 3.8)]
 
 Compilation:
@@ -127,14 +126,4 @@ Compilation:
 
 Do `src/vir -help` from the command line.
 Try `src/vir -interpret tests/ll/factorial.ll`.
-
-# Notes
-
-### coq-flocq
-
-On some OSX configurations the opam installation for coq-flocq fails with a
-permissions error `# Failed to create server: Operation not permitted` caused by
-opam's sandboxing scripts.  The solution is to temporarily disable opam's
-sandboxing by editing ~/.opam/config to remove the lines having to do with
-`wrap-*-commands:`.
 

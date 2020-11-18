@@ -371,4 +371,4 @@ Definition model_to_L5_cfg (prog: cfg dtyp) :=
 
 Definition refine_cfg_ret: relation (PropT L5 (memory_stack * (local_env * (global_env * uvalue)))) :=
   fun ts ts' => forall t, ts t -> exists t', ts' t' /\ eutt  (TT × (TT × (TT × refine_uvalue))) t t'.
->>>>>> master
+

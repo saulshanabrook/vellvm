@@ -32,16 +32,16 @@ Module BoundedSet(Import S:FSetInterface.WS) <: LATTICE.
 
   Definition eq (t1 t2: t) : Prop :=
     match t1, t2 with
-      | Some s1, Some s2 => s1 [=] s2
-      | None, None => True
-      | _, _ => False
+    | Some s1, Some s2 => s1 [=] s2
+    | None, None => True
+    | _, _ => False
     end.
 
   Definition le (t1 t2: t) : Prop :=
     match t1, t2 with
-      | Some s1, Some s2 => s2 [<=] s1
-      | None, Some _ | None, None => True
-      | Some _, None => False
+    | Some s1, Some s2 => s2 [<=] s1
+    | None, Some _ | None, None => True
+    | Some _, None => False
     end.
 
   Include EqLeNotation.
@@ -74,17 +74,17 @@ Module BoundedSet(Import S:FSetInterface.WS) <: LATTICE.
 
     destruct x, x0; simpl; 
       intros H; repeat red in H; simpl in H; 
-      intuition.
+        intuition.
     repeat red in H1. repeat red in H0.
     red; intuition.
   Qed.
 
   Definition eq_dec : forall x y, {x == y} + {x ~= y}.
     refine (fun t1 t2 => match t1, t2 with
-                           | Some s1, Some s2 => _
-                           | None, None => left _
-                           | _, _ => right _
-                         end); auto using S.eq_dec.
+                      | Some s1, Some s2 => _
+                      | None, None => left _
+                      | _, _ => right _
+                      end); auto using S.eq_dec.
   Defined.
 
   Definition bot : t := None.
@@ -103,9 +103,9 @@ Module BoundedSet(Import S:FSetInterface.WS) <: LATTICE.
 
   Definition join (t1 t2: t) : t :=
     match t1, t2 with
-      | Some s1, Some s2 => Some (S.inter s1 s2) 
-      | None, Some s | Some s, None => Some s
-      | None, None => None
+    | Some s1, Some s2 => Some (S.inter s1 s2) 
+    | None, Some s | Some s, None => Some s
+    | None, None => None
     end.
 
   Lemma le_join_l : forall x y, x <= join x y.
@@ -122,17 +122,17 @@ Module BoundedSet(Import S:FSetInterface.WS) <: LATTICE.
 
   Definition union (t1 t2: t) : t :=
     match t1, t2 with
-      | Some s1, Some s2 => Some (S.union s1 s2) 
-      | None, Some s | Some s, None => None
-      | None, None => None
+    | Some s1, Some s2 => Some (S.union s1 s2) 
+    | None, Some s | Some s, None => None
+    | None, None => None
     end.
-    
+  
   Definition singleton (e:S.elt) : t := Some (S.singleton e).
 
   Definition In (e:S.elt) (t:t) : Prop :=
     match t with
-      | Some s => S.In e s
-      | None => True
+    | Some s => S.In e s
+    | None => True
     end.
 
 End BoundedSet.
@@ -185,7 +185,7 @@ Module Spec (Import G:GRAPH).
     intros g v1 v2 p H.
     destruct H; left; reflexivity.
   Qed.
-    
+  
   Lemma acyclic_path_exists: forall (g:G.t) (v1 v2 v3 : V) p,
       Path g v1 v2 p -> In v3 p -> exists q, Path g v1 v3 (v3::q) /\ ~ In v3 q.
   Proof.
@@ -200,14 +200,14 @@ Module Spec (Import G:GRAPH).
       * destruct (in_dec eq_dec_V u vs).
       + apply IHHp in i. exact i.
       + exists vs. split. eapply path_cons; eauto. auto.
-      * apply IHHp in H1. exact H1.
+        * apply IHHp in H1. exact H1.
   Qed.            
 
   Lemma path_splits: forall (g:G.t) (v1 v2 v3 : V) p,
       Path g v1 v2 p -> In v3 p ->
       exists p1, exists p2, Path g v1 v3 (v3::p1)
-                  /\ Path g v3 v2 (v2::p2)
-                  /\ p = (v2::p2 ++ p1).
+                            /\ Path g v3 v2 (v2::p2)
+                            /\ p = (v2::p2 ++ p1).
   Proof.
     intros g v1 v2 v3 p Hp Hin.
     generalize dependent v3.
@@ -264,7 +264,7 @@ Module Spec (Import G:GRAPH).
       apply in_or_app. left. eapply start_in_path. apply HQ2.
     - subst. simpl. right. apply in_or_app. right. exact H.
   Qed.
-    
+  
   Lemma IDom_unique : forall (g:G.t) (v1 v2 v : V),
       reachable g v1 ->
       IDom g v1 v -> IDom g v2 v -> v1 = v2.
@@ -277,9 +277,9 @@ Module Spec (Import G:GRAPH).
     eapply Dom_antisymmetric; eauto.
   Qed.
   
-    
+  
   Lemma dom_step : forall g v1 v2,
-    mem g v2 -> edge g v1 v2 -> forall v', SDom g v' v2 -> Dom g v' v1.
+      mem g v2 -> edge g v1 v2 -> forall v', SDom g v' v2 -> Dom g v' v1.
   Proof.
     unfold SDom, Dom. intros g v1 v2 Hmem Hsucc v' [Hneq Hdom] p Hp.
     cut (In v' (v2::p)). inversion 1; subst; intuition. 
@@ -298,17 +298,17 @@ Module Type Algdom (Import G:GRAPH).
   Parameter calc_sdom : G.t -> option (V -> L.t).
 
   Axiom entry_sound : forall g sdom,
-    calc_sdom g = Some sdom ->
-    sdom (entry g) == L.top.
+      calc_sdom g = Some sdom ->
+      sdom (entry g) == L.top.
 
   Axiom successors_sound : forall g sdom n1 n2,
-    calc_sdom g = Some sdom ->
-    mem g n1 -> mem g n2 -> edge g n1 n2 -> 
-    L.union (L.singleton n1) (sdom n1) <= sdom n2.
+      calc_sdom g = Some sdom ->
+      mem g n1 -> mem g n2 -> edge g n1 n2 -> 
+      L.union (L.singleton n1) (sdom n1) <= sdom n2.
 
   Axiom complete : forall g sdom n1 n2,
-    calc_sdom g = Some sdom ->
-    SDom g n1 n2 -> L.In n1 (sdom n2).
+      calc_sdom g = Some sdom ->
+      SDom g n1 n2 -> L.In n1 (sdom n2).
 
 End Algdom.
 
@@ -316,15 +316,15 @@ Module AlgdomProperties (Import G:GRAPH) (Import A : Algdom G).
   Module Import GS := Spec G.
 
   Lemma sound : forall g sdom n1 n2,
-    calc_sdom g = Some sdom ->              
-    L.In n1 (sdom n2) -> Dom g n1 n2.
+      calc_sdom g = Some sdom ->              
+      L.In n1 (sdom n2) -> Dom g n1 n2.
   Proof.
     red; intros. remember (entry g). induction H1. subst.
     pose proof entry_sound g sdom H. 
 
     destruct (sdom (entry g)); try contradiction; simpl in *.
-      exfalso. rewrite H2 in H0. eapply L.SFacts.empty_iff. eauto.
-      
+    exfalso. rewrite H2 in H0. eapply L.SFacts.empty_iff. eauto.
+    
     right. destruct (E.eq_dec v2 n1). subst. inversion H1; intuition.
     apply IHPath; auto.
 

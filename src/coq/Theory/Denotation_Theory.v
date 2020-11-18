@@ -22,7 +22,7 @@ From Vir Require Import
      Syntax.AstLib
      Semantics.TopLevel
      Syntax.Traversal
-     Semantics.DynamicTypes
+     Syntax.DynamicTypes
      Semantics.LLVMEvents
      PostConditions.
 

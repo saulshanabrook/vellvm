@@ -16,7 +16,7 @@ From Vir Require Import
      Syntax.AstLib
      Syntax.CFG
      Syntax.Traversal
-     Semantics.DynamicTypes.
+     Syntax.DynamicTypes.
 
 Require Import Coqlib.
 

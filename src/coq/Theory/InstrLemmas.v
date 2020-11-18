@@ -16,8 +16,8 @@ From Vir Require Import
      Utils.Util
      Syntax.LLVMAst
      Syntax.AstLib
+     Syntax.DynamicTypes
      Semantics.LLVMEvents
-     Semantics.DynamicTypes
      Semantics.DynamicValues
      Semantics.TypToDtyp
      Semantics.TopLevel

@@ -22,7 +22,7 @@ From Vir Require Import
      Syntax.AstLib
      Semantics.TypToDtyp
      Semantics.LLVMEvents
-     Semantics.DynamicTypes
+     Syntax.DynamicTypes
      Semantics.DynamicValues
      Semantics.TopLevel
      Handlers.Handlers

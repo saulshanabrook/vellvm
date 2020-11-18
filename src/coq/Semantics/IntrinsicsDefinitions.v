@@ -7,10 +7,10 @@ From ExtLib Require Import
      Data.String.
 
 From Vir Require Import
-     LLVMEvents
-     LLVMAst
-     Error
-     Coqlib
+     Utils.Error
+     Syntax.LLVMAst
+     Semantics.LLVMEvents
+     Numeric.Coqlib
      Numeric.Integers
      Numeric.Floats.
 

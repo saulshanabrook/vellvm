@@ -19,7 +19,7 @@ From Vir Require Import
      Utils.Util
      Syntax.LLVMAst
      Syntax.AstLib
-     Semantics.DynamicTypes
+     Syntax.DynamicTypes
      Semantics.MemoryAddress.
 
 Require Import Integers Floats.

@@ -1,5 +1,7 @@
 Require Import Ascii Strings.String.
-Require Import Vir.LLVMAst.
+From Vir Require Import
+     Syntax.LLVMAst.
+
 Open Scope string_scope.
 
 

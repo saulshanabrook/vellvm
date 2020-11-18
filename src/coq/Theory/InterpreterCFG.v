@@ -13,7 +13,7 @@ From ITree Require Import
 From Vir Require Import
      Utils.Util
      Semantics.LLVMEvents
-     Semantics.DynamicTypes
+     Syntax.DynamicTypes
      Semantics.DynamicValues
      Handlers.Handlers
      Refinement.

@@ -326,6 +326,7 @@ Proof.
   unfold handler_correct. intros. reflexivity.
   assumption. reflexivity.
 Qed.
+
 Theorem interpreter_sound: forall p, model p (interpreter p).
 Proof.
   intros p.

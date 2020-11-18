@@ -7,11 +7,11 @@ From ExtLib Require Import
      Data.String.
 
 From Vir Require Import
-     Util
-     LLVMAst
-     LLVMEvents
-     Error
-     IntrinsicsDefinitions.
+     Utils.Util
+     Utils.Error
+     Syntax.LLVMAst
+     Semantics.LLVMEvents
+     Semantics.IntrinsicsDefinitions.
 
 From ITree Require Import
      ITree

@@ -10,8 +10,8 @@ From ITree Require Import
 From Vir Require Import
      Utils.Tactics
      Utils.Util
+     Syntax.DynamicTypes
      Semantics.LLVMEvents
-     Semantics.DynamicTypes
      Handlers.Handlers.
 
 Section InterpreterMCFG.

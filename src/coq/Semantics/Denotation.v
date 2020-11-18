@@ -21,7 +21,7 @@ From Vir Require Import
      Syntax.LLVMAst
      Syntax.AstLib
      Syntax.CFG
-     Semantics.DynamicTypes
+     Syntax.DynamicTypes
      Semantics.MemoryAddress
      Semantics.LLVMEvents
      Handlers.Intrinsics.

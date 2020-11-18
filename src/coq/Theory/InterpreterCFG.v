@@ -177,7 +177,7 @@ Section InterpreterCFG.
 
   Lemma interp_cfg_to_L3_GR : forall defs id g l m v,
       Maps.lookup id g = Some v ->
-      interp_cfg_to_L3 defs (trigger (GlobalRead id)) g l m ≈ ret (m,(l,(g,v))).
+      interp_cfg_to_L3 defs (trigger (GlobalRead id)) g l m ≈ Ret (m,(l,(g,v))).
   Proof.
     intros * LU.
     unfold interp_cfg_to_L3.
@@ -192,7 +192,7 @@ Section InterpreterCFG.
 
   Lemma interp_cfg_to_L3_LR : forall defs id g l m v,
       Maps.lookup id l = Some v ->
-      interp_cfg_to_L3 defs (trigger (LocalRead id)) g l m ≈ ret (m,(l,(g,v))).
+      interp_cfg_to_L3 defs (trigger (LocalRead id)) g l m ≈ Ret (m,(l,(g,v))).
   Proof.
     intros * LU.
     unfold interp_cfg_to_L3.
@@ -208,7 +208,7 @@ Section InterpreterCFG.
   Qed.
 
   Lemma interp_cfg_to_L3_LW : forall defs id g l m v,
-      interp_cfg_to_L3 defs (trigger (LocalWrite id v)) g l m ≈ ret (m,(Maps.add id v l, (g,tt))).
+      interp_cfg_to_L3 defs (trigger (LocalWrite id v)) g l m ≈ Ret (m,(Maps.add id v l, (g,tt))).
   Proof.
     intros.
     unfold interp_cfg_to_L3.
@@ -221,7 +221,7 @@ Section InterpreterCFG.
   Qed.
 
   Lemma interp_cfg_to_L3_GW : forall defs id g l m v,
-      interp_cfg_to_L3 defs (trigger (GlobalWrite id v)) g l m ≈ ret (m,(l,(Maps.add id v g,tt))).
+      interp_cfg_to_L3 defs (trigger (GlobalWrite id v)) g l m ≈ Ret (m,(l,(Maps.add id v g,tt))).
   Proof.
     intros.
     unfold interp_cfg_to_L3.
@@ -252,13 +252,35 @@ Section InterpreterCFG.
     reflexivity.
   Qed.
 
+  Lemma interp_cfg_to_L3_store :
+    forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr) g l defs,
+      write m a val = inr m' ->
+      interp_cfg_to_L3 defs (trigger (Store (DVALUE_Addr a) val)) g l m ≈ Ret (m',(l,(g,tt))).
+  Proof.
+    intros m m' t val a g l defs WRITE.
+    unfold interp_cfg_to_L3.
+    rewrite interp_intrinsics_trigger.
+    cbn.
+    unfold Intrinsics.F_trigger.
+    rewrite interp_global_trigger.
+    rewrite subevent_subevent.
+    cbn.
+    rewrite interp_local_bind, interp_local_trigger.
+    cbn; rewrite bind_bind.
+    rewrite interp_memory_bind, subevent_subevent.
+    rewrite interp_memory_store; eauto.
+    cbn.
+    rewrite 2 bind_ret_l, interp_local_ret, interp_memory_ret.
+    reflexivity.
+  Qed.
+
   Arguments allocate : simpl never.
   Lemma interp_cfg_to_L3_alloca :
     forall (defs : intrinsic_definitions) (m : memory_stack) (t : dtyp) (g : global_env) l,
       non_void t ->
       exists m' a',
         allocate m t = inr (m', a') /\
-        interp_cfg_to_L3 defs (trigger (Alloca t)) g l m ≈ ret (m', (l, (g, DVALUE_Addr a'))).
+        interp_cfg_to_L3 defs (trigger (Alloca t)) g l m ≈ Ret (m', (l, (g, DVALUE_Addr a'))).
   Proof.
     intros * NV.
     unfold interp_cfg_to_L3.
@@ -288,9 +310,9 @@ Section InterpreterCFG.
 
   Lemma interp_cfg_to_L3_intrinsic :
     forall (defs : intrinsic_definitions) (m : memory_stack) (τ : dtyp) (g : global_env) l fn args df res,
-      assoc Strings.String.string_dec fn (defs_assoc defs) = Some df ->
+      assoc fn (defs_assoc defs) = Some df ->
       df args = inr res ->
-      interp_cfg_to_L3 defs (trigger (Intrinsic τ fn args)) g l m ≈ ret (m, (l, (g, res))).
+      interp_cfg_to_L3 defs (trigger (Intrinsic τ fn args)) g l m ≈ Ret (m, (l, (g, res))).
   Proof.
     intros defs m τ g l fn args df res LUP RES.
     unfold interp_cfg_to_L3.
@@ -304,6 +326,78 @@ Section InterpreterCFG.
     rewrite interp_memory_ret.
 
     reflexivity.
+  Qed.
+
+  Lemma interp_cfg_to_L3_GEP_array' : forall defs t a size g l m val i,
+      get_array_cell m a i t = inr val ->
+      exists ptr,
+        interp_cfg_to_L3 defs (trigger (GEP
+                                  (DTYPE_Array size t)
+                                  (DVALUE_Addr a)
+                                  [DVALUE_I64 (Integers.Int64.repr 0); DVALUE_I64 (Integers.Int64.repr (Z.of_nat i))])) g l m
+                      ≈ Ret (m, (l, (g, DVALUE_Addr ptr))) /\
+        handle_gep_addr (DTYPE_Array size t) a [DVALUE_I64 (repr 0); DVALUE_I64 (repr (Z.of_nat i))] = inr ptr /\
+        read m ptr t = inr val.
+  Proof.
+    intros defs t a size g l m val i GET.
+    epose proof @interp_memory_GEP_array' _ (PickE +' UBE +' DebugE +' FailureE) _ _ _ t _ size _ _ _ GET as [ptr [INTERP READ]].
+    exists ptr.
+    split; auto.
+
+    unfold interp_cfg_to_L3.
+    rewrite interp_intrinsics_trigger; cbn.
+    unfold Intrinsics.F_trigger.
+    rewrite subevent_subevent.
+    rewrite interp_global_trigger; cbn.
+    rewrite subevent_subevent.
+    rewrite interp_local_bind, interp_local_trigger.
+    cbn.
+    rewrite subevent_subevent.
+    repeat rewrite interp_memory_bind.
+    rewrite INTERP.
+    rewrite bind_bind.
+    rewrite bind_ret_l.
+    rewrite interp_memory_ret.
+    rewrite bind_ret_l.
+    rewrite interp_local_ret.
+    rewrite interp_memory_ret.
+    reflexivity.
+  Qed.
+
+  Lemma interp_cfg_to_L3_GEP_array_no_read : forall defs t a size g l m i,
+      dtyp_fits m a (DTYPE_Array size t) ->
+      exists ptr,
+        interp_cfg_to_L3 defs (trigger (GEP
+                                  (DTYPE_Array size t)
+                                  (DVALUE_Addr a)
+                                  [DVALUE_I64 (Integers.Int64.repr 0); DVALUE_I64 (Integers.Int64.repr (Z.of_nat i))])) g l m
+                      ≈ Ret (m, (l, (g, DVALUE_Addr ptr))) /\
+        handle_gep_addr (DTYPE_Array size t) a [DVALUE_I64 (repr 0); DVALUE_I64 (repr (Z.of_nat i))] = inr ptr.
+  Proof.
+    intros defs t a size g l m i FITS.
+    epose proof @interp_memory_GEP_array_no_read _ (PickE +' UBE +' DebugE +' FailureE) _ _ _ t _ size _ _ FITS as [ptr [INTERP GEP]].
+    exists ptr.
+    split; auto.
+
+    unfold interp_cfg_to_L3.
+    rewrite interp_intrinsics_trigger; cbn.
+    unfold Intrinsics.F_trigger.
+    rewrite subevent_subevent.
+    rewrite interp_global_trigger; cbn.
+    rewrite subevent_subevent.
+    rewrite interp_local_bind, interp_local_trigger.
+    cbn.
+    rewrite subevent_subevent.
+    repeat rewrite interp_memory_bind.
+    rewrite INTERP.
+    rewrite bind_bind.
+    rewrite bind_ret_l.
+    rewrite interp_memory_ret.
+    rewrite bind_ret_l.
+    rewrite interp_local_ret.
+    rewrite interp_memory_ret.
+    reflexivity.
+    auto.
   Qed.
 
   Lemma interp_cfg_to_L3_GEP_array : forall defs t a size g l m val i,

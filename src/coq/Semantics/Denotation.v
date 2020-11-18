@@ -264,21 +264,8 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
     | ID_Global x => dv <- trigger (GlobalRead x);; ret (dvalue_to_uvalue dv)
     | ID_Local x  => trigger (LocalRead x)
     end.
-  Definition iop_is_div (iop : ibinop) : bool :=
-    match iop with
-    | UDiv _ => true
-    | SDiv _ => true
-    | URem   => true
-    | SRem   => true
-    | _      => false
-    end.
 
-  Definition fop_is_div (fop : fbinop) : bool :=
-    match fop with
-    | FDiv => true
-    | FRem => true
-    | _    => false
-    end.
+  (* Predicate testing whether a [dvalue] is equal to zero at its type *)
   Definition dvalue_is_zero (dv : dvalue) : Prop :=
     match dv with
     | DVALUE_I1 x     => x = zero
@@ -559,6 +546,8 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | (_, INSTR_LandingPad) => raise "Unsupported itree instruction"
         | (_, _) => raise "ID / Instr mismatch void/non-void"
         end.
+
+      (* Denotation of terminators: may return either an new label to jump to, or a [uvalue] as result of the current function call *)
       Definition denote_terminator (t: terminator dtyp): itree exp_E (block_id + uvalue) :=
         match t with
 
@@ -588,47 +577,68 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | TERM_Resume _
         | TERM_Invoke _ _ _ _ => raise "Unsupport itree terminator"
         end.
+
+      (* Denotation of straight-line code *)
       Definition denote_code (c: code dtyp): itree instr_E unit :=
         map_monad_ denote_instr c.
-      Definition denote_block (b: block dtyp) : itree instr_E (block_id + uvalue) :=
-        denote_code (blk_code b);;
-        translate exp_E_to_instr_E (denote_terminator (snd (blk_term b))).
-      Definition denote_phi (bid : block_id) (id_p : local_id * phi dtyp) : itree exp_E (local_id * uvalue) :=
+
+      (* Denotation of a single phi instruction. Takes as argument the label from which we have previously jumped.  *)
+      Definition denote_phi (bid_from : block_id) (id_p : local_id * phi dtyp) : itree exp_E (local_id * uvalue) :=
         let '(id, Phi dt args) := id_p in
-        match assoc RawIDOrd.eq_dec bid args with
+        match assoc bid_from args with
         | Some op =>
           uv <- denote_exp (Some dt) op ;;
           ret (id,uv)
-        | None => raise ("jump: phi node doesn't include block " ++ to_string bid)
+        | None => raise ("jump: phi node doesn't include block " ++ to_string bid_from)
         end.
-      
-      Definition denote_bks (bks: list (block dtyp)): block_id -> itree instr_E (block_id + uvalue) :=
-        iter (C := ktree _) (bif := sum) 
-             (fun (bid_src : block_id) =>
+
+      (* Denotation of the phi nodes of a block.
+         Since llvm allows for phi nodes to affect arbitrary expressions, they _have_ to be processed in parallel.
+         We therefore first compute all the values, then perform all the writes
+       *)
+      Definition denote_phis (bid_from: block_id) (phis: list (local_id * phi dtyp)): itree instr_E unit :=
+        dvs <- Util.map_monad
+                (fun x => translate exp_E_to_instr_E (denote_phi bid_from x))
+                phis;;
+        Util.map_monad (fun '(id,dv) => trigger (LocalWrite id dv)) dvs;;
+        ret tt.
+
+      (* Denotation of the entire block, simply sequencing the denotations of its three components *)
+      Definition denote_block (b: block dtyp) (bid_from : block_id) : itree instr_E (block_id + uvalue) :=
+        denote_phis bid_from (blk_phis b);;
+        denote_code (blk_code b);;
+        translate exp_E_to_instr_E (denote_terminator (snd (blk_term b))).
+
+      (* Denotation of an open cfg.
+         The [iter] combinator ties the recursive knot created by the jumps between the blocks.
+         Since we are here denoting a _potentially open_ cfg, we don't necessarily return a [uvalue],
+         we may also return an updated pair of labels (src,tgt) toward which the computation is meant
+         to continue, but that are not part of the open cfg considered.
+       *)
+      Definition denote_bks (bks: list (block dtyp))
+        : (block_id * block_id) -> itree instr_E ((block_id * block_id) + uvalue) :=
+        iter (C := ktree _) (bif := sum)
+             (fun '((bid_from,bid_src) : block_id * block_id) => 
                 match find_block DynamicTypes.dtyp bks bid_src with
-                | None => ret (inr (inl bid_src))
+                | None => ret (inr (inl (bid_from,bid_src)))
                 | Some block_src =>
-                  bd <- denote_block block_src;;
+                  bd <- denote_block block_src bid_from;;
                   match bd with
                   | inr dv => ret (inr (inr dv))
-                  | inl bid_target =>
-                    match find_block DynamicTypes.dtyp bks bid_target with
-                    | None => ret (inr (inl bid_target))
-                    | Some block_target =>
-                      dvs <- Util.map_monad
-                              (fun x => translate exp_E_to_instr_E (denote_phi bid_src x))
-                              (blk_phis block_target) ;;
-                      Util.map_monad (fun '(id,dv) => trigger (LocalWrite id dv)) dvs;;
-                      ret (inl bid_target)
-                    end
+                  | inl bid_target => ret (inl (bid_src,bid_target))
                   end
                 end).
+
+      (* Denotation of a closed cfg.
+         We simply denote it as an open cfg, but fail if we do not get as a result a [uvalue].
+       *)
       Definition denote_cfg (f: cfg dtyp) : itree instr_E uvalue :=
-        r <- denote_bks (blks _ f) (init _ f) ;;
+        r <- denote_bks (blks _ f) (init _ f,init _ f) ;;
         match r with
         | inl bid => raise ("Can't find block in denote_cfg " ++ to_string bid)
         | inr uv  => ret uv
         end.
+
       Fixpoint combine_lists_err {A B:Type} (l1:list A) (l2:list B) : err (list (A * B)) :=
         match l1, l2 with
         | [], [] => ret []
@@ -638,6 +648,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | _, _ =>
           ret []
         end.
+
       Definition function_denotation : Type :=
         list uvalue -> itree L0' uvalue.
 
@@ -650,7 +661,23 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
           trigger StackPop ;;
           trigger MemPop ;;
           ret rv.
-      Definition lookup_defn {B} := (@assoc _ B (@dvalue_eq_dec)).
+
+      (* We now turn to the second knot to be tied: a top-level itree program is a set
+         of mutually recursively defined functions, i.e. [cfg]s. We hence need to
+         resolve this mutually recursive definition by interpreting away the call events.
+         As mentionned above, calls are not tail recursive: we need a more general fixpoint
+         operator than [loop], which [mrec] provides.
+       *)
+      (* A slight complication comes from the fact that not all call events will be interpreted
+         away as such. Some of them correspond to external calls -- or to intrinsics -- that will
+         be kept uninterpreted for now.
+         Since the type of [mrec] forces us to get rid of the [CallE] family of events that we
+         interpret, we therefore cast external calls into an isomorphic family of events
+         that live in the "right" injection of the [_CFG_INTERNAL] effect
+       *)
+
+      Definition lookup_defn {B} := @assoc dvalue B _.
+
       Definition denote_mcfg
                  (fundefs:list (dvalue * function_denotation)) (dt : dtyp)
                  (f_value : uvalue) (args : list uvalue) : itree L0 uvalue :=

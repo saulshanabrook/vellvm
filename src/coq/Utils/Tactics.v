@@ -99,3 +99,33 @@ Ltac inv_sum :=
   | h: inr _ = inl _ |-  _ => inv h
   end.
 
+Ltac break_sum :=
+  match goal with
+  | v: _ + _ |- _ => destruct v
+  end.
+
+From ITree Require Import
+     ITree
+     Eq.Eq.
+
+Ltac bind_ret_r1 :=
+  match goal with
+    |- eutt _ ?t ?s => let x := fresh in
+                     remember s as x;
+                     rewrite <- (bind_ret_r t); subst x
+  end.
+
+Ltac bind_ret_r2 :=
+  match goal with
+    |- eutt _ ?t ?s => let x := fresh in
+                     remember t as x;
+                     rewrite <- (bind_ret_r s); subst x
+  end.
+
+Ltac forward H :=
+  let H' := fresh in
+  match type of H with
+  | ?P -> _ => assert P as H'; [| specialize (H H'); clear H']
+  end.
+
+

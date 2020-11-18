@@ -1,7 +1,8 @@
 From Coq Require Import
      ZArith
      String
-     List.
+     List
+     Lia.
 
 From ExtLib Require Import
      Structures.Monads
@@ -188,14 +189,12 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
       constructor. auto. cbn. apply IHn.
     Qed.
 
-    Require Import Coq.micromega.Lia.
-
     Lemma dvalue_default : forall t v,
         inr v = (default_dvalue_of_dtyp t) ->
         dvalue_has_dtyp v t.
     Proof.
       intros t v. revert v.
-      induction t using dtyp_ind'; try do_it;
+      induction t; try do_it;
         try (intros; subst; inversion H; constructor).
       - intros. subst. cbn in H.
         unfold default_dvalue_of_dtyp_i in H.
@@ -301,7 +300,7 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
    Lemma concretize_u_concretize_uvalue : forall u, concretize_u u (concretize_uvalue u).
     Proof.
       intros u.
-      induction u using uvalue_ind'; try do_it.
+      induction u; try do_it.
 
       - cbn. destruct (default_dvalue_of_dtyp t) eqn: EQ.
         econstructor. Unshelve. 3 : { exact DVALUE_None. }

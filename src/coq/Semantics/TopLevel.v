@@ -65,10 +65,25 @@ Import D IS.
   Definition allocate_globals (gs:list (global dtyp)) : itree L0 unit :=
     map_monad_ allocate_global gs.
 
+  Require Import Coq.Lists.ListSet.
   (* Who is in charge of allocating the addresses for external functions declared in this mcfg? *)
+
+  (* Returns `true` only if both function are named and have
+     the same name.
+   *)
+  Definition function_name_eq (a b:function_id) : bool :=
+    match a, b with
+    | Name aname, Name bname => eqb aname bname
+    | _, _ => false
+    end.
+
   Definition allocate_declaration (d:declaration dtyp) : itree L0 unit :=
-    'v <- trigger (Alloca DTYPE_Pointer);;
-    trigger (GlobalWrite (dc_name d) v).
+    match List.find (fun x => function_name_eq (dc_name d) (dc_name x)) defined_intrinsics_decls with
+    | Some _ => Ret tt (* Don't allocate pointers for LLVM intrinsics declarations *)
+    | None =>
+      'v <- trigger (Alloca DTYPE_Pointer);;
+      trigger (GlobalWrite (dc_name d) v)
+    end.
 
   Definition allocate_declarations (ds:list (declaration dtyp)) : itree L0 unit :=
     map_monad_ allocate_declaration ds.
@@ -87,8 +102,8 @@ Import D IS.
     map_monad_ initialize_global gs.
 
   Definition build_global_environment (CFG : CFG.mcfg dtyp) : itree L0 unit :=
-    allocate_globals (m_globals CFG) ;;
     allocate_declarations ((m_declarations CFG) ++ (List.map (df_prototype) (m_definitions CFG)));;
+    allocate_globals (m_globals CFG) ;;
     translate _exp_E_to_L0 (initialize_globals (m_globals CFG)).
 
   (** Local environment implementation

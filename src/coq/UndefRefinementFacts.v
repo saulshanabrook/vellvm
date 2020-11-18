@@ -64,7 +64,7 @@ Proof.
       replace (DynamicValues.Int64.unsigned (DynamicValues.Int64.repr 1) *
                DynamicValues.Int64.unsigned x) with (DynamicValues.Int64.unsigned x).
       * destruct (Eqv.eqv_dec_p 64%nat 1%nat); rewrite DynamicValues.Int64.repr_unsigned; reflexivity.
-      * rewrite Integers.Int64.unsigned_repr; try omega; cbn; try omega.
+      * rewrite Integers.Int64.unsigned_repr; try lia; cbn; try omega.
 Qed.
 
 Lemma rel_prime_mod_mul :
@@ -207,15 +207,15 @@ Proof.
                  (DynamicValues.Int64.unsigned x))
         with (DynamicValues.Int64.unsigned x).
       * destruct (Eqv.eqv_dec_p 64%nat 1%nat); rewrite DynamicValues.Int64.repr_unsigned; reflexivity.
-      * rewrite Integers.Int64.unsigned_repr by (cbn; omega).
+      * rewrite Integers.Int64.unsigned_repr by (cbn; lia).
         rewrite Z.land_comm.
-        rewrite Z.land_ones by omega.
+        rewrite Z.land_ones by lia.
         rewrite Z.mod_small. reflexivity.
         
         cbn.
         pose proof DynamicValues.Int64.unsigned_range_2 x.
         cbn in H0.
-        omega.
+        lia.
 Qed.
 
 Theorem undef_refines_or_undef_undef:
@@ -236,7 +236,7 @@ Proof.
                  (DynamicValues.Int64.unsigned x))
         with (DynamicValues.Int64.unsigned x).
       * destruct (Eqv.eqv_dec_p 64%nat 1%nat); rewrite DynamicValues.Int64.repr_unsigned; reflexivity.
-      * rewrite Integers.Int64.unsigned_repr by (cbn; omega).
+      * rewrite Integers.Int64.unsigned_repr by (cbn; lia).
         reflexivity.
 Qed.
 
@@ -277,7 +277,7 @@ Proof.
       rewrite DynamicValues.Int64.divs_one.
       reflexivity.
       cbn.
-      omega.
+      lia.
 Qed.
 
 Theorem zero_refines_undef_urem_1:

@@ -1,5 +1,6 @@
 **.vo
 **.vos
+**.vio
 **.vok
 **.v.d
 **.glob
@@ -30,7 +31,7 @@ src/ml/extracted/STAMP
 src/.depend
 output
 src/ml/extracted/.merlin
-src/ml/libvir/.merlin
-src/.lia.cache
+src/ml/libvellvm/.merlin
+.lia.cache
 src/.ll_files.tmp
 src/coq/.lia.cache

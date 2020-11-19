@@ -11,9 +11,9 @@ print(test_dir)
 def files_in_dir(dir):
     return [dir + f for f in os.listdir(dir) if isfile(join(dir, f))]
 
-def run_vellvm(file):
+def run_vir(file):
     print("Processing ", file)
-    cmd = ['./vellvm', '--test-file', file]
+    cmd = ['./vir', '--test-file', file]
     process = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines = True)
     stdout, stderr = process.communicate()
     return stdout + stderr
@@ -51,7 +51,7 @@ def summarize(results):
 def write_log(dir, files):
     results = []
     for f in files:
-        result = run_vellvm(f)
+        result = run_vir(f)
         result = decide_status(result)
         results.append(result)
     (p, fa, ex, suite, unk) = summarize(results)

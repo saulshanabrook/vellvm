@@ -14,7 +14,6 @@ let parse_pp_test path =
   let dot_s = Platform.gen_name !Platform.output_path filename ".s" in
   let _ = Printf.fprintf stderr "Running llc on: %s\n%!" path in
   try
-    (* SAZ: turning off using llc for now -- LLVM v. 9 doesn't parse these *)
     let _ = (* llc_parse path dot_s *) () in
     let prog = parse_file path in
     let _ = output_file vll_file prog in

@@ -1044,6 +1044,12 @@ End DvalueInd.
       | DVALUE_I64 i1, DVALUE_I64 i2 => ret (eval_int_icmp icmp i1 i2)
       | DVALUE_Poison, DVALUE_Poison => ret DVALUE_Poison
       | DVALUE_Poison, _ => if is_DVALUE_IX v2 then ret DVALUE_Poison else failwith "ill_typed-iop"
+      | DVALUE_Addr a1, DVALUE_Addr a2 =>
+        match icmp with
+        | Eq => if A.eq_dec a1 a2 then ret (DVALUE_I1 (Int1.one)) else ret (DVALUE_I1 (Int1.zero))
+        | Ne => if A.eq_dec a1 a2 then ret (DVALUE_I1 (Int1.zero)) else ret (DVALUE_I1 (Int1.one))
+        | _ => failwith "non-equality pointer comparison"
+        end
       | _, DVALUE_Poison => if is_DVALUE_IX v1 then ret DVALUE_Poison else failwith "ill_typed-iop"
       | _, _ => failwith "ill_typed-icmp"
       end.

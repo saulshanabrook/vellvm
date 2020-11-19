@@ -57,6 +57,9 @@ Variant param_attr : Set :=
 | PARAMATTR_Returned
 | PARAMATTR_Nonnull
 | PARAMATTR_Dereferenceable (a:int)
+| PARAMATTR_Immarg
+| PARAMATTR_Noundef
+| PARAMATTR_Nofree
 .
 
 Variant fn_attr : Set :=
@@ -227,7 +230,6 @@ Section TypedSyntax.
   | INSTR_Fence
   | INSTR_AtomicCmpXchg
   | INSTR_AtomicRMW
-  | INSTR_Unreachable
   | INSTR_VAArg
   | INSTR_LandingPad
   .
@@ -243,6 +245,7 @@ Section TypedSyntax.
   | TERM_IndirectBr (v:texp) (brs:list block_id)
   | TERM_Resume     (v:texp)
   | TERM_Invoke     (fnptrval:tident) (args:list texp) (to_label:block_id) (unwind_label:block_id)
+  | TERM_Unreachable
   .
 
 

@@ -538,7 +538,6 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
 
         | (_, INSTR_Comment _) => ret tt
 
-        | (_, INSTR_Unreachable) => raise "IMPOSSIBLE: unreachable in reachable position"
         | (_, INSTR_Fence)
         | (_, INSTR_AtomicCmpXchg)
         | (_, INSTR_AtomicRMW)
@@ -572,6 +571,9 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
           end
 
         | TERM_Br_1 br => ret (inl br)
+
+        | TERM_Unreachable => raise "IMPOSSIBLE: unreachable in reachable position"  
+
         | TERM_Switch _ _ _
         | TERM_IndirectBr _ _
         | TERM_Resume _

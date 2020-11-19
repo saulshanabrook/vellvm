@@ -1769,7 +1769,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       unfold DynamicValues.Int1.modulus,DynamicValues.Int1.wordsize, DynamicValues.Wordsize1.wordsize, two_power_nat in *.
       cbn in *; lia.
     Qed.
-{
+
     Lemma unsigned_I8_in_range : forall (x : DynamicValues.int8),
         0 <= DynamicValues.Int8.unsigned x <= 255.
     Proof.
@@ -1778,59 +1778,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       unfold DynamicValues.Int8.modulus,DynamicValues.Int8.wordsize, DynamicValues.Wordsize8.wordsize, two_power_nat in *.
       cbn in *; lia.
     Qed.
-    Lemma deserialize_serialize : forall val t (TYP : dvalue_has_dtyp val t),
-        forall off (bytes : mem_block),
-          off >= 0 ->
-          deserialize_sbytes (lookup_all_index off (sizeof_dtyp t) (add_all_index (serialize_dvalue val) off bytes) SUndef) t = dvalue_to_uvalue val.
-    Proof.
-      induction 1; try auto.
-      - admit.
-      - intros.
-        simpl add_all_index; simpl sizeof_dtyp.
-        replace 8 with (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ 0)))))))) by reflexivity.
-        do 8 (rewrite lookup_all_index_add; try lia).
-        cbn; f_equal.
-        pose proof (unsigned_I1_in_range x).
-        assert (EQ :DynamicValues.Int1.unsigned x / 256 = 0).
-        apply Z.div_small; lia.
-        rewrite EQ.
-        repeat rewrite Zdiv_0_l.
-        repeat rewrite Byte.unsigned_repr.
-        all: unfold Byte.max_unsigned, Byte.modulus; cbn; try lia.
-        rewrite Z.add_0_r.
-        apply DynamicValues.Int1.repr_unsigned.
-      - intros.
-        simpl add_all_index; simpl sizeof_dtyp.
-        replace 8 with (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ 0)))))))) by reflexivity.
-        do 8 (rewrite lookup_all_index_add; try lia).
-        cbn; f_equal.
-        pose proof (unsigned_I8_in_range x).
-        revert H0; generalize (DynamicValues.Int8.unsigned x) as y; intros y ?.
-        repeat rewrite Byte.unsigned_repr.
-        all: unfold Byte.max_unsigned, Byte.modulus; cbn.
-        all: try lia.
-        all: admit.
-      - admit.
-      - admit.
-      - admit.
-      - admit.
-    Admitted.
-    Lemma write_read :
-      forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr),
-        write m a val = inr m' ->
-        dvalue_has_dtyp val t ->
-        read m' a t = inr (dvalue_to_uvalue val).
-    Proof.
-      unfold write, read; cbn.
-      intros * WR TYP.
-      flatten_hyp WR; try inv_sum.
-      destruct l,a as [id off]; inv_sum.
-      rewrite get_logical_block_of_add_logical_block.
-      cbn.
-      unfold read_in_mem_block.
-      rewrite deserialize_serialize; auto.
-      admit.
-    Admitted.
 
     Arguments add : simpl never.
     Arguments lookup : simpl never.
@@ -1925,51 +1872,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       cbn. destruct ptr. reflexivity.
     Qed.
 
-    Lemma write_correct : forall m1 a v m2,
-        write m1 a v = inr m2 ->
-        write_spec m1 a v m2.
-    Proof.
-      intros; split; [| split]; eauto using write_allocated, write_read, write_untouched.
-    Qed.
-
-    Lemma dtyp_fits_after_write :
-      forall m m' ptr ptr' τ τ',
-        dtyp_fits m ptr τ ->
-        write m ptr' τ' = inr m' ->
-        dtyp_fits m' ptr τ.
-    Proof.
-    Admitted.
-
-    Lemma write_array_cell_get_array_cell :
-      forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr) (i : nat),
-        write_array_cell m a i t val = inr m' ->
-        dvalue_has_dtyp val t ->
-        get_array_cell m' a i t = inr (dvalue_to_uvalue val).
-    Proof.
-    Admitted.
-
-    Lemma write_array_cell_untouched :
-      forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr) (i : nat) (i' : nat),
-        write_array_cell m a i t val = inr m' ->
-        dvalue_has_dtyp val t ->
-        i <> i' ->
-        get_array_cell m' a i' t = get_array_cell m a i' t.
-    Proof.
-      intros m m' t val a i i' H H0 H1.
-    Admitted.
-
-    Lemma write_array_cell_untouched_ptr_block :
-      forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a a' : addr) (i i' : nat),
-        write_array_cell m a i t val = inr m' ->
-        dvalue_has_dtyp val t ->
-        fst a' <> fst a ->
-        get_array_cell m' a' i' t = get_array_cell m a' i' t.
-    Proof.
-      intros m m' t val a a' i i' WRITE TYP BLOCK_NEQ.
-      destruct a as [b1 o1].
-      destruct a' as [b2 o2].
-    Admitted.
-
     Lemma lookup_mapsto :
       forall {A} k m (v : A),
         lookup k m = Some v <-> IM.MapsTo k v m.
@@ -2028,14 +1930,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       - apply no_key_not_in with (v:=lb) in NOKEY.
         contradiction.
     Qed.
-    Lemma read_empty_block : forall τ,
-        read_in_mem_block (make_empty_mem_block τ) 0 τ = UVALUE_Undef τ.
-    Proof.
-      unfold read_in_mem_block.
-      unfold make_empty_mem_block.
-      unfold deserialize_sbytes.
-      intros τ. induction τ.
-    Admitted.
+
     Inductive is_supported : dtyp -> Prop :=
     | is_supported_DTYPE_I1 : is_supported (DTYPE_I 1)
     | is_supported_DTYPE_I8 : is_supported (DTYPE_I 8)
@@ -2106,58 +2001,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Proof.
       intros m τ x H.
       destruct τ; inversion H; intros NV; inversion NV.
-    Qed.
-
-    Lemma allocate_correct : forall m1 τ m2 a,
-        allocate m1 τ = inr (m2,a) ->
-        allocate_spec m1 τ m2 a.
-    Proof.
-      intros ((cm,lm),s) * EQ;
-        destruct s as [|f s]; apply allocate_inv in EQ as [NV [EQm2 EQa]]; subst; cbn.
-      - split.
-        + cbn. apply next_logical_key_fresh.
-        + { split.
-            + unfold read; cbn.
-              unfold get_logical_block, get_logical_block_mem; cbn.
-              rewrite lookup_add_eq; cbn.
-              f_equal; apply read_empty_block.
-            + intros * SIZE ALLOC NOVER.
-              unfold read; cbn.
-              unfold get_logical_block, get_logical_block_mem; cbn.
-
-              cbn in ALLOC.
-
-              apply no_overlap__not_overlaps in NOVER.
-              unfold next_logical_key, next_logical_key_mem, overlaps in *.
-              cbn in *.
-              destruct (Z.eq_dec (logical_next_key lm) (fst a')) as [Ha' | Ha'].
-              --
-                exfalso. eapply next_logical_key_fresh; erewrite Ha'; eauto.
-              --
-                rewrite lookup_add_ineq; auto.
-          }
-      - split.
-        + cbn. apply next_logical_key_fresh.
-        + { split.
-            + unfold read; cbn.
-              unfold get_logical_block, get_logical_block_mem; cbn.
-              rewrite lookup_add_eq; cbn.
-              f_equal; apply read_empty_block.
-            + intros * SIZE ALLOC NOVER.
-              unfold read; cbn.
-              unfold get_logical_block, get_logical_block_mem; cbn.
-
-              cbn in ALLOC.
-
-              apply no_overlap__not_overlaps in NOVER.
-              unfold next_logical_key, next_logical_key_mem, overlaps in *.
-              cbn in *.
-              destruct (Z.eq_dec (logical_next_key lm) (fst a')) as [Ha' | Ha'].
-              --
-                exfalso. eapply next_logical_key_fresh; erewrite Ha'; eauto.
-              --
-                rewrite lookup_add_ineq; auto.
-          }
     Qed.
 
     Lemma allocated_get_logical_block :
@@ -2331,66 +2174,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           apply ALLOC.
         + destruct (handle_gep_h (DTYPE_Array sz τ) (i + sz * sizeof_dtyp τ * DynamicValues.Int64.unsigned x) idxs); inversion GEP; subst.
           apply ALLOC.
-    Qed.
-
-    Lemma handle_gep_array_no_overlap :
-      forall i ptr ptr' τ τ' sz elem_addr,
-        no_overlap_dtyp ptr τ ptr' (DTYPE_Array sz τ') ->
-        handle_gep_addr (DTYPE_Array sz τ') ptr' [DVALUE_I64 (repr 0); DVALUE_I64 (repr (Z.of_nat i))] = inr elem_addr ->
-        Z.of_nat i < sz ->
-        0 <= sizeof_dtyp τ' ->
-        no_overlap_dtyp ptr τ elem_addr τ'.
-    Proof.
-      intros i [b1 o1] [b2 o2] τ τ' sz elem_addr OVER GEP BOUNDS SIZE;
-        inversion GEP; subst.
-      - unfold no_overlap_dtyp in *.
-        cbn in *.
-        unfold no_overlap in *.
-        destruct OVER as [OVER | [OVER | OVER]].
-        + left. auto.
-        + right. left.
-          cbn in *.
-          (* TODO: this is a mess... *)
-          replace (DynamicValues.Int64.unsigned (DynamicValues.Int64.repr 0)) with 0.
-          replace (o2 + sz * sizeof_dtyp τ' * 0 + 0 * sizeof_dtyp τ' + sizeof_dtyp τ') with (o2 + sizeof_dtyp τ') by lia.
-          admit.
-          admit.
-        + right. right.
-          cbn in *.
-          admit.
-    Admitted.
-
-    Lemma get_array_cell_write_no_overlap :
-      forall m1 m2 ptr ptr' τ τ' i v uv sz elem_addr,
-        write m1 ptr v = inr m2 ->
-        dvalue_has_dtyp v τ ->
-
-        no_overlap_dtyp ptr τ ptr' (DTYPE_Array sz τ') ->
-        allocated ptr' m1 ->
-        handle_gep_addr (DTYPE_Array sz τ') ptr' [DVALUE_I64 (repr 0); DVALUE_I64 (repr (Z.of_nat i))] = inr elem_addr ->
-        Z.of_nat i < sz ->
-        0 <= sizeof_dtyp τ' ->
-        get_array_cell m1 ptr' i τ' = inr uv ->
-        get_array_cell m2 ptr' i τ' = inr uv.
-    Proof.
-      intros m1 m2 ptr ptr' τ τ' i v uv sz elem_addr WRITE TYP NEQ ALLOC GEP POS TYPSIZE GET.
-
-      pose proof (write_preserves_allocated ALLOC WRITE) as ALLOC2.
-
-      apply write_correct in WRITE.
-      destruct WRITE.
-      specialize (is_written0 τ TYP).
-      destruct is_written0.
-
-      erewrite <- read_array in GET; eauto.
-      erewrite <- read_array; eauto.
-
-      erewrite -> old_lu0; eauto.
-
-      eapply handle_gep_addr_allocated; eauto.
-
-      cbn in GEP.
-      eapply handle_gep_array_no_overlap; eauto.
     Qed.
 
     Definition equiv : memory_stack -> memory_stack -> Prop :=

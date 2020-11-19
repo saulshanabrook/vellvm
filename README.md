@@ -65,7 +65,7 @@ These unverified parts of the development live in the `src/ml` folder.
                                  walks over the ITree that remains after complete interpretation of the denotation of a program
 - `libvir/llvm_parser.mly` the parser, adapter from Vellvm, as discussed in Section 4.5.
 - `testing/assertion.ml`   custom annotations of llvm programs as comments used to define our tests.
-- `mail.ml`                top-level from which our executable is obtained.
+- `main.ml`                top-level from which our executable is obtained.
 
 ## Test suite
 

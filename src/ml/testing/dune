@@ -7,6 +7,6 @@
 (library
   (name testing)
   (wrapped false)
-  (libraries extracted libvir str)
+  (libraries extracted libvir str qcheck)
   (synopsis "Vir Testing Library")
   )

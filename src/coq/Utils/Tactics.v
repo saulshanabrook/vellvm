@@ -128,4 +128,32 @@ Ltac forward H :=
   | ?P -> _ => assert P as H'; [| specialize (H H'); clear H']
   end.
 
+(** [break_inner_match' t] tries to destruct the innermost [match] it
+    find in [t]. *)
+Ltac break_inner_match' t :=
+ match t with
+   | context[match ?X with _ => _ end] =>
+     break_inner_match' X || destruct X eqn:?
+   | _ => destruct t eqn:?
+ end.
+
+(** [break_inner_match_goal] tries to destruct the innermost [match] it
+    find in your goal. *)
+Ltac break_inner_match_goal :=
+ match goal with
+   | [ |- context[match ?X with _ => _ end] ] =>
+     break_inner_match' X
+ end.
+
+(** [break_inner_match_hyp] tries to destruct the innermost [match] it
+    find in a hypothesis. *)
+Ltac break_inner_match_hyp :=
+ match goal with
+   | [ H : context[match ?X with _ => _ end] |- _ ] =>
+     break_inner_match' X
+ end.
+
+(** [break_inner_match] tries to destruct the innermost [match] it
+    find in your goal or a hypothesis. *)
+Ltac break_inner_match := break_inner_match_goal || break_inner_match_hyp.
 

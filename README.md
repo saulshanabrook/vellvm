@@ -83,8 +83,9 @@ Our current test-suite of LLVM programs for which we compare our semantics again
     * flocq      (installed via, e.g. opam install coq-flocq, see note below) 
     * ceres      (installed via, e.g. opam install coq-ceres)
   - Additional opam packages: 
-    * dune
-    * menhir
+    * dune       (installed via, e.g. opam install dune)
+    * menhir     (installed via, e.g. opam install menhir)
+    * qcheck     (installed via, e.g. opam install qcheck)
   - llvm (not required for compiling, only for differential testing)
 
 Compilation:

@@ -63,7 +63,7 @@ These unverified parts of the development live in the `src/ml` folder.
 - `extracted/Extract.v`    instructions for the extraction of the development to OCaml
 - `libvir/interpreter.ml`  OCaml driver for running the interpreter; the `step` function 
                                  walks over the ITree that remains after complete interpretation of the denotation of a program
-- `libvir/llvm_parser.mly` the parser, adapter from Vellvm, as discussed in Section 4.5.
+- `libvir/llvm_parser.mly` the parser, adapted from Vellvm, as discussed in Section 4.5.
 - `testing/assertion.ml`   custom annotations of llvm programs as comments used to define our tests.
 - `main.ml`                top-level from which our executable is obtained.
 
@@ -82,6 +82,7 @@ Our current test-suite of LLVM programs for which we compare our semantics again
     * paco       (installed via, e.g. opam install coq-paco)
     * flocq      (installed via, e.g. opam install coq-flocq, see note below) 
     * ceres      (installed via, e.g. opam install coq-ceres)
+    WARNING: you should not have the itree opam package in your switch to avoid conflict with the extended version of the library we provide locally
   - Additional opam packages: 
     * dune       (installed via, e.g. opam install dune)
     * menhir     (installed via, e.g. opam install menhir)

@@ -2113,7 +2113,7 @@ Section Memory_Stack_Theory.
       unfold dtyp_fits in *.
       erewrite get_logical_block_allocated; eauto.
     Qed.
-
+    
     Lemma handle_gep_addr_allocated :
       forall idxs sz τ ptr m elem_addr,
         allocated ptr m ->
@@ -2129,31 +2129,6 @@ Section Memory_Stack_Theory.
         + destruct (handle_gep_h (DTYPE_Array sz τ) (i + Z.of_N (sz * sizeof_dtyp τ) * DynamicValues.Int64.unsigned x) idxs); inversion GEP; subst.
           apply ALLOC.
     Qed.
-
-    Lemma handle_gep_array_no_overlap :
-      forall i ptr ptr' τ τ' sz elem_addr,
-        no_overlap_dtyp ptr τ ptr' (DTYPE_Array sz τ') ->
-        handle_gep_addr (DTYPE_Array sz τ') ptr' [DVALUE_I64 (repr 0); DVALUE_I64 (repr (Z.of_nat i))] = inr elem_addr ->
-        (N.of_nat i < sz)%N ->
-        no_overlap_dtyp ptr τ elem_addr τ'.
-    Proof.
-      intros i [b1 o1] [b2 o2] τ τ' sz elem_addr OVER GEP BOUNDS;
-        inversion GEP; subst.
-      - unfold no_overlap_dtyp in *.
-        cbn in *.
-        unfold no_overlap in *.
-        destruct OVER as [OVER | [OVER | OVER]].
-        + left. auto.
-        + right. left.
-          cbn in *.
-          (* TODO: this is a mess... *)
-          replace (DynamicValues.Int64.unsigned (DynamicValues.Int64.repr 0)) with 0.
-          admit.
-          admit.
-        + right. right.
-          cbn in *.
-          admit.
-    Admitted.
 
     (* ext_memory only talks in terms of reads... Does not
        necessarily preserved what's allocated, because you might
@@ -2274,38 +2249,6 @@ Section Memory_Stack_Theory.
         }
         
         lia.
-    Qed.
-
-    Lemma get_array_cell_write_no_overlap :
-      forall m1 m2 ptr ptr' τ τ' i v uv sz elem_addr,
-        write m1 ptr v = inr m2 ->
-        dvalue_has_dtyp v τ ->
-
-        no_overlap_dtyp ptr τ ptr' (DTYPE_Array sz τ') ->
-        allocated ptr' m1 ->
-        handle_gep_addr (DTYPE_Array sz τ') ptr' [DVALUE_I64 (repr 0); DVALUE_I64 (repr (Z.of_nat i))] = inr elem_addr ->
-        (N.of_nat i < sz)%N ->
-        get_array_cell m1 ptr' i τ' = inr uv ->
-        get_array_cell m2 ptr' i τ' = inr uv.
-    Proof.
-      intros m1 m2 ptr ptr' τ τ' i v uv sz elem_addr WRITE TYP NEQ ALLOC GEP POS GET.
-
-      pose proof (write_preserves_allocated ALLOC WRITE) as ALLOC2.
-
-      apply write_correct in WRITE.
-      destruct WRITE.
-      specialize (is_written0 τ TYP).
-      destruct is_written0.
-
-      erewrite <- read_array in GET; eauto.
-      erewrite <- read_array; eauto.
-
-      erewrite -> old_lu0; eauto.
-
-      eapply handle_gep_addr_allocated; eauto.
-
-      cbn in GEP.
-      eapply handle_gep_array_no_overlap; eauto.
     Qed.
 
     Definition equiv : memory_stack -> memory_stack -> Prop :=

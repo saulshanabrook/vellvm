@@ -10,6 +10,8 @@ Section Pure.
   Variable E : Type -> Type.
   Notation rel A B := (A -> B -> Prop).
   Notation "'(' p ',' q ')' '{{' Q '}}'" := (eutt Q p q).
+
+
   Notation prog := (itree E).
 
   Lemma consequence_pure:
@@ -27,6 +29,7 @@ Section Pure.
     eapply eutt_clo_bind; eauto.
   Qed.
 
+  Notation prog := (itree E).
   Lemma consequence_pure_bind:
     forall {A1 A2 B1 B2}
       (R: rel A1 B1) (Q: rel A2 B2)

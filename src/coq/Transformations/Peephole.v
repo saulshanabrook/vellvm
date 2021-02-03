@@ -273,9 +273,11 @@ Section Liveness.
       LiveIn bk  ≡ defs bk.(blk_phis) +++ upward_exposed bk +++ (LiveOut bk ∖ defs bk)
       LiveOut bk ≡ (set_flat_map (fun bk' => LiveIn bk' ∖ defs bk'.(blk_phis)) (bk_outputs bk)) +++ uses bk.(blk_phis)
       In SSA form, the fixpoint can be directly computed in two passses over the CFG.
+      CAREFUL: the notion of liveness is a bit tricky when it comes to phi-nodes, as in the relevant notion depends on the
+      algorithm of interest. Be sure to double check stuff.
    *)
 
-
+  (* Reducible graph: no jumps into the middle of loops. *)
 
 End Liveness.
 

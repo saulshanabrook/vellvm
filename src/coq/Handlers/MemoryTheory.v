@@ -876,174 +876,6 @@ Section Serialization_Theory.
     apply skipn_length_app.
   Qed.
 
-  Lemma serialize_inverses : forall dval t (TYP : dvalue_has_dtyp dval t),
-      deserialize_sbytes (serialize_dvalue dval) t = dvalue_to_uvalue dval.
-  Proof.
-    intros dval t TYP.
-    induction TYP; auto.
-    - (* I1 *) admit.
-    - (* I8 *) admit.
-    - (* I32 *) admit.
-    - (* I64 *) admit.
-    - cbn. rewrite DynamicValues.unsupported_cases_match; auto.
-    - (* Double *) admit.
-    - (* Float *) admit.
-    - (* Half *) admit.
-    - (* X86_fp80 *) admit.
-    - (* FP128 *) admit.
-    - (* Ppc_fp128 *) admit.
-    - (* Structs *)
-      generalize dependent f.
-      generalize dependent dt.
-      generalize dependent dts.
-      induction fields; intros dts TYP2 IHTYP2 dt f TYP1 IHTYP1; inversion TYP2.
-      + cbn. rewrite app_nil_r.
-        unfold deserialize_sbytes.
-        rewrite dvalue_serialized_not_sundef.
-        cbn.
-        rewrite firstn_sizeof_dtyp; auto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite IHTYP1.
-        auto.
-      + subst; cbn.
-        unfold deserialize_sbytes.
-
-        rewrite all_not_sundef_app; auto.
-
-        cbn.
-        rewrite serialize_firstn_app; eauto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite IHTYP1.
-
-        cbn in *.
-        rewrite serialize_skipn_app; eauto.
-        rewrite serialize_firstn_app; eauto.
-        rewrite deserialize_sbytes_defined_dvalue.
-
-        unfold deserialize_sbytes in IHTYP2.
-        rewrite all_not_sundef_app in IHTYP2; auto.
-
-        cbn in IHTYP2.
-        inversion IHTYP2.
-        rewrite serialize_firstn_app in H0; eauto.
-        rewrite deserialize_sbytes_defined_dvalue in H0.
-        rewrite H0.
-
-        rewrite serialize_firstn_app; eauto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite H0.
-
-        reflexivity.
-    - (* Packed Structs *)
-      generalize dependent f.
-      generalize dependent dt.
-      generalize dependent dts.
-      induction fields; intros dts TYP2 IHTYP2 dt f TYP1 IHTYP1; inversion TYP2.
-      + cbn. rewrite app_nil_r.
-        unfold deserialize_sbytes.
-        rewrite dvalue_serialized_not_sundef.
-        cbn.
-        rewrite firstn_sizeof_dtyp; auto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite IHTYP1.
-        auto.
-      + subst; cbn.
-        unfold deserialize_sbytes.
-
-        rewrite all_not_sundef_app; auto.
-
-        cbn.
-        rewrite serialize_firstn_app; eauto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite IHTYP1.
-
-        cbn in *.
-        rewrite serialize_skipn_app; eauto.
-        rewrite serialize_firstn_app; eauto.
-        rewrite deserialize_sbytes_defined_dvalue.
-
-        unfold deserialize_sbytes in IHTYP2.
-        rewrite all_not_sundef_app in IHTYP2; auto.
-
-        cbn in IHTYP2.
-        inversion IHTYP2.
-        rewrite serialize_firstn_app in H0; eauto.
-        rewrite deserialize_sbytes_defined_dvalue in H0.
-        rewrite H0.
-
-        rewrite serialize_firstn_app; eauto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite H0.
-
-        reflexivity.
-    - (* Arrays *)
-      generalize dependent sz.
-      generalize dependent dt.
-      induction xs; intros dt IH IHdtyp sz H; inversion H.
-      + subst. auto.
-      + cbn. unfold deserialize_sbytes.
-        rewrite all_not_sundef_app; auto.
-        cbn in *.
-        rewrite SuccNat2Pos.id_succ.
-        subst.
-
-        rewrite serialize_firstn_app; auto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite IH; auto.
-
-        unfold deserialize_sbytes in IHxs.
-        setoid_rewrite dvalue_serialized_not_sundef in IHxs.
-        setoid_rewrite all_not_sundef_fold_right_serialize in IHxs.
-
-        assert (forall x : dvalue, In x xs -> deserialize_sbytes_defined (serialize_dvalue x) dt = dvalue_to_uvalue x) as H1.
-        intros x H.
-        rewrite deserialize_sbytes_defined_dvalue. auto.
-
-        assert (forall x : dvalue, In x xs -> dvalue_has_dtyp x dt) as H2 by auto.
-
-        pose proof (IHxs dt H1 H2 (Datatypes.length xs) eq_refl).
-        cbn in H.
-        inversion H.
-
-        rewrite serialize_skipn_app.
-        rewrite Nnat.Nat2N.id.
-        reflexivity.
-        auto.
-    - (* Vectors *)
-      generalize dependent sz.
-      generalize dependent dt.
-      induction xs; intros dt IH IHdtyp Hvect sz H; inversion H.
-      + subst. auto.
-      + cbn. unfold deserialize_sbytes.
-        rewrite all_not_sundef_app; auto.
-        cbn in *.
-        rewrite SuccNat2Pos.id_succ.
-        subst.
-
-        rewrite serialize_firstn_app; auto.
-        rewrite deserialize_sbytes_defined_dvalue.
-        rewrite IH; auto.
-
-        unfold deserialize_sbytes in IHxs.
-        setoid_rewrite dvalue_serialized_not_sundef in IHxs.
-        setoid_rewrite all_not_sundef_fold_right_serialize in IHxs.
-
-        assert (forall x : dvalue, In x xs -> deserialize_sbytes_defined (serialize_dvalue x) dt = dvalue_to_uvalue x) as H1.
-        intros x H.
-        rewrite deserialize_sbytes_defined_dvalue. auto.
-
-        assert (forall x : dvalue, In x xs -> dvalue_has_dtyp x dt) as H2 by auto.
-
-        pose proof (IHxs dt H1 H2 Hvect (Datatypes.length xs) eq_refl).
-        cbn in H.
-        inversion H.
-
-        rewrite serialize_skipn_app.
-        rewrite Nnat.Nat2N.id.
-        reflexivity.
-        auto.
-  Admitted.
-
 End Serialization_Theory.
 
 Section Memory_Stack_Theory.
@@ -1235,15 +1067,24 @@ Section Memory_Stack_Theory.
     unfold DynamicValues.Int1.modulus,DynamicValues.Int1.wordsize, DynamicValues.Wordsize1.wordsize, two_power_nat in *.
     cbn in *; lia.
   Qed.
-  {
-    Lemma unsigned_I8_in_range : forall (x : DynamicValues.int8),
+
+  Lemma unsigned_I8_in_range : forall (x : DynamicValues.int8),
       0 <= DynamicValues.Int8.unsigned x <= 255.
-    Proof.
-      destruct x as [x [? ?]].
-      cbn in *.
-      unfold DynamicValues.Int8.modulus,DynamicValues.Int8.wordsize, DynamicValues.Wordsize8.wordsize, two_power_nat in *.
-      cbn in *; lia.
-    Qed.
+  Proof.
+    destruct x as [x [? ?]].
+    cbn in *.
+    unfold DynamicValues.Int8.modulus,DynamicValues.Int8.wordsize, DynamicValues.Wordsize8.wordsize, two_power_nat in *.
+    cbn in *; lia.
+  Qed.
+
+  Lemma unsigned_I32_in_range : forall (x : DynamicValues.int32),
+      0 <= DynamicValues.Int32.unsigned x <= 4294967295.
+  Proof.
+    destruct x as [x [? ?]].
+    cbn in *.
+    unfold DynamicValues.Int32.modulus,DynamicValues.Int8.wordsize, DynamicValues.Wordsize8.wordsize, two_power_nat in *.
+    cbn in *; lia.
+  Qed.
 
     (** ** Deserialize - Serialize
         Starting from a dvalue [val] whose [dtyp] is [t], if:
@@ -1259,38 +1100,71 @@ Section Memory_Stack_Theory.
         forall off (bytes : mem_block),
           deserialize_sbytes (lookup_all_index off (sizeof_dtyp t) (add_all_index (serialize_dvalue val) off bytes) SUndef) t = dvalue_to_uvalue val.
     Proof.
-      induction 1; try auto.
-      - admit.
+      induction 1; try auto; intros.
+      -
+        simpl add_all_index; simpl sizeof_dtyp.
+        replace 8%N with (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ 0)))))))) by reflexivity.
+        do 8 (rewrite lookup_all_index_add; try lia).
+        cbn; f_equal.
+      -
+        simpl add_all_index; simpl sizeof_dtyp.
+        replace 8%N with (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ 0)))))))) by reflexivity.
+        do 8 (rewrite lookup_all_index_add; try lia).
+        cbn; f_equal.
+        pose proof (unsigned_I1_in_range x).
+        assert (EQ :DynamicValues.Int1.unsigned x / 256 = 0).
+        apply Z.div_small; lia.
+        rewrite EQ.
+        repeat rewrite Zdiv_0_l.
+        repeat rewrite Byte.unsigned_repr.
+        all: unfold Byte.max_unsigned, Byte.modulus; cbn; try lia.
+        rewrite Z.add_0_r.
+        apply DynamicValues.Int1.repr_unsigned.
+      -
+        simpl add_all_index; simpl sizeof_dtyp.
+        replace 8%N with (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ 0)))))))) by reflexivity.
+        do 8 (rewrite lookup_all_index_add; try lia).
+        cbn; f_equal.
+        pose proof (unsigned_I8_in_range x).
+        repeat rewrite Byte.unsigned_repr.
+        all: unfold Byte.max_unsigned, Byte.modulus; cbn.
+        1:{
+          repeat rewrite Z.div_small; try nia.
+          repeat rewrite Z.add_0_r.
+          apply Int8.repr_unsigned.
+        }
+        all: repeat rewrite Z.div_small; nia.
       - intros.
         simpl add_all_index; simpl sizeof_dtyp.
-        replace 8 with (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ 0)))))))) by reflexivity.
+        replace 8%N with (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ 0)))))))) by reflexivity.
+        do 8 (rewrite lookup_all_index_add; try lia).
+        cbn; f_equal.
+        pose proof (unsigned_I32_in_range x).
+        repeat rewrite Byte.unsigned_repr_eq.
+        unfold Byte.max_unsigned, Byte.modulus, Byte.wordsize, Wordsize_8.wordsize; cbn.
+        replace (two_power_nat 8) with 256 by reflexivity.
+        remember (Int32.unsigned x) as xv.
+        match goal with
+        | [|- context[Int32.repr ?zv]] => replace zv with xv
+        end.
+        subst xv.
+        apply Int32.repr_unsigned.
+        clear -H.
+
+        rewrite Z.add_0_r.
         admit.
-        (* do 8 (rewrite lookup_all_index_add; try lia). *)
-        (* cbn; f_equal. *)
-        (* pose proof (unsigned_I1_in_range x). *)
-        (* assert (EQ :DynamicValues.Int1.unsigned x / 256 = 0). *)
-        (* apply Z.div_small; lia. *)
-        (* rewrite EQ. *)
-        (* repeat rewrite Zdiv_0_l. *)
-        (* repeat rewrite Byte.unsigned_repr. *)
-        (* all: unfold Byte.max_unsigned, Byte.modulus; cbn; try lia. *)
-        (* rewrite Z.add_0_r. *)
-        (* apply DynamicValues.Int1.repr_unsigned. *)
-      - intros.
+      - admit.
+      -
+        cbn.
+        repeat (break_match; try reflexivity);
+        contradict H;constructor.
+      -
         simpl add_all_index; simpl sizeof_dtyp.
-        replace 8 with (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ (Z.succ 0)))))))) by reflexivity.
+        replace 8%N with (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ (N.succ 0)))))))) by reflexivity.
+        do 8 (rewrite lookup_all_index_add; try lia).
+        cbn; f_equal.
+        clear bytes off.
         admit.
-        (* do 8 (rewrite lookup_all_index_add; try lia). *)
-        (* cbn; f_equal. *)
-        (* pose proof (unsigned_I8_in_range x). *)
-        (* repeat rewrite Byte.unsigned_repr. *)
-        (* all: unfold Byte.max_unsigned, Byte.modulus; cbn. *)
-        (* all: try lia. *)
-        (* all: admit. *)
-      - admit.
-      - admit.
-      - admit.
-      - admit.
     Admitted.
 
     (** ** Write - Read
@@ -2022,13 +1896,74 @@ Section Memory_Stack_Theory.
       eapply lookup_member; eauto.
     Qed.
 
-    (* TODO: not sure how to show this, but it should be true? *)
-    Lemma IM_key_in_elements :
-      forall key elt m,
-        IM.In (elt:=elt) key m ->
-        In key (map fst (IM.elements (elt:=elt) m)).
+    Lemma NM_NS_In {elt:Type} (k:IM.key) (m:IM.t elt):
+      IM.In k m ->
+      IS.In k (ISP.of_list (map fst (IM.elements  m))).
     Proof.
-    Admitted.
+      pose proof (IM.elements_3w m) as U.
+      intros H.
+      rewrite <- IP.of_list_3 with (s:=m) in H.
+      unfold IP.of_list, IP.to_list in H.
+      generalize dependent (IM.elements m). intros l U H.
+      induction l.
+      -
+        simpl in H.
+        apply IP.F.empty_in_iff in H.
+        tauto.
+      -
+        destruct a as [k' v].
+        simpl in *.
+        destruct (Z.eq_decidable k k') as [K|NK].
+        +
+          (* k=k' *)
+          apply IS.add_1.
+          auto.
+        +
+          (* k!=k' *)
+          apply ISP.FM.add_neq_iff; try auto.
+          apply IHl.
+          *
+            inversion U.
+            auto.
+          *
+            eapply IP.F.add_neq_in_iff with (x:=k').
+            auto.
+            apply H.
+    Qed.
+
+    Lemma IM_key_in_elements :
+      forall k elt m,
+        IM.In (elt:=elt) k m ->
+        In k (map fst (IM.elements (elt:=elt) m)).
+    Proof.
+      intros k elt m H.
+      apply NM_NS_In in H.
+      pose proof (IM.elements_3w m) as U.
+      generalize dependent (IM.elements m). intros l U H.
+      induction l.
+      -
+        cbn in U.
+        apply ISP.FM.empty_iff in U.
+        trivial.
+      -
+        destruct a as [k' v].
+        simpl in *.
+        destruct (Z.eq_decidable k k') as [K|NK].
+        +
+          (* k=k' *)
+          left.
+          auto.
+        +
+          (* k!=k' *)
+          right.
+          apply IHl.
+          *
+            apply ISP.FM.add_neq_iff in U; auto.
+          *
+            clear IHl.
+            inv H.
+            auto.
+    Qed.
 
     Lemma allocated_next_key_diff :
       forall m ptr,

@@ -49,7 +49,7 @@
    - we have not found the space to detail it in the paper, but the theoretical tools used to
      express the well-definedness of the source semantics in an itree-world is developed in [[./src/coq/Utils/NoFailure.v][NoFailure]] 
    - we have not found the space to detail it in the paper, but the [tfor] itree combinator we
-     introduce to help reason generically about [genWhileLoop] is defined in [[./src/coq/Utils/TFor.v][TFor]]
+     introduce to help reason generically about [genWhileLoop] is defined in [TFor](./src/coq/Utils/TFor.v)
 
 
 # Vellvm

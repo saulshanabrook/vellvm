@@ -18,11 +18,8 @@
    - the compilation pass from FHCOL down to LLVM IR, described through Section 4: [Compiler](./coq/LLVMGen/Compiler.v).
    - all the other files contained in [LLVMGen](./coq/LLVMGen/) are part of the proof of correctness for the compilation of operators,
      stated in Section 5.
-     
      The state invariant sketched in Section 7 can be found in [Correctness_Invariants](./coq/LLVMGen/Correctness_Invariants.v).
-     
      The result itself is stated in [Correctness_GenIR](./coq/LLVMGen/Correctness_GenIR.v).
-     
      *Note on admits*: This file contains three admits. These correspond to three operators that we have not yet proved.
      We emphasize that these operators have a similar structure to the cases of IMap and Power that we have proved:
      they use "genWhileLoop" to iterate some operation over a vector.

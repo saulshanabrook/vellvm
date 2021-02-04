@@ -2273,6 +2273,44 @@ Section Memory_Stack_Theory.
       erewrite 2 sizeof_serialized; eauto.
     Qed.
 
+    Lemma write_different_blocks :
+      forall m m2 p p' v v2 dv2 τ τ',
+        write m p v = inr m2 ->
+        read m p' τ = inr v2 ->
+        fst p <> fst p' ->
+        uvalue_to_dvalue v2 = inr dv2 ->
+        dvalue_has_dtyp dv2 τ ->
+        dvalue_has_dtyp v τ' ->
+        read m2 p' τ = inr v2.
+    Proof.
+      intros m m2 p p' v v2 dv2 τ τ' WRITE READ NEQ UVDV TYP1 TYP2.
+      erewrite write_untouched; eauto.
+      unfold no_overlap_dtyp.
+      unfold no_overlap.
+      left. auto.
+    Qed.
+
+    Lemma read_in_mem_block_type :
+      forall bytes a τ v,
+        read_in_mem_block bytes a τ = v ->
+        uvalue_has_dtyp v τ.
+    Proof.
+    Admitted.
+
+    Lemma read_type :
+      forall m p τ v,
+        read m p τ = inr v ->
+        uvalue_has_dtyp v τ.
+    Proof.
+      intros m p τ v READ.
+      unfold read in *.
+      break_match; inversion READ.
+      clear H0.
+      break_match; subst.
+      inversion READ.
+      eapply read_in_mem_block_type; eauto.
+    Qed.
+
 End Memory_Stack_Theory.
 
 Section PARAMS.
@@ -3006,44 +3044,6 @@ Section PARAMS.
       lia.
     }
     lia.
-  Qed.
-
-  Lemma write_different_blocks :
-    forall m m2 p p' v v2 dv2 τ τ',
-      write m p v = inr m2 ->
-      read m p' τ = inr v2 ->
-      fst p <> fst p' ->
-      uvalue_to_dvalue v2 = inr dv2 ->
-      dvalue_has_dtyp dv2 τ ->
-      dvalue_has_dtyp v τ' ->
-      read m2 p' τ = inr v2.
-  Proof.
-    intros m m2 p p' v v2 dv2 τ τ' WRITE READ NEQ UVDV TYP1 TYP2.
-    erewrite write_untouched; eauto.
-    unfold no_overlap_dtyp.
-    unfold no_overlap.
-    left. auto.
-  Qed.
-
-  Lemma read_in_mem_block_type :
-    forall bytes a τ v,
-      read_in_mem_block bytes a τ = v ->
-      uvalue_has_dtyp v τ.
-  Proof.
-  Admitted.
-
-  Lemma read_type :
-    forall m p τ v,
-      read m p τ = inr v ->
-      uvalue_has_dtyp v τ.
-  Proof.
-    intros m p τ v READ.
-    unfold read in *.
-    break_match; inversion READ.
-    clear H0.
-    break_match; subst.
-    inversion READ.
-    eapply read_in_mem_block_type; eauto.
   Qed.
 
 End PARAMS.

@@ -11,17 +11,17 @@
   
    The repository https://github.com/vzaliva/helix/tree/itp21/ contains the HELIX development over-viewed in Section 2. Here the following may be found:
    
-   - the abstract syntax of DHCOL, of which FHCOL is a specialization, described in Section 3: [[./coq/DSigmaHCOL/DSigmaHCOL.v][DSigmaHCOL]]
-   - the big-step interpreter, also described in Section 3: [[./coq/DSigmaHCOL/DSigmaHCOLEval.v][DSigmaHCOLEval]]
-   - the itree-based denotation, described in Section 5: [[./coq/DSigmaHCOL/DSigmaHCOLITree.v][DSigmaHCOLITree]] 
-   - the proof of correctness of this new semantics, stated in Section 5: [[./coq/LLVMGen/EvalDenoteEquiv.v][EvalDenoteEquiv]]
-   - the compilation pass from FHCOL down to LLVM IR, described through Section 4: [[./coq/LLVMGen/Compiler.v][Compiler]]
-   - all the other files contained in [[./coq/LLVMGen/][LLVMGen]] are part of the proof of correctness for the compilation of operators,
+   - the abstract syntax of DHCOL, of which FHCOL is a specialization, described in Section 3: [DSigmaHCOL](./coq/DSigmaHCOL/DSigmaHCOL.v).
+   - the big-step interpreter, also described in Section 3: [DSigmaHCOLEval](./coq/DSigmaHCOL/DSigmaHCOLEval.v).
+   - the itree-based denotation, described in Section 5: [DSigmaHCOLITree](./coq/DSigmaHCOL/DSigmaHCOLITree.v).
+   - the proof of correctness of this new semantics, stated in Section 5: [EvalDenoteEquiv](./coq/LLVMGen/EvalDenoteEquiv.v).
+   - the compilation pass from FHCOL down to LLVM IR, described through Section 4: [Compiler](./coq/LLVMGen/Compiler.v).
+   - all the other files contained in [LLVMGen](./coq/LLVMGen/) are part of the proof of correctness for the compilation of operators,
      stated in Section 5.
      
-     The state invariant sketched in Section 7 can be found in [[./coq/LLVMGen/Correctness_Invariants.v][Correctness_Invariants]].
+     The state invariant sketched in Section 7 can be found in [Correctness_Invariants](./coq/LLVMGen/Correctness_Invariants.v).
      
-     The result itself is stated in [[./coq/LLVMGen/Correctness_GenIR.v][Correctness_GenIR]].
+     The result itself is stated in [Correctness_GenIR](./coq/LLVMGen/Correctness_GenIR.v).
      
      *Note on admits*: This file contains three admits. These correspond to three operators that we have not yet proved.
      We emphasize that these operators have a similar structure to the cases of IMap and Power that we have proved:
@@ -36,20 +36,20 @@
    The repository https://github.com/vellvm/vellvm/tree/itp21 as a whole
    contains the Vellvm development. In here can be found:
 
-   - the abstract syntax of the language, omitted from the paper: [[./src/coq/Syntax/LLVMAst.v][LLVMAst.v]]
+   - the abstract syntax of the language, omitted from the paper: [LLVMAst.v](./src/coq/Syntax/LLVMAst.v).
    - the semantics, the focus of another paper under submission and cited as such
      in the present submission, can be found primarily within
-     the folders [[./src/coq/Semantics][Semantics]] and [[./src/coq/Handlers][Handlers]] 
-   - the new extended meta-theory, described in Section 6, can be found in the folder [[./src/coq/Theory][Theory]]
-   - the symbolic interpreter, described in Section 6, is defined in [[./src/coq/Theory/SymbolicInterpreter.v][SymbolicInterpreter]].
+     the folders [Semantics](./src/coq/Semantics) and [Handlers](./src/coq/Handlers).
+   - the new extended meta-theory, described in Section 6, can be found in the folder [Theory](./src/coq/Theory).
+   - the symbolic interpreter, described in Section 6, is defined in [SymbolicInterpreter](./src/coq/Theory/SymbolicInterpreter.v).
      We fine-tune it on the Helix side in the Prelude to enforce it to run on the right hand-side of
      refinement proofs, and to pair it with the shallow symbolic interpreter for the FHCOL denotation.
    - although as mentioned in Section 6 we work with the relation program logic at a shallow level in
-     the current proof for HELIX, we have drafted a more formal take on it in [[./src/coq/Utils/RelLog.v][RelLog]]
+     the current proof for HELIX, we have drafted a more formal take on it in [RelLog](./src/coq/Utils/RelLog.v).
    - we have not found the space to detail it in the paper, but the theoretical tools used to
-     express the well-definedness of the source semantics in an itree-world is developed in [[./src/coq/Utils/NoFailure.v][NoFailure]] 
+     express the well-definedness of the source semantics in an itree-world is developed in [NoFailure](./src/coq/Utils/NoFailure.v).
    - we have not found the space to detail it in the paper, but the [tfor] itree combinator we
-     introduce to help reason generically about [genWhileLoop] is defined in [TFor](./src/coq/Utils/TFor.v)
+     introduce to help reason generically about [genWhileLoop] is defined in [TFor](./src/coq/Utils/TFor.v).
 
 
 # Vellvm

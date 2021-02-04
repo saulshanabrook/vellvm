@@ -1477,24 +1477,6 @@ Section Memory_Stack_Theory.
           rewrite Z.add_0_l in *.
           subst.
           lia.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
-      -
-        admit.
     Admitted.
 
     (** ** Write - Read
@@ -1808,7 +1790,6 @@ Section Memory_Stack_Theory.
         contradiction.
     Qed.
 
-    (* This is false for VOID, and 0 length arrays *)
     Lemma read_empty_block : forall τ,
         read_in_mem_block (make_empty_mem_block τ) 0 τ = UVALUE_Undef τ.
     Proof.
@@ -1855,7 +1836,6 @@ Section Memory_Stack_Theory.
     Definition not_undef (v : uvalue) : Prop
       := forall τ, v <> UVALUE_Undef τ.
 
-    (* TODO: finish a less specialized version of this *)
     Lemma read_array_not_pointer : forall mem a τ sz v dv,
         not_undef v ->
         read mem a (DTYPE_Array sz τ) = inr v ->
@@ -1880,41 +1860,6 @@ Section Memory_Stack_Theory.
         inversion READ; subst;
           eapply NU; eauto.
     Qed.
-
-    (* Lemma read_value_has_dtyp : forall mem a τ v dv, *)
-    (*     is_supported τ -> *)
-    (*     not_pointer τ -> *)
-    (*     non_void τ -> *)
-    (*     read mem a τ = inr v -> *)
-    (*     uvalue_to_dvalue v = inr dv -> *)
-    (*     dvalue_has_dtyp dv τ. *)
-    (* Proof. *)
-    (*   intros mem a τ v dv SUP NP NV READ CONVERT. *)
-    (*   unfold read in READ. *)
-    (*   break_match; try solve [inversion READ]. *)
-    (*   break_match; subst. *)
-    (*   unfold read_in_mem_block in READ. *)
-    (*   unfold deserialize_sbytes in READ. *)
-    (*   break_match. *)
-    (*   - (* Fully defined *) *)
-    (*     inversion SUP; *)
-    (*       try solve [exfalso; auto]; *)
-    (*       try solve [inversion READ; subst; inversion CONVERT; subst; constructor]. *)
-
-    (*     +  *)
-    (*     unfold deserialize_sbytes_defined in READ. *)
-    (*     cbn in *. *)
-    (*     + inversion READ; subst; inversion CONVERT; subst. *)
-    (*       constructor. *)
-    (*     + unfold deserialize_sbytes_defined in READ *)
-    (*       break_match; inversion SUP; subst. *)
-    (*       inversion READ; subst; inversion CONVERT; subst; *)
-    (*       constructor. *)
-
-    (*   - (* UNDEF, actually a contradiction *) *)
-    (*     inversion READ; subst. *)
-    (*     cbn in CONVERT. inversion CONVERT. *)
-    (* Qed. *)
 
     Lemma allocate_succeeds : forall m1 τ,
         non_void τ ->
@@ -2934,31 +2879,6 @@ Section PARAMS.
         reflexivity.
       - auto.
     Qed.
-
-    (* Lemma write_read : *)
-    (*   forall (m m' : memory_stack) (t : dtyp) (val : dvalue) (a : addr), *)
-    (*     write m a val = inr m' -> *)
-    (*     read m' a t = inr (dvalue_to_uvalue val). *)
-    (* Proof. *)
-    (*   intros m m' t val a Hwrite. *)
-    (*   unfold write in Hwrite. *)
-    (*   unfold read. *)
-    (*   destruct (get_logical_block m a) eqn:Hbk. *)
-    (*   - destruct l eqn:Hl. destruct a as [b o]. *)
-    (*     cbn in Hbk. *)
-    (*     cbn in Hwrite. *)
-    (*     inversion Hwrite. *)
-    (*     cbn. *)
-
-    (*     (* TODO: clean this up *) *)
-    (*     epose proof get_logical_block_of_add_logical_block m (b, o). *)
-    (*     unfold get_logical_block in H2. *)
-    (*     rewrite H2. clear H2. *)
-
-    (*     rewrite blah. *)
-    (*     reflexivity. *)
-    (*   - inversion Hwrite. *)
-    (* Qed. *)
 
     Lemma no_overlap_reflect :
       forall x y s, reflect (no_overlap x s y s) (no_overlap_b x s y s).

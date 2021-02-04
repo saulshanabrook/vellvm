@@ -20,7 +20,7 @@
      stated in Section 5.\
      The state invariant sketched in Section 7 can be found in [Correctness_Invariants](./coq/LLVMGen/Correctness_Invariants.v).\
      The result itself is stated in [Correctness_GenIR](./coq/LLVMGen/Correctness_GenIR.v).\
-     **Note on admits**: This file contains three admits. These correspond to three operators that we have not yet proved.
+     **Note on admits**: This file contains three admits. These correspond to three operators that we have not yet proved (and have not presented in the paper).
      We emphasize that these operators have a similar structure to the cases of IMap and Power that we have proved:
      they use "genWhileLoop" to iterate some operation over a vector.
      As such, we are confident that while these proofs will require some non-trivial effort, they will not require
@@ -47,7 +47,15 @@
      express the well-definedness of the source semantics in an itree-world is developed in [NoFailure](./src/coq/Utils/NoFailure.v).
    - we have not found the space to detail it in the paper, but the [tfor] itree combinator we
      introduce to help reason generically about [genWhileLoop] is defined in [TFor](./src/coq/Utils/TFor.v).
-
+     
+     **Note on admits**: The Vellvm development contains three admits at the present.\
+     They are all three minor technicalities of the memory model, in [MemoryTheory](./src/coq/Handlers/MemoryTheory.v).\
+     One expresses the behavior of the successive deserialization of the serialization of a dynamic value: we have proved most cases,
+     but it requires some tedious arithmetic at each numerical types, and lacked a few cycles to complete it.\
+     One relates to a fringe case w.r.t. what happens when one tries to read a data of size 0 from memory.\
+     The last one is about the size of values read in memory, and rises a slight issue in the fringe case mentioned above.\
+     None of them is related in any fashion to the heart of the proof that we present in this paper. We naturally intend to fix
+     them as soon as possible nonetheless.
 
 # Vellvm
 [![Build Status](https://travis-ci.com/vellvm/vellvm.svg?branch=master)](https://travis-ci.com/vellvm/vellvm)

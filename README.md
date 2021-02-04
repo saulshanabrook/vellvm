@@ -20,13 +20,18 @@
      stated in Section 5.\
      The state invariant sketched in Section 7 can be found in [Correctness_Invariants](./coq/LLVMGen/Correctness_Invariants.v).\
      The result itself is stated in [Correctness_GenIR](./coq/LLVMGen/Correctness_GenIR.v).\
-     **Note on admits**: This file contains three admits. These correspond to three operators that we have not yet proved (and have not presented in the paper).
+     **Note on admits**:\
+     The [Correctness_GenIR](./coq/LLVMGen/Correctness_GenIR.v) file contains three admits: these correspond to three operators that we have not yet proved (and have not presented in the paper).\
      We emphasize that these operators have a similar structure to the cases of IMap and Power that we have proved:
      they use "genWhileLoop" to iterate some operation over a vector.
      As such, we are confident that while these proofs will require some non-trivial effort, they will not require
      any new meta-theory nor significant invariant, and hence will not be an obstacle. We intend to tackle them
-     in the upcoming weeks.
-
+     in the upcoming weeks.\
+     The [Correctness_IMap](./coq/LLVMGen/Correctness_IMap.v) file contains one admit: [commut_gen']. This technical lemma is a variant of
+     a series of others that we have proved to commute pure computations represented as itrees under the right hypotheses.
+     We use it to prove that it is benign for the compiler to inverse the order of iteration when compiling down the IMap operator.
+     We unfortunately realized late that the meta-theoretical lemma [commut_gen] that we had proved ahead of time was slightly too weak
+     for our purpose, and hence admitted temporarily this stronger version. 
    
 ### Vellvm side
 

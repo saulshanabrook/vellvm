@@ -20,7 +20,7 @@
      stated in Section 5.\
      The state invariant sketched in Section 7 can be found in [Correctness_Invariants](./coq/LLVMGen/Correctness_Invariants.v).\
      The result itself is stated in [Correctness_GenIR](./coq/LLVMGen/Correctness_GenIR.v).\
-     *Note on admits*: This file contains three admits. These correspond to three operators that we have not yet proved.
+     **Note on admits**: This file contains three admits. These correspond to three operators that we have not yet proved.
      We emphasize that these operators have a similar structure to the cases of IMap and Power that we have proved:
      they use "genWhileLoop" to iterate some operation over a vector.
      As such, we are confident that while these proofs will require some non-trivial effort, they will not require

@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dmitri@sease.upenn.edu>            *
  *     Anonymized              *

@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Anonymized              *
  *     Copyright (c) 2017 Joachim Breitner <joachim@cis.upenn.edu>            *

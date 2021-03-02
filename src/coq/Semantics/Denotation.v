@@ -759,26 +759,6 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | (_, _) => raise "ID / Instr mismatch void/non-void"
         end.
 
-      (* Computes the label to be returned by a switch terminator, after evaluation of values
-         assuming already neither poison nor undef for the selector *)
-      Fixpoint select_switch
-               (value : dvalue) (default_dest : block_id)
-               (switches : list (dvalue * block_id)) : err block_id :=
-        match switches with
-        | [] => ret default_dest
-        | (v,id):: switches =>
-          match value, v with
-          | DVALUE_I1 i1, DVALUE_I1 i2    
-          | DVALUE_I8 i1, DVALUE_I8 i2   
-          | DVALUE_I32 i1, DVALUE_I32 i2
-          | DVALUE_I64 i1, DVALUE_I64 i2
-            => if cmp Ceq i1 i2
-              then ret id
-              else select_switch value default_dest switches
-          | _,_ => failwith "Ill-typed switch."
-          end
-        end.
-
       (* A [terminator] either returns from a function call, producing a [dvalue],
          or jumps to a new [block_id]. *)
       Definition denote_terminator (t: terminator dtyp): itree exp_E (block_id + uvalue) :=
@@ -806,22 +786,10 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
 
         | TERM_Br_1 br => ret (inl br)
 
-        | TERM_Switch (dt,e) default_br dests =>
-          uselector <- denote_exp (Some dt) e;;
-          (* Selection on [undef] is UB *)
-          selector <- pickUnique uselector;;
-          match selector with
-          | DVALUE_Poison => raiseUB "Switching on poison."
-          | _ => (* We evaluate all the selectors. Note that they are enforced to be constants, we could reflect this in the syntax and avoid this step *)
-            switches <- map_monad
-                         (fun '((t,e),id) => us <- denote_exp (Some t) e;; s <- pickUnique us;; ret (s,id))
-                         dests;;
-            lift_err (fun b => ret (inl b)) (select_switch selector default_br switches)
-          end
-
         | TERM_Unreachable => raiseUB "IMPOSSIBLE: unreachable in reachable position" 
 
         (* Currently unhandled VIR terminators *)
+        | TERM_Switch _ _ _
         | TERM_IndirectBr _ _
         | TERM_Resume _
         | TERM_Invoke _ _ _ _ => raise "Unsupport itree terminator"

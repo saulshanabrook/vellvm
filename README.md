@@ -1,43 +1,3 @@
-# Vellvm
-[![Build Status](https://travis-ci.com/vellvm/vellvm.svg?branch=master)](https://travis-ci.com/vellvm/vellvm)
-
-Vellvm is an ongoing project aiming at the formal verification in the Coq proof
-assistant of a compilation infrastructure inspired by the LLVM compiler.
-
-As such, its central piece is Verified IR (VIR), a Coq formalization of the
-semantics of (a subset of) the LLVM IR that is intended for _formal
-verification_ of LLVM-based software. 
-It is being developed at the University of Pennsylvania as part of the DeepSpec project.
-
-After VIR, the second component whose development is reaching maturity is the verification of 
-a verified front-end for the [Helix](https://github.com/vzaliva/helix) chain of compilation.
-
-### See:
- - [Vellvm](http://www.cis.upenn.edu/~stevez/vellvm/)
- - [DeepSpec](http://deepspec.org)
- - [LLVM](http://llvm.org)
-
-# Participants
- - Steve Zdancewic
- - Yannick Zakowski
- - Calvin Beck
- - Irene Yoon
- 
-## Past Contributors
- - Vivien Durey 
- - Dmitri Garbuzov 
- - Olek Gierczak
- - William Mansky
- - Milo Martin
- - Santosh Nagarakatte 
- - Emmett Neyman 
- - Christine Rizkallah 
- - Robert Zajac
- - Richard Zhang 
- - Jianzhou Zhao
-
----
-
 # Structure of the development
 
 The development is organized as follows.
@@ -94,7 +54,7 @@ These unverified parts of the development live in the `src/ml` folder.
 - `extracted/Extract.v`    instructions for the extraction of the development to OCaml
 - `libvir/interpreter.ml`  OCaml driver for running the interpreter; the `step` function 
                                  walks over the ITree that remains after complete interpretation of the denotation of a program
-- `libvir/llvm_parser.mly` the parser, adapted from Vellvm, as discussed in Section 4.5.
+- `libvir/llvm_parser.mly` the parser
 - `testing/assertion.ml`   custom annotations of llvm programs as comments used to define our tests.
 - `main.ml`                top-level from which our executable is obtained.
 
@@ -124,8 +84,8 @@ Our current test-suite of LLVM programs for which we compare our semantics again
 
 Compilation:
 
-1. Install all external dependencies
-2. Clone the vellvm git repo with the `--recurse-submodule` option
+1. Install all external dependencies (`make opam` in the `src/` directory should do this, if desired)
+2. Clone the git repo with the `--recurse-submodule` option (`git submodule update --init` should also work after cloning)
 1. Run `make` in the /src directory: it will first compile the itree / quickchick libraries, then vir, and finally extract the OCaml executable
 
 # Running

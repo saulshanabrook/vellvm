@@ -21,9 +21,6 @@ From Vir Require Import
     behavior at any level by simply locally defining other [fmap] or [endo] instances.
 
     Examples of use are provided at the end of the file.
-
-   NOTE YZ: I wrote the code as such for historical reasons, but I believe all instances of [endo] for
-   structures that are family of types could be redefined as [endo id].
  *)
 
 Section Endo.

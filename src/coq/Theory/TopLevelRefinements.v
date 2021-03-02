@@ -49,7 +49,6 @@ Module R := Refinement.Make Memory.Addr LLVMEvents.
 Import R. 
 
 (**
-   YZ: Trying to figure how to tidy up everything. This file is currently a holdall.
    In here, we have:
    * partial interpreters to each levels;
    * hierarchies of refinements of mcfgs and proofs of inclusions;

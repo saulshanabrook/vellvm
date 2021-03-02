@@ -249,9 +249,6 @@ Ltac vstep3 :=
     is currently of interest.
 
     The following tactics simply put in the context such continuations.
-
-    YZ: We may want to hide the continuations altogether as is done for the [cfg].
-
  *)
 
 Ltac focus_single_step_r :=

@@ -104,7 +104,7 @@ Open Scope N_scope.
     itrees in the second phase.
  *)
 
-(* YZ Ask Steve: why is LLVMEvents an argument to the functor rather than have Make(A) inside the module? *)
+
 Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
   Import LLVMEvents.
 
@@ -123,7 +123,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
        and has to be done here hundreds and hundreds of times due to the brutal pattern matching on
        several values. Factoring the inference upfront is therefore necessary.
      *)
-    (* YZ: Loosen [conv_E] into [exp_E] to reduce the number of interfaces at play? *)
+    
     Definition eval_conv_h conv (t1:dtyp) (x:dvalue) (t2:dtyp) : itree conv_E dvalue :=
       let raise := @raise conv_E dvalue _
       in
@@ -347,7 +347,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
       Note: global maps contain [dvalue]s, while local maps contain [uvalue]s.
       We perform the conversion here.
    *)
-  (* YZ: Loosen [lookup_E] into [exp_E] to reduce the number of interfaces at play? *)
+  
   Definition lookup_id (i:ident) : itree lookup_E uvalue :=
     match i with
     | ID_Global x => dv <- trigger (GlobalRead x);; ret (dvalue_to_uvalue dv)
@@ -831,7 +831,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
       Definition denote_code (c: code dtyp): itree instr_E unit :=
         map_monad_ denote_instr c.
 
-      (* YZ FIX: no need to push/pop, but do all the assignments afterward *)
+      
       (* One needs to be careful when denoting phi-nodes: they all must
          be evaluated in the same environment.
          We therefore starts the denotation of a phi-node by pushing a
@@ -977,7 +977,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
  *)
       Definition lookup_defn {B} := @assoc dvalue B _.
 
-      (* YZ Note: we could have chosen to distinguish both kinds of calls in [denote_instr] *)
+      
       Definition denote_mcfg
                  (fundefs:list (dvalue * function_denotation)) (dt : dtyp)
                  (f_value : uvalue) (args : list uvalue) : itree L0 uvalue :=

@@ -2646,7 +2646,7 @@ Section Memory_Stack_Theory.
       constructor; auto.
     Qed.
 
-    (* YZ : Either exists, or define more properly *)
+    
     Definition equiv_sum {A : Type} (R : A -> A -> Prop) : err A -> err A -> Prop :=
       fun ma ma' => match ma,ma' with
                     | inr a, inr a' => R a a'

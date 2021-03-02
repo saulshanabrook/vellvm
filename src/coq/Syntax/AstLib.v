@@ -758,7 +758,7 @@ Section hiding_notation.
   End SerializeTyp.
 End hiding_notation.
 
-(* YZ: The following code is not used currently. TODO double check if it can be removed *)
+
 (*
 Section WithType.
   Variable (T:Set).

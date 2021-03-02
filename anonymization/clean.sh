@@ -23,3 +23,5 @@ find .. -not -path "*anonymization*" -not -path "*.git*" -type f -exec perl -pi 
 # Remove comments from people
 find .. -not -path "*anonymization*" -not -path "*.git*" -type f -exec perl -pi -e  "s|\(\* Calvin.*?\*\)||g"  {} \;
 find .. -not -path "*anonymization*" -not -path "*.git*" -type f -exec perl -pi -e  "s|\(\* SAZ.*?\*\)||g"  {} \;
+find .. -not -path "*anonymization*" -not -path "*.git*" -type f -exec perl -pi -e  "s|\(\* IY.*?\*\)||g"  {} \;
+find .. -not -path "*anonymization*" -not -path "*.git*" -type f -exec perl -pi -e  "s|\(\* YZ.*?\*\)||g"  {} \;

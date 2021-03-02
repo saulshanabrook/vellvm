@@ -814,7 +814,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
           (* From LLVM Docs : The 'llvm.memcpy.*' intrinsics copy a block of
              memory from the source location to the destination location,
              which are not allowed to overlap. *)
-          (* IY: Could clean up with boolean reflection? *)
+          
           if (no_overlap_b (dst_b, dst_o) mem_block_size
                                  (src_b, src_o) mem_block_size) then
             (* No guarantee that src_block has a certain size. *)

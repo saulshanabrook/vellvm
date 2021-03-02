@@ -315,7 +315,7 @@ Admitted.
     apply refine_mcfg_L2_correct, swap_correct_L2.
   Qed.
 
-  (* YZ: TEMPORARY TESTING, TO REMOVE AFTERWARDS *)
+  
   (*
   (* Here's some random cfg *)
   Definition foo :=

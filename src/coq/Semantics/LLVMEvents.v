@@ -64,7 +64,7 @@ Set Implicit Arguments.
 Set Contextual Implicit.
 
  (* Interactions with global variables for the LLVM IR *)
- (* YZ: Globals are read-only, except for the initialization. We could want to reflect this in the events themselves. *)
+ 
   Variant GlobalE (k v:Type) : Type -> Type :=
   | GlobalWrite (id: k) (dv: v): GlobalE k v unit
   | GlobalRead  (id: k): GlobalE k v v.

@@ -332,7 +332,7 @@ Inductive wf_typ : list (ident * typ) -> typ -> Prop :=
 .
 
 
-Hint Constructors wf_typ.
+Hint Constructors wf_typ : core.
 
 
 Definition wf_env (env : list (ident * typ)) : Prop :=
@@ -431,7 +431,7 @@ Inductive guarded_wf_typ : list (ident * typ) -> typ -> Prop :=
       guarded_wf_typ defs TYPE_Opaque
 .
 
-Hint Constructors guarded_wf_typ.
+Hint Constructors guarded_wf_typ : core.
 
 
 Theorem wf_typ_is_guarded_wf_typ :
@@ -529,7 +529,7 @@ Inductive typ_order : typ -> typ -> Prop :=
 .
 
 
-Hint Constructors typ_order.
+Hint Constructors typ_order : core.
 
 
 Theorem wf_typ_order :
@@ -547,8 +547,8 @@ Proof.
   apply lt_wf. apply wf_typ_order.
 Qed.
 
-Hint Resolve wf_lt_typ_order.
-Hint Constructors lex_ord.
+Hint Resolve wf_lt_typ_order : core.
+Hint Constructors lex_ord : core.
 
 
 Definition length_order {A : Type} (l1 l2 : list A) :=
@@ -808,7 +808,7 @@ Proof.
 Defined.    
 
 
-Hint Constructors unrolled_typ.
+Hint Constructors unrolled_typ : core.
 
 
 Lemma find_in_wf_env :
@@ -914,8 +914,8 @@ Proof.
         assumption.
 Qed.
 
-Hint Constructors sized_typ.
-Hint Constructors guarded_typ.
+Hint Constructors sized_typ : core.
+Hint Constructors guarded_typ : core.
 
 
 (* Types with no identifiers *)
@@ -950,7 +950,7 @@ Inductive simple_typ : typ -> Prop :=
 .
 
 
-Hint Constructors simple_typ.
+Hint Constructors simple_typ : core.
 
 
 Theorem map_in_id :

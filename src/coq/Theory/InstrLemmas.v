@@ -11,7 +11,7 @@ From ITree Require Import
      Eq.Eq
      TranslateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Utils.Util
      Syntax.LLVMAst

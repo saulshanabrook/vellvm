@@ -20,7 +20,7 @@
   * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.           *
   * }}}                                                                      *)
 (*  ------------------------------------------------------------------------- *)
-(* Adapted for use in Vellvm by Steve Zdancewic (c) 2017                      *)
+(* Adapted for use in Vir by Steve Zdancewic (c) 2017                      *)
 (*  ------------------------------------------------------------------------- *)
 
 

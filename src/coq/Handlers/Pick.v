@@ -13,7 +13,7 @@ From ITree Require Import
      Eq.Eq
      Events.State.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Error
      Utils.Util
      Utils.PropT

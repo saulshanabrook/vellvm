@@ -12,8 +12,8 @@
 (ocamllex llvm_lexer)
 
 (library
-  (name libvellvm)
+  (name libvir)
   (wrapped false)
   (libraries extracted str)
-  (synopsis "Vellvm library")
+  (synopsis "Vir library")
   )

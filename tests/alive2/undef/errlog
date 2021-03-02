@@ -19,7 +19,7 @@ Vighnesh look at this
 
 ../tests/alive2/undef/br-undef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 br-undefsrctgt:
   failed - UVALUE_I8(3) = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -31,7 +31,7 @@ br-undefsrctgt:
 
 ../tests/alive2/undef/br-undef3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 br-undef3srctgt:
   failed - UVALUE_I8(3) = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -43,7 +43,7 @@ br-undef3srctgt:
 
 ../tests/alive2/undef/br-undef4.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 br-undef4srctgt:
   failed - UVALUE_I8(0) = UVALUE_I8(2) on generated input ()
@@ -58,7 +58,7 @@ br-undef4srctgt:
 
 ../tests/alive2/undef/fncall-freeze.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 fncall-freezesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I8(2930), UVALUE_I8(-6498))
@@ -69,7 +69,7 @@ fncall-freezesrctgt:
 
 ../tests/alive2/undef/fncall-freeze2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 fncall-freeze2srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I8(9985), UVALUE_I8(-8721))
@@ -80,7 +80,7 @@ fncall-freeze2srctgt:
 
 ../tests/alive2/undef/fncall-readmem.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 fncall-readmemsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I32(1237))
@@ -93,7 +93,7 @@ fncall-readmemsrctgt:
 
 ../tests/alive2/undef/opt-noundef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 opt-noundefsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I32(3983))

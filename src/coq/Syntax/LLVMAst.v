@@ -19,13 +19,13 @@
   * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.           *
    }}}                                                                       *)
 (*  ------------------------------------------------------------------------- *)
-(* Adapted for use in Vellvm by Steve Zdancewic (c) 2017                      *)
+(* Adapted for use in Vir by Steve Zdancewic (c) 2017                      *)
 (*  ------------------------------------------------------------------------- *)
 
 (* begin hide *)
 Require Import Floats.
 From Coq Require Import List String Ascii ZArith.
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util.
 
 Import ListNotations.
@@ -42,7 +42,7 @@ Open Scope list_scope.
     should target: [@toplevel_entities typ (block typ * list (block typ))]
 
     All changes to this file must naturally be mirrored in the parser.
-    "/src/ml/libvellvm/llvm_parser.mly"
+    "/src/ml/libvir/llvm_parser.mly"
 
 *)
 

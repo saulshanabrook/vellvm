@@ -20,7 +20,7 @@ Vighnesh look at this
 
 ../tests/alive2/refinement/nondet-fail2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 nondet-fail2srctgt:
   failed - UVALUE_I1(0) = UVALUE_I1(1) on generated input ()

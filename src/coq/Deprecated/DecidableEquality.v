@@ -9,10 +9,10 @@ Require Import ZArith.
 (* CompCert dependencies *)
 Require Import Integers Floats.
 
-(* Vellvm dependencies *)
-Require Import Vellvm.Util.
-Require Import Vellvm.LLVMAst Vellvm.AstLib Vellvm.CFG.
-Require Import Vellvm.DynamicValues Vellvm.StepSemantics Vellvm.Memory.
+(* Vir dependencies *)
+Require Import Vir.Util.
+Require Import Vir.LLVMAst Vir.AstLib Vir.CFG.
+Require Import Vir.DynamicValues Vir.StepSemantics Vir.Memory.
 Require Import List.
 (** ** Decidable Equality *) 
 

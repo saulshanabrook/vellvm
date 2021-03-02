@@ -18,7 +18,7 @@ Vighnesh look at this
 
 ../tests/alive2/params/omit-array.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 omit-arraysrctgt:
   failed - EXP_Cstring not yet implemented = EXP_Cstring not yet implemented on generated input ()
@@ -29,7 +29,7 @@ omit-arraysrctgt:
 
 ../tests/alive2/params/succinct-incorrect.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 succinct-incorrectsrctgt:
   failed - UVALUE_I32(3413) = UVALUE_I32(3414) on generated input (UVALUE_I32(3413))

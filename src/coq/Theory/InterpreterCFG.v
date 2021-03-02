@@ -10,7 +10,7 @@ From ITree Require Import
      Basics.Monad
      Eq.Eq.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Semantics.LLVMEvents
      Semantics.InterpretationStack

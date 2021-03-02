@@ -12,7 +12,7 @@ From ITree Require Import
      Eq.Eq
      Events.State.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Error
      Syntax.LLVMAst
@@ -141,7 +141,7 @@ End StackMap.
 
 From ExtLib Require Import
      Data.Map.FMapAList.
-From Vellvm Require Import
+From Vir Require Import
      LLVMAst
      MemoryAddress.
 

@@ -55,7 +55,7 @@ Vighnesh look at this
 
 ../tests/alive2/attrs/align-ret-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 align-ret-callsitesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -68,7 +68,7 @@ align-ret-callsitesrctgt:
 
 ../tests/alive2/attrs/align-ret-callsite2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 align-ret-callsite2srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -81,7 +81,7 @@ align-ret-callsite2srctgt:
 
 ../tests/alive2/attrs/dereferenceable-ret-callsite-align.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 dereferenceable-ret-callsite-alignsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I1(1))
@@ -93,7 +93,7 @@ dereferenceable-ret-callsite-alignsrctgt:
 
 ../tests/alive2/attrs/dereferenceable-ret-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 dereferenceable-ret-callsitesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I1(0))
@@ -106,7 +106,7 @@ dereferenceable-ret-callsitesrctgt:
 
 ../tests/alive2/attrs/dereferenceable-ret-callsite2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 dereferenceable-ret-callsite2srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I1(1))
@@ -119,7 +119,7 @@ dereferenceable-ret-callsite2srctgt:
 
 ../tests/alive2/attrs/noreturn-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-2srctgt:
   failed - IMPOSSIBLE: unreachable in reachable position = Uninterpreted Call on generated input (UVALUE_I1(1))
@@ -130,7 +130,7 @@ noreturn-2srctgt:
 
 ../tests/alive2/attrs/noreturn-3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-3srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -143,7 +143,7 @@ noreturn-3srctgt:
 
 ../tests/alive2/attrs/noreturn-fail-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-fail-2srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -156,7 +156,7 @@ noreturn-fail-2srctgt:
 
 ../tests/alive2/attrs/noreturn-fail-4.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-fail-4srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -169,7 +169,7 @@ noreturn-fail-4srctgt:
 
 ../tests/alive2/attrs/noreturn-fail-5.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-fail-5srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -182,7 +182,7 @@ noreturn-fail-5srctgt:
 
 ../tests/alive2/attrs/noreturn-fail-6.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-fail-6srctgt:
   failed - UVALUE_None = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -194,7 +194,7 @@ noreturn-fail-6srctgt:
 
 ../tests/alive2/attrs/noreturn-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturn-failsrctgt:
   failed - Uninterpreted Call = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -205,7 +205,7 @@ noreturn-failsrctgt:
 
 ../tests/alive2/attrs/noreturn.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noreturnsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -218,7 +218,7 @@ noreturnsrctgt:
 
 ../tests/alive2/attrs/noundef-fndef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-fndefsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I1(0))
@@ -231,7 +231,7 @@ noundef-fndefsrctgt:
 
 ../tests/alive2/attrs/noundef-ret-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-ret-callsitesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -244,7 +244,7 @@ noundef-ret-callsitesrctgt:
 
 ../tests/alive2/attrs/noundef-ret-fndef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-ret-fndefsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -257,7 +257,7 @@ noundef-ret-fndefsrctgt:
 
 ../tests/alive2/attrs/noundef-ret.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-retsrctgt:
   failed - UVALUE_Undef = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -269,7 +269,7 @@ noundef-retsrctgt:
 
 ../tests/alive2/attrs/noundef-ret2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-ret2srctgt:
   failed - UVALUE_I32(0) = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -281,7 +281,7 @@ noundef-ret2srctgt:
 
 ../tests/alive2/attrs/noundef-ret3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-ret3srctgt:
   failed - UVALUE_I32(5774) = IMPOSSIBLE: unreachable in reachable position on generated input (UVALUE_I32(5774))
@@ -292,7 +292,7 @@ noundef-ret3srctgt:
 
 ../tests/alive2/attrs/noundef-ret4.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundef-ret4srctgt:
   failed - UVALUE_Poison = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -304,7 +304,7 @@ noundef-ret4srctgt:
 
 ../tests/alive2/attrs/noundefaggr-ret-fndef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundefaggr-ret-fndefsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -317,7 +317,7 @@ noundefaggr-ret-fndefsrctgt:
 
 ../tests/alive2/attrs/noundefaggr-ret-fndef2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundefaggr-ret-fndef2srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -330,7 +330,7 @@ noundefaggr-ret-fndef2srctgt:
 
 ../tests/alive2/attrs/noundefaggr-ret-fndef3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundefaggr-ret-fndef3srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -343,7 +343,7 @@ noundefaggr-ret-fndef3srctgt:
 
 ../tests/alive2/attrs/noundefaggr-ret.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundefaggr-retsrctgt:
   failed - TODO = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -356,7 +356,7 @@ noundefaggr-retsrctgt:
 
 ../tests/alive2/attrs/noundefaggr-ret2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 noundefaggr-ret2srctgt:
   failed - TODO = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -369,7 +369,7 @@ noundefaggr-ret2srctgt:
 
 ../tests/alive2/attrs/returned-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 returned-failsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I8(3281))
@@ -385,121 +385,121 @@ returned-failsrctgt:
 
 ../tests/alive2/attrs/align-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 13, column 25, token '('")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/align-callsite2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 2, column 19, token 'align'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/align-callsite3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 2, column 19, token 'align'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/align-fndef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 26, token '('")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/dereferenceable-align-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 3, column 20, token 'dereferenceable'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/dereferenceable-callsite-align-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 9, column 20, token 'dereferenceable'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/dereferenceable-callsite-max.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 9, column 20, token 'dereferenceable'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/dereferenceable-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 9, column 20, token 'dereferenceable'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/dereferenceable-nofree.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 20, column 46, token 'nofree'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/dereferenceable-shrink.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 4, column 19, token 'dereferenceable'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/nofree.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 24, token 'nofree'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/nofree2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 19, token 'nofree'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/nofree3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 19, token 'nofree'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/nonnull-bugfix.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 19, column 27, token 'nonnull'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/nonnull-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 2, column 19, token 'nonnull'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/nonnull-callsite3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 15, column 19, token 'nonnull'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/noundef-bundle.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 5, column 31, token '['")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/noundef-callsite.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 4, column 18, token 'noundef'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/noundef2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 6, column 18, token 'noundef'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/attrs/readnone-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 7, column 19, token 'readnone'")
 <<<<<<<<<<<<<<< 
 

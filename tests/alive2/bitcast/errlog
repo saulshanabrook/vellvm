@@ -19,7 +19,7 @@ Vighnesh look at this
 
 ../tests/alive2/bitcast/cast-vec-roundtrip-bigendian.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 cast-vec-roundtrip-bigendiansrctgt:
   failed - ill-typed_conv = UVALUE_I8(3594) on generated input (UVALUE_I8(3594))
@@ -32,7 +32,7 @@ cast-vec-roundtrip-bigendiansrctgt:
 
 ../tests/alive2/bitcast/cast-vec-roundtrip.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 cast-vec-roundtripsrctgt:
   failed - ill-typed_conv = UVALUE_I8(8793) on generated input (UVALUE_I8(8793))

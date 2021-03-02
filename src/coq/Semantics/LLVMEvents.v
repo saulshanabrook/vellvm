@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -27,7 +27,7 @@ From ITree Require Import
      ITree
      Events.Exception.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Error
      Syntax.LLVMAst
@@ -40,7 +40,7 @@ Import ITreeNotations.
 
 (****************************** LLVM Events *******************************)
 (**
-   Vellvm's semantics relies on _Interaction Trees_, a generic data-structure allowing to model
+   Vir's semantics relies on _Interaction Trees_, a generic data-structure allowing to model
    effectful computations.
    This file defined the interface provided to the interaction trees, that is the set of
    events that a LLVM program can trigger.

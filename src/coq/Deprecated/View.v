@@ -63,7 +63,7 @@ Definition Subevent A B := forall x, View A x B.
  Consider the case from GlobalE for example *)
 From ITree Require Import 
      Events.State.
-From Vellvm Require Import
+From Vir Require Import
      LLVMEvents.
 From ExtLib Require Import
      Programming.Show

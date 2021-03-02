@@ -14,7 +14,7 @@ From ITree Require Import
      KTreeFacts
      Eq.Eq.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Tactics
      Syntax.CFG

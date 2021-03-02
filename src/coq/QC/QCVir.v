@@ -1,5 +1,5 @@
 From QuickChick Require Import QuickChick.
-From Vellvm Require Import GenAST TopLevel LLVMAst DynamicValues.
+From Vir Require Import GenAST TopLevel LLVMAst DynamicValues.
 Require Import Semantics.LLVMEvents.
 Require Import Semantics.InterpretationStack.
 Require Import Handlers.Handlers.
@@ -15,7 +15,7 @@ From ITree Require Import
 Require Import ExtrOcamlBasic.
 Require Import ExtrOcamlString.
 
-(* TODO: Use the existing vellvm version of this? *)
+(* TODO: Use the existing vir version of this? *)
 Inductive MlResult a e :=
 | MlOk : a -> MlResult a e
 | MlError : e -> MlResult a e.
@@ -45,12 +45,12 @@ Extract Constant to_caml_str =>
 
 
 Axiom llc_command : string -> int.
-Extract Constant llc_command => "fun prog -> let f = open_out ""temporary_vellvm.ll"" in Printf.fprintf f ""%s"" prog; close_out f; Sys.command ""clang -Wno-everything temporary_vellvm.ll -o vellvmqc && ./vellvmqc""".
+Extract Constant llc_command => "fun prog -> let f = open_out ""temporary_vir.ll"" in Printf.fprintf f ""%s"" prog; close_out f; Sys.command ""clang -Wno-everything temporary_vir.ll -o virqc && ./virqc""".
 
 Definition run_llc (prog : list (toplevel_entity typ (block typ * list (block typ)))) : uvalue
   := UVALUE_I8 (repr (llc_command (to_caml_str (show prog)))).
 
-Definition vellvm_agrees_with_clang (prog : list (toplevel_entity typ (block typ * list (block typ)))) : Checker
+Definition vir_agrees_with_clang (prog : list (toplevel_entity typ (block typ * list (block typ)))) : Checker
   := 
     (* collect (show prog) *)
             match interpret prog, run_llc prog with
@@ -58,7 +58,7 @@ Definition vellvm_agrees_with_clang (prog : list (toplevel_entity typ (block typ
             | _, _ => checker true
             end.
 
-Definition agrees := (forAll (run_GenLLVM gen_llvm) vellvm_agrees_with_clang).
+Definition agrees := (forAll (run_GenLLVM gen_llvm) vir_agrees_with_clang).
 Extract Constant defNumTests    => "100".
-QuickChick (forAll (run_GenLLVM gen_llvm) vellvm_agrees_with_clang).
+QuickChick (forAll (run_GenLLVM gen_llvm) vir_agrees_with_clang).
 (*! QuickChick agrees. *)

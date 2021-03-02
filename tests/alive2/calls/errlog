@@ -18,7 +18,7 @@ Vighnesh look at this
 
 ../tests/alive2/calls/call-freeze.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 call-freezesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I8(9072))
@@ -31,7 +31,7 @@ call-freezesrctgt:
 
 ../tests/alive2/calls/escape.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 escapesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -44,7 +44,7 @@ escapesrctgt:
 
 ../tests/alive2/calls/escape2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 escape2srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -57,7 +57,7 @@ escape2srctgt:
 
 ../tests/alive2/calls/fncall-noreturn.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 fncall-noreturnsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -70,7 +70,7 @@ fncall-noreturnsrctgt:
 
 ../tests/alive2/calls/issue455.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 issue455srctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I1(1))
@@ -83,7 +83,7 @@ issue455srctgt:
 
 ../tests/alive2/calls/nocapture.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 nocapturesrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -96,7 +96,7 @@ nocapturesrctgt:
 
 ../tests/alive2/calls/readnone-duplicated.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 readnone-duplicatedsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -109,7 +109,7 @@ readnone-duplicatedsrctgt:
 
 ../tests/alive2/calls/readonly-undef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 readonly-undefsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -122,7 +122,7 @@ readonly-undefsrctgt:
 
 ../tests/alive2/calls/readonly.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 readonlysrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I8(9095))
@@ -138,13 +138,13 @@ readonlysrctgt:
 
 ../tests/alive2/calls/fncall-vararg.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("lexing: empty token")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/calls/ranges.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 9, column 30, token ','")
 <<<<<<<<<<<<<<< 
 

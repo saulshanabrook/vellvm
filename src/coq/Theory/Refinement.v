@@ -4,7 +4,7 @@ From ITree Require Import
      Basics.HeterogeneousRelations
      Eq.Eq.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Syntax.LLVMAst
      Handlers.Handlers

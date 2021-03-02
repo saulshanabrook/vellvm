@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -10,8 +10,8 @@
 
 Require Import ZArith List String Omega.
 Require Import Program.
-Require Import Vellvm.Util.
-Require Import Vellvm.LLVMAst Vellvm.AstLib Vellvm.CFG Vellvm.CFGProp.
+Require Import Vir.Util.
+Require Import Vir.LLVMAst Vir.AstLib Vir.CFG Vir.CFGProp.
 Import ListNotations.
 Open Scope Z_scope.
 Open Scope string_scope.
@@ -19,7 +19,7 @@ Open Scope string_scope.
 Set Implicit Arguments.
 Set Contextual Implicit.
 
-Require Import Vellvm.Handlers.Memory.
+Require Import Vir.Handlers.Memory.
 
 Definition optimization {T} := definition T (list (block T)) -> definition T (list (block T)).
 

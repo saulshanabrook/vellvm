@@ -24,7 +24,7 @@ Vighnesh look at this
 
 ../tests/alive2/opt-memory/calloc.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 callocsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input ()
@@ -37,7 +37,7 @@ callocsrctgt:
 
 ../tests/alive2/opt-memory/memaccess-strlen.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memaccess-strlensrctgt:
   failed - EXP_Cstring not yet implemented = EXP_Cstring not yet implemented on generated input ()

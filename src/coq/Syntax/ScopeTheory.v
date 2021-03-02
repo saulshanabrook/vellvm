@@ -3,7 +3,7 @@ From Coq Require Import
      List.
 Import ListNotations.
 
-From Vellvm Require Import
+From Vir Require Import
      Numeric.Coqlib
      Utils.Util
      Utils.Tactics
@@ -774,7 +774,7 @@ Proof.
       eapply free_in_cfg_cons; eauto.
 Qed.
 
-From Vellvm Require Import Syntax.TypToDtyp.
+From Vir Require Import Syntax.TypToDtyp.
 
 Section DTyp.
 

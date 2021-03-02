@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -9,7 +9,7 @@
  ---------------------------------------------------------------------------- *)
 
 Require Import Ascii Strings.String.
-From Vellvm Require Import
+From Vir Require Import
      Syntax.LLVMAst.
 Open Scope string_scope.
 
@@ -17,7 +17,7 @@ Open Scope string_scope.
 Definition mangle_raw_id (id:raw_id) : raw_id :=
   match id with
   | Anon n => id
-  | Name s => Name (append "_vellvm" s)
+  | Name s => Name (append "_vir" s)
   | Raw n => id
   end.
 

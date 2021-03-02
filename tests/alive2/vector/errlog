@@ -17,7 +17,7 @@ Vighnesh look at this
 
 ../tests/alive2/vector/vector-poison-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 vector-poison-2srctgt:
   failed - insertelement not implemented = UVALUE_Poison on generated input (UVALUE_I32(6903))
@@ -29,7 +29,7 @@ vector-poison-2srctgt:
 
 ../tests/alive2/vector/vector-poison.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 vector-poisonsrctgt:
   failed - insertelement not implemented = UVALUE_Poison on generated input (UVALUE_I32(6226))

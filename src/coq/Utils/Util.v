@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dmitri@sease.upenn.edu>            *
  *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
@@ -9,7 +9,7 @@
  *   3 of the License, or (at your option) any later version.                 *
  ---------------------------------------------------------------------------- *)
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics.
 
 From Coq Require Import
@@ -1503,7 +1503,7 @@ Tactic Notation "inv_bind" hyp(H) :=
       destruct o eqn:hy; [|discriminate]; simpl in H
     end.
 
-From Vellvm Require Import
+From Vir Require Import
      Numeric.Coqlib.
  
 Infix "⊍" := list_disjoint (at level 60).

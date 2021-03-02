@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2018 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -17,7 +17,7 @@ From ExtLib Require Import
      Programming.Eqv
      Data.String.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Error
      Syntax.LLVMAst
      Semantics.LLVMEvents
@@ -170,7 +170,7 @@ Definition defined_intrinsics_decls :=
   [ fabs_32_decl; fabs_64_decl; maxnum_32_decl ; maxnum_64_decl; minimum_32_decl; minimum_64_decl; memcpy_8_decl ].
 
 (* This functor module provides a way to (extensibly) add the semantic behavior
-   for intrinsics defined outside of the core Vellvm operational semantics.
+   for intrinsics defined outside of the core Vir operational semantics.
 
    Internally, invocation of an intrinsic looks no different than that of an
    external function call, so each LLVM intrinsic instruction should produce
@@ -285,7 +285,7 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
       | _ => failwith "llvm_minimum_f32 got incorrect / ill-typed intputs"
       end.
 
-  (* Clients of Vellvm can register the names of their own intrinsics
+  (* Clients of Vir can register the names of their own intrinsics
      definitions here. *)
   Definition defined_intrinsics : intrinsic_definitions :=
     [ (fabs_32_decl, llvm_fabs_f32) ;

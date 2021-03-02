@@ -21,7 +21,7 @@ From ExtLib Require Import
      Programming.Eqv
      Data.String.
 
-From Vellvm Require Import
+From Vir Require Import
      Numeric.Coqlib
      Numeric.Integers
      Numeric.Floats

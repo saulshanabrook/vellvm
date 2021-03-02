@@ -41,7 +41,7 @@ Local Open Scope cat_scope.
 
 (* TODO: Move to itrees library --------------------------------------------- *)
 
-(* SAZ: Some of these aren't actually needed for Vellvm's PropT *)
+(* SAZ: Some of these aren't actually needed for Vir's PropT *)
 Lemma eutt_iter'' {E I1 I2 R1 R2}
       (RI1 RI2 : I1 -> I2 -> Prop)
       (HSUB: RI2 <2= RI1)

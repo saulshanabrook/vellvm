@@ -3,7 +3,7 @@ From Coq Require Import
      List.
 Import ListNotations.
 
-From Vellvm Require Import
+From Vir Require Import
      Numeric.Coqlib
      Utils.Util
      Utils.Tactics

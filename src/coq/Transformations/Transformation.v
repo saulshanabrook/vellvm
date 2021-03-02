@@ -1,4 +1,4 @@
-From Vellvm Require Import
+From Vir Require Import
      CFG
      LLVMAst
      TopLevel

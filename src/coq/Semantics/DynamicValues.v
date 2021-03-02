@@ -401,25 +401,6 @@ Fixpoint uvalue_to_dvalue (uv : uvalue) : err dvalue :=
     ret (DVALUE_Vector elts')
 
   | _ => failwith "Attempting to convert a partially non-reduced uvalue to dvalue. Should not happen"
-                 (* YZ: likely useless to recurse: I think it should be an invariant that:
-                    1: We only call [uvalue_to_dvalue] on concrete [uvalue]s
-                    2: That concrete [uvalue] do not contain any operators, i.e. are already fully reduced
-                  *)
-                 
-  (*
-  | UVALUE_IBinop iop v1 v2                => ret (DVALUE_IBinop iop v1 v2)
-  | UVALUE_ICmp cmp v1 v2                  => ret (DVALUE_ICmp cmp v1 v2)
-  | UVALUE_FBinop fop fm v1 v2             => ret (DVALUE_FBinop fop fm v1 v2)
-  | UVALUE_FCmp cmp v1 v2                  => ret (DVALUE_FCmp cmp v1 v2)
-  | UVALUE_Conversion conv v t_to          => ret (DVALUE_Conversion conv v t_to)
-  | UVALUE_GetElementPtr t ptrval idxs     => ret (DVALUE_GetElementPtr t ptrval idxs)
-  | UVALUE_ExtractElement vec idx          => ret (DVALUE_ExtractElement vec idx)
-  | UVALUE_InsertElement vec elt idx       => ret (DVALUE_InsertElement vec elt idx)
-  | UVALUE_ShuffleVector vec1 vec2 idxmask => ret (DVALUE_ShuffleVector vec1 vec2 idxmask)
-  | UVALUE_ExtractValue vec idxs           => ret (DVALUE_ExtractValue vec idxs)
-  | UVALUE_InsertValue vec elt idxs        => ret (DVALUE_InsertValue vec elt idxs)
-  | UVALUE_Select cnd v1 v2                => ret (DVALUE_Select cnd v1 v2)
-   *)
   end.
 
 Lemma uvalue_to_dvalue_of_dvalue_to_uvalue :
@@ -476,9 +457,6 @@ Qed.
 
 
 (* returns true iff the uvalue contains no occurrence of UVALUE_Undef. *)
-(* YZ: See my comment above. If I'm correct, then we should also fail on operators and hence have:
-   is_concrete uv = true <-> uvalue_to_dvalue uv = Some v
- *)
 Fixpoint is_concrete (uv : uvalue) : bool :=
   match uv with
   | UVALUE_Addr a => true
@@ -496,18 +474,6 @@ Fixpoint is_concrete (uv : uvalue) : bool :=
   | UVALUE_Array elts => forallb is_concrete elts
   | UVALUE_Vector elts => forallb is_concrete elts
   | _ => false
-  (* | UVALUE_IBinop iop v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_ICmp cmp v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_FBinop fop fm v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_FCmp cmp v1 v2 => allb is_concrete [v1 ; v2] *)
-  (* | UVALUE_Conversion conv v t_to => is_concrete v *)
-  (* | UVALUE_GetElementPtr t ptrval idxs => allb is_concrete (ptrval :: idxs) *)
-  (* | UVALUE_ExtractElement vec idx => allb is_concrete [vec ; idx] *)
-  (* | UVALUE_InsertElement vec elt idx => allb is_concrete [vec ; elt ; idx] *)
-  (* | UVALUE_ShuffleVector vec1 vec2 idxmask => allb is_concrete [vec1 ; vec2 ; idxmask] *)
-  (* | UVALUE_ExtractValue vec idxs => is_concrete vec *)
-  (* | UVALUE_InsertValue vec elt idxs => allb is_concrete [vec ; elt] *)
-  (* | UVALUE_Select cnd v1 v2 => allb is_concrete [cnd ; v1 ; v2] *)
   end.
 
 (* If both operands are concrete, uvalue_to_dvalue them and run them through

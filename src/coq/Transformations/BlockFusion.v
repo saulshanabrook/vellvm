@@ -16,7 +16,7 @@ From ITree Require Import
      InterpFacts
      TranslateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Tactics
      Utils.PostConditions

@@ -15,7 +15,7 @@ From ITree Require Import
      Events.State
      Events.StateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Utils.Util
      Syntax.LLVMAst

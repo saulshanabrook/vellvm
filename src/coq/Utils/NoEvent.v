@@ -854,7 +854,7 @@ Qed.
    forall t', model_pick t t' -> t' ≈ elim_pick t
  *)
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Utils.Util
      Utils.PropT
@@ -933,10 +933,10 @@ Section DeterministicSingleton.
   Admitted.
 
   Variable remove_pick_ub : itree (ExternalCallE +' PickE +' UBE +' DebugE +' FailureE) ~> itree (ExternalCallE +' DebugE +' FailureE).
-  Variable deterministic_vellvm : forall R, itree L0 R -> Prop.
-  (* Definition deterministic_vellvm *)
+  Variable deterministic_vir : forall R, itree L0 R -> Prop.
+  (* Definition deterministic_vir *)
   Lemma deterministc_llvm_is_singleton : forall R RR t g sl mem,
-      deterministic_vellvm t ->
+      deterministic_vir t ->
       is_singleton (interp_mcfg5 (R := R) RR t g sl mem) (remove_pick_ub (interp_mcfg3 (R := R) t g sl mem)).
 
   (*

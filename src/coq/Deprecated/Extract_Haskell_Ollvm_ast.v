@@ -1,7 +1,7 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *     Copyright (c) 2017 Joachim Breitner <joachim@cis.upenn.edu>            *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
@@ -12,7 +12,7 @@
 Require Import Ascii String.
 Extraction Language Haskell.
 
-Require Import Vellvm.LLVMAst.
+Require Import Vir.LLVMAst.
 
 Extract Inductive option => "Prelude.Maybe" [ "Nothing" "Just" ].
 Extract Inductive list => "[]" [ "[]" "(:)" ].

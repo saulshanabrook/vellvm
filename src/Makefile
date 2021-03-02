@@ -11,7 +11,7 @@ OPAMPKGS=coq coq-ext-lib coq-paco coq-ceres coq-flocq coq-mathcomp-ssreflect coq
 ITREEDIR=../lib/InteractionTrees
 QUICKCHICKDIR=../lib/QuickChick
 
-COQINCLUDES=$(foreach d, $(COQDIR), -R $(d) Vellvm) -R $(EXTRACTDIR) Extract -R $(ITREEDIR)/theories/ ITree -R $(QUICKCHICKDIR)/src/ QuickChick -I $(QUICKCHICKDIR)/src
+COQINCLUDES=$(foreach d, $(COQDIR), -R $(d) Vir) -R $(EXTRACTDIR) Extract -R $(ITREEDIR)/theories/ ITree -R $(QUICKCHICKDIR)/src/ QuickChick -I $(QUICKCHICKDIR)/src
 COQC="$(COQBIN)coqc" -q $(COQINCLUDES) $(COQCOPTS)
 COQDEP="$(COQBIN)coqdep" $(COQINCLUDES)
 COQEXEC="$(COQBIN)coqtop" -q -w none $(COQINCLUDES) -batch -load-vernac-source
@@ -26,7 +26,7 @@ COQFILESINTERP := Numeric/Archi Numeric/Coqlib Numeric/Integers Numeric/Zbits Nu
 									Syntax/Scope Syntax/SurfaceSyntax\
 									Semantics/MemoryAddress Semantics/DynamicValues Semantics/LLVMEvents Semantics/IntrinsicsDefinitions\
 									Handlers/Intrinsics Handlers/Local Handlers/Global Handlers/Stack Handlers/Pick Handlers/UndefinedBehaviour Handlers/Memory Handlers/MemoryTheory Handlers/Handlers\
-								  Semantics/Denotation Semantics/InterpretationStack Semantics/TopLevel QC/GenAST QC/QCVellvm
+								  Semantics/Denotation Semantics/InterpretationStack Semantics/TopLevel QC/GenAST QC/QCVir
 
 COQFILESTHEORY := Syntax/ScopeTheory Theory/Refinement Theory/InterpreterMCFG Theory/InterpreterCFG Theory/ExpLemmas Theory/InstrLemmas Theory/DenotationTheory\
 									Theory/TopLevelRefinements Theory/SymbolicInterpreter\
@@ -44,13 +44,13 @@ all:
 	@test -f .depend || $(MAKE) depend
 	$(MAKE) coq
 	$(MAKE) extracted
-	$(MAKE) vellvm
+	$(MAKE) vir
 
 interp:
 	@test -f .depend || $(MAKE) depend
 	$(MAKE) coqinterp
 	$(MAKE) extracted
-	$(MAKE) vellvm
+	$(MAKE) vir
 
 coq: $(VOFILES)
 
@@ -100,20 +100,20 @@ depend: itrees quickchick $(VFILES)
 EXE=_build/default/ml/main.exe
 
 $(EXE): extracted ml/dune ml/extracted/dune ml/testing/dune
-	@echo "Compiling Vellvm"
+	@echo "Compiling Vir"
 	dune build ml/main.exe 
 
-vellvm: $(EXE)
-	cp $(EXE) vellvm
+vir: $(EXE)
+	cp $(EXE) vir
 
-test: vellvm
-	./vellvm --test
+test: vir
+	./vir --test
 
 print-includes:
 	@echo $(COQINCLUDES)
 
-clean: clean-vellvm clean-itrees
-clean-vellvm:
+clean: clean-vir clean-itrees
+clean-vir:
 	rm -f .depend
 	find $(COQDIR) -name "*.vo" -delete
 	find $(COQDIR) -name "*.vio" -delete
@@ -128,13 +128,13 @@ clean-vellvm:
 	rm -f $(EXTRACTDIR)/STAMP $(EXTRACTDIR)/*.ml $(EXTRACTDIR)/*.mli
 	dune clean
 	rm -rf output
-	rm -f vellvm
+	rm -f vir
 	rm -f doc/coq2html.ml doc/coq2html doc/*.cm? doc/*.o
 clean-itrees:
 	make -C $(ITREEDIR) clean
 	make -C $(QUICKCHICKDIR) clean
 
-.PHONY: clean-vellvm clean-itrees
+.PHONY: clean-vir clean-itrees
 
 doc/coq2html: 
 	make -C ../lib/coq2html

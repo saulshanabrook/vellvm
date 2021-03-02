@@ -1,14 +1,14 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
  *   3 of the License, or (at your option) any later version.                 *
  ---------------------------------------------------------------------------- *)
 
-(** * Plugging the pieces together: executable and propositional semantics for Vellvm *)
+(** * Plugging the pieces together: executable and propositional semantics for Vir *)
 
 (* begin hide *)
 From Coq Require Import
@@ -23,7 +23,7 @@ From ExtLib Require Import
      Structures.Monads
      Data.Map.FMapAList.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Error
      Utils.PropT
@@ -47,10 +47,10 @@ Open Scope string_scope.
 (* end hide *)
 
 (** * Top Level
-   This file ties things together to concretely defines the semantics of a [Vellvm]
+   This file ties things together to concretely defines the semantics of a [Vir]
    program. It covers two main tasks to do so: to initialize the memory, and to
    chain together the successive interpreters.
-   As such, the raw denotation of a [Vellvm] program in terms of an [itree] is
+   As such, the raw denotation of a [Vir] program in terms of an [itree] is
    progressively stripped out of its events.
    We provide two such chains of interpretations: a model, that handles the
    internal non-determinism due to under-defined values into the non-determinism
@@ -61,7 +61,7 @@ Open Scope string_scope.
 (** * Initialization
     The initialization phase allocates and initializes globals,
     and allocates function pointers. This initialization phase is internalized
-    in [Vellvm], it is an [itree] as any other.
+    in [Vir], it is an [itree] as any other.
  *)
 
 Definition allocate_global (g:global dtyp) : itree L0 unit :=
@@ -144,7 +144,7 @@ Notation res_L3 := (memory_stack * res_L2)%type (* (only parsing) *).
 Notation res_L4 := (memory_stack * (local_env * lstack * (global_env * uvalue)))%type (* (only parsing) *).
 
 (**
-     Full denotation of a Vellvm program as an interaction tree:
+     Full denotation of a Vir program as an interaction tree:
      * initialize the global environment;
      * point wise denote each function;
      * retrieve the address of the entry point function;
@@ -157,7 +157,7 @@ Notation res_L4 := (memory_stack * (local_env * lstack * (global_env * uvalue)))
      *  %ans = call ret_typ entry (args)
      *  ret ret_typ %ans
      *)
-Definition denote_vellvm
+Definition denote_vir
            (ret_typ : dtyp)
            (entry : string)
            (args : list uvalue)
@@ -168,7 +168,7 @@ Definition denote_vellvm
   denote_mcfg defns ret_typ (dvalue_to_uvalue addr) args.
 
 
-(* SAZ: main_args and denote_vellvm_main may not be needed anymore, but I'm keeping them 
+(* SAZ: main_args and denote_vir_main may not be needed anymore, but I'm keeping them 
      For backwards compatibility.
  *)
 (* (for now) assume that [main (i64 argc, i8** argv)]
@@ -179,8 +179,8 @@ Definition main_args := [DV.UVALUE_I64 (DynamicValues.Int64.zero);
                         DV.UVALUE_Addr (Addr.null)
                         ].
 
-Definition denote_vellvm_main (mcfg : CFG.mcfg dtyp) : itree L0 uvalue :=
-  denote_vellvm (DTYPE_I (32)%N) "main" main_args mcfg.
+Definition denote_vir_main (mcfg : CFG.mcfg dtyp) : itree L0 uvalue :=
+  denote_vir (DTYPE_I (32)%N) "main" main_args mcfg.
 
 (**
      Now that we know how to denote a whole llvm program, we can _interpret_
@@ -192,7 +192,7 @@ Definition interpreter_gen
            (args : list uvalue)
            (prog: list (toplevel_entity typ (block typ * list (block typ))))
   : itree L5 res_L4 :=
-  let t := denote_vellvm ret_typ entry args (convert_types (mcfg_of_tle prog)) in
+  let t := denote_vir ret_typ entry args (convert_types (mcfg_of_tle prog)) in
   interp_mcfg5_exec t [] ([],[]) empty_memory_stack.
 
 (**
@@ -202,7 +202,7 @@ Definition interpreter_gen
 Definition interpreter := interpreter_gen (DTYPE_I 32%N) "main" main_args.
 
 (**
-     We now turn to the definition of our _model_ of vellvm's semantics. The
+     We now turn to the definition of our _model_ of vir's semantics. The
      process is extremely similar to the one for defining the executable
      semantics, except that we use, where relevant, the handlers capturing
      all allowed behaviors into the [Prop] monad.
@@ -218,7 +218,7 @@ Definition model_gen
            (args : list uvalue)
            (prog: list (toplevel_entity typ (block typ * list (block typ))))
   : PropT L5 (memory_stack * (local_env * lstack * (global_env * uvalue))) :=
-  let t := denote_vellvm ret_typ entry args (convert_types (mcfg_of_tle prog)) in
+  let t := denote_vir ret_typ entry args (convert_types (mcfg_of_tle prog)) in
   ℑs eq t [] ([],[]) empty_memory_stack. 
 
 (**

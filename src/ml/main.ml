@@ -1,7 +1,7 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -185,10 +185,10 @@ let args =
 
 let files = ref []
 let _ =
-  Printf.printf "(* -------- Vellvm Test Harness -------- *)\n%!";
+  Printf.printf "(* -------- Vir Test Harness -------- *)\n%!";
   try
     Arg.parse args (fun filename -> files := filename :: !files)
-      "USAGE: ./vellvm [options] <files>\n";
+      "USAGE: ./vir [options] <files>\n";
     Platform.configure ();
     process_files !files
 

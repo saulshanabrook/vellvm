@@ -4,7 +4,7 @@ From Coq Require Import
      String
      Logic.FunctionalExtensionality.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Tactics
      Syntax.LLVMAst
@@ -249,7 +249,7 @@ Qed.
     Front-ends and optimizations generate code containing static types.
     Since the semantics always acts upon dynamic types, in order to reason
     about the sub-components of code produce, we need to be able to convert
-    types of any syntactic substructure of Vellvm.
+    types of any syntactic substructure of Vir.
 
     We leverage the parameterized [Fmap] typeclass to do this in a fairly lightway.
  *)

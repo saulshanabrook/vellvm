@@ -14,7 +14,7 @@ From ITree Require Import
      Events.StateKleisli
      Events.StateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      PropT
      Error
      Util
@@ -97,9 +97,9 @@ Proof.
     destruct H as [t1 [H1 H2]].
     rewrite interp3_bind in H2.
 
-Lemma interp_vellvm_model_user_bind: forall {R S} g l m (t: itree _ R) (k: R -> itree _ S) t',
-    interp_vellvm_model_user [] (bind t k) g l m t' ->
-    bind (interp_vellvm_model_user [] t g l m) (fun '(m,(l,(g,x))) => interp_vellvm_model_user [] (k x) g l m) t'.
+Lemma interp_vir_model_user_bind: forall {R S} g l m (t: itree _ R) (k: R -> itree _ S) t',
+    interp_vir_model_user [] (bind t k) g l m t' ->
+    bind (interp_vir_model_user [] t g l m) (fun '(m,(l,(g,x))) => interp_vir_model_user [] (k x) g l m) t'.
 Proof.
   intros.
   cbn in *.
@@ -152,7 +152,7 @@ Section Substitute_cfg_correct.
   Proof.
     intros p id f d IN LU REFINE t tIN.
     unfold model_to_L5 in tIN.
-    unfold denote_vellvm in tIN.
+    unfold denote_vir in tIN.
     simpl in tIN.
 
     destruct tIN as (t' & (t'' & t''IN & HUndef) & HUB).
@@ -170,7 +170,7 @@ Section Substitute_cfg_correct.
     rewrite normalize_types_swap.
     pattern (normalize_types p); generalize (normalize_types p); clear p; intros p.
 
-    unfold denote_vellvm.
+    unfold denote_vir.
     simpl; rewrite 2 interp2_bind.
     split_bind.
 

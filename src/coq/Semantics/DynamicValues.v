@@ -1,7 +1,7 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -25,7 +25,7 @@ From ExtLib Require Import
      Data.Nat
      Data.List.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Error
      Utils.Util
      Syntax.LLVMAst
@@ -187,7 +187,7 @@ Qed.
 Definition ll_float  := Floats.float32.
 Definition ll_double := Floats.float.
 
-Module DVALUE(A:Vellvm.Semantics.MemoryAddress.ADDRESS).
+Module DVALUE(A:Vir.Semantics.MemoryAddress.ADDRESS).
 
   (* The set of dynamic values manipulated by an LLVM program. *)
   Unset Elimination Schemes.
@@ -1208,7 +1208,7 @@ Class VInt I : Type :=
 
     (* Evaluate integer opererations to get a dvalue.
 
-     These operations are between VInts, which are "vellvm"
+     These operations are between VInts, which are "vir"
      integers. This is a typeclass that wraps all of the integer
      operations that we use for integer types with different bitwidths.
 

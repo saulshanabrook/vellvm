@@ -1,8 +1,8 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dgarbuzov@gmail.com>               *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -13,7 +13,7 @@
 Require Import List Equalities Orders RelationClasses Omega.
 Require Import FSets FMaps.
 Import ListNotations.
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util.
 (* end hide *)
 

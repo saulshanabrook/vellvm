@@ -1,10 +1,10 @@
-# Vellvm License
+# Vir License
 
-All files in this distribution are part of the Vellvm project.
+All files in this distribution are part of the Vir project.
 
-Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>
+Anonymized
 
-Vellvm is distributed under terms of the GNU General Public License
+Vir is distributed under terms of the GNU General Public License
 version 3, or, at your option, any later version.  A copy of the GPLv3
 is given below.
 

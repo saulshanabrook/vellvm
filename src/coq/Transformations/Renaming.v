@@ -1,7 +1,7 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -21,7 +21,7 @@ From ITree Require Import
      Basics.MonadState
      Events.StateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Error
      Util
      LLVMAst
@@ -45,7 +45,7 @@ Import EqvNotation.
 Open Scope Z_scope.
 Open Scope string_scope.
 
-From Vellvm Require Import
+From Vir Require Import
      AstLib.
 Import ListNotations.
 
@@ -140,9 +140,9 @@ Section Swap.
     unfold refine_mcfg_L2.
     unfold model_to_L2.
 
-    (* unfold denote_vellvm. *)
-    (* unfold denote_vellvm_init. *)
-    (* unfold denote_vellvm. *)
+    (* unfold denote_vir. *)
+    (* unfold denote_vir_init. *)
+    (* unfold denote_vir. *)
     (* simpl; rewrite 2 interp2_bind. *)
     (* split_bind. *)
 

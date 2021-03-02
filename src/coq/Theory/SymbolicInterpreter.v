@@ -10,7 +10,7 @@ From ITree Require Import
      Eq.Eq
      TranslateFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Syntax.LLVMAst
      Syntax.CFG

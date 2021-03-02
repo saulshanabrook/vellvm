@@ -13,7 +13,7 @@ From ITree Require Import
      Events.StateFacts
      InterpFacts.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Error
      Semantics.LLVMEvents.
@@ -159,7 +159,7 @@ End Globals.
 
 From ExtLib Require Import
      Data.Map.FMapAList.
-From Vellvm Require Import
+From Vir Require Import
      LLVMAst
      MemoryAddress.
 

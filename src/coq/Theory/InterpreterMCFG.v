@@ -7,7 +7,7 @@ From ITree Require Import
      Events.StateFacts
      Eq.Eq.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Utils.Util
      Syntax.DynamicTypes

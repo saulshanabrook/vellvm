@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2018 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -35,7 +35,7 @@ From ExtLib Require Import
      Programming.Eqv
      Data.String.
 
-From Vellvm Require Import
+From Vir Require Import
      Numeric.Coqlib
      Numeric.Integers
      Numeric.Floats

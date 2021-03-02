@@ -32,7 +32,7 @@ Vighnesh look at this
 
 ../tests/alive2/memory/aggregate-padding.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 aggregate-paddingsrctgt:
   failed - UVALUE_I8(0) = UVALUE_Undef on generated input ()
@@ -47,7 +47,7 @@ aggregate-paddingsrctgt:
 
 ../tests/alive2/memory/alloca-vla-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 alloca-vla-failsrctgt:
   failed - UVALUE_Undef = UVALUE_I32(4) on generated input (UVALUE_I32(942), UVALUE_I32(-3094))
@@ -59,7 +59,7 @@ alloca-vla-failsrctgt:
 
 ../tests/alive2/memory/alloca-vla.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 alloca-vlasrctgt:
   failed - UVALUE_Undef = UVALUE_I32(3) on generated input (UVALUE_I32(9214), UVALUE_I32(-9834))
@@ -71,7 +71,7 @@ alloca-vlasrctgt:
 
 ../tests/alive2/memory/calloc-overflow.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 calloc-overflowsrctgt:
   failed - Uninterpreted Call = UVALUE_I8(1) on generated input (UVALUE_I64(2237))
@@ -84,7 +84,7 @@ calloc-overflowsrctgt:
 
 ../tests/alive2/memory/calloc-overflow2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 calloc-overflow2srctgt:
   failed - Uninterpreted Call = UVALUE_I8(1) on generated input (UVALUE_I64(4906))
@@ -97,7 +97,7 @@ calloc-overflow2srctgt:
 
 ../tests/alive2/memory/lifetime-disjoint.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 lifetime-disjointsrctgt:
   failed - Unknown intrinsic: llvm.lifetime.start.p0i8 = Unknown intrinsic: llvm.lifetime.start.p0i8 on generated input ()
@@ -108,7 +108,7 @@ lifetime-disjointsrctgt:
 
 ../tests/alive2/memory/malloc-noundef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 malloc-noundefsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I64(1174))
@@ -121,7 +121,7 @@ malloc-noundefsrctgt:
 
 ../tests/alive2/memory/malloc-poison-ub.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 malloc-poison-ubsrctgt:
   failed - Uninterpreted Call = IMPOSSIBLE: unreachable in reachable position on generated input (UVALUE_I1(1))
@@ -132,7 +132,7 @@ malloc-poison-ubsrctgt:
 
 ../tests/alive2/memory/memcmp-basic-fail-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-basic-fail-2srctgt:
   failed - Uninterpreted Call = UVALUE_I32(1) on generated input ()
@@ -145,7 +145,7 @@ memcmp-basic-fail-2srctgt:
 
 ../tests/alive2/memory/memcmp-basic-fail-3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-basic-fail-3srctgt:
   failed - Uninterpreted Call = UVALUE_I32(0) on generated input ()
@@ -158,7 +158,7 @@ memcmp-basic-fail-3srctgt:
 
 ../tests/alive2/memory/memcmp-basic-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-basic-failsrctgt:
   failed - Uninterpreted Call = UVALUE_I32(0) on generated input ()
@@ -171,7 +171,7 @@ memcmp-basic-failsrctgt:
 
 ../tests/alive2/memory/memcmp-bcmp.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-bcmpsrctgt:
   failed - Uninterpreted Call = Uninterpreted Call on generated input (UVALUE_I64(5364), UVALUE_I64(-8798), UVALUE_I64(3467))
@@ -182,7 +182,7 @@ memcmp-bcmpsrctgt:
 
 ../tests/alive2/memory/memcmp-noub.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-noubsrctgt:
   failed - Uninterpreted Call = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -193,7 +193,7 @@ memcmp-noubsrctgt:
 
 ../tests/alive2/memory/memcmp-noub2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-noub2srctgt:
   failed - unsupported integer size = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -204,7 +204,7 @@ memcmp-noub2srctgt:
 
 ../tests/alive2/memory/memcmp-noub3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-noub3srctgt:
   failed - Uninterpreted Call = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -215,7 +215,7 @@ memcmp-noub3srctgt:
 
 ../tests/alive2/memory/memcmp-noub4.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-noub4srctgt:
   failed - Uninterpreted Call = IMPOSSIBLE: unreachable in reachable position on generated input ()
@@ -226,7 +226,7 @@ memcmp-noub4srctgt:
 
 ../tests/alive2/memory/memcmp-opt-bigendian.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-opt-bigendiansrctgt:
   failed - Uninterpreted Call = UVALUE_I32(1) on generated input (UVALUE_I32(6531), UVALUE_I32(-1394))
@@ -237,7 +237,7 @@ memcmp-opt-bigendiansrctgt:
 
 ../tests/alive2/memory/memcmp-opt-littleendian-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcmp-opt-littleendian-failsrctgt:
   failed - Uninterpreted Call = UVALUE_I32(1) on generated input (UVALUE_I64(6536), UVALUE_I64(-7134))
@@ -248,7 +248,7 @@ memcmp-opt-littleendian-failsrctgt:
 
 ../tests/alive2/memory/memcpy-eq.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 memcpy-eqsrctgt:
   failed - memcpy got incorrect arguments = UVALUE_I8(43) on generated input ()
@@ -261,7 +261,7 @@ memcpy-eqsrctgt:
 
 ../tests/alive2/memory/nonlocalbid.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 nonlocalbidsrctgt:
   failed - Uninterpreted Call = UVALUE_I8(1) on generated input ()
@@ -275,7 +275,7 @@ nonlocalbidsrctgt:
 
 ../tests/alive2/memory/strlen-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 strlen-failsrctgt:
   failed - EXP_Cstring not yet implemented = EXP_Cstring not yet implemented on generated input ()
@@ -286,7 +286,7 @@ strlen-failsrctgt:
 
 ../tests/alive2/memory/strlen-load-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 strlen-load-failsrctgt:
   failed - Uninterpreted Call = UVALUE_I1(1) on generated input ()
@@ -300,7 +300,7 @@ strlen-load-failsrctgt:
 
 ../tests/alive2/memory/strlen-load.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 strlen-loadsrctgt:
   failed - Uninterpreted Call = UVALUE_I1(1) on generated input ()
@@ -314,7 +314,7 @@ strlen-loadsrctgt:
 
 ../tests/alive2/memory/strlen-long-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 strlen-long-failsrctgt:
   failed - EXP_Cstring not yet implemented = EXP_Cstring not yet implemented on generated input ()
@@ -325,7 +325,7 @@ strlen-long-failsrctgt:
 
 ../tests/alive2/memory/strlen-long.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 strlen-longsrctgt:
   failed - EXP_Cstring not yet implemented = EXP_Cstring not yet implemented on generated input ()
@@ -339,25 +339,25 @@ strlen-longsrctgt:
 
 ../tests/alive2/memory/calloc-overflow-3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 18, token ')'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/memory/memset-align.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Unknown or unsupported keyword: writeonly")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/memory/umul_overflow-fail.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Unknown or unsupported keyword: speculatable")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/memory/umul_overflow.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Unknown or unsupported keyword: speculatable")
 <<<<<<<<<<<<<<< 
 

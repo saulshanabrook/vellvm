@@ -32,7 +32,7 @@ Vighnesh look at this
 
 ../tests/alive2/abs.v0.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 absv0srctgt:
   failed - UVALUE_I8(1021) = Unknown intrinsic: llvm.abs.i8 on generated input (UVALUE_I8(1021))
@@ -44,7 +44,7 @@ absv0srctgt:
 
 ../tests/alive2/abs.v1.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 absv1srctgt:
   failed - UVALUE_I8(9384) = Unknown intrinsic: llvm.abs.i8 on generated input (UVALUE_I8(9384))
@@ -56,7 +56,7 @@ absv1srctgt:
 
 ../tests/alive2/abs.v2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 absv2srctgt:
   failed - UVALUE_Poison = Unknown intrinsic: llvm.abs.i8 on generated input (UVALUE_I8(2187))
@@ -68,7 +68,7 @@ absv2srctgt:
 
 ../tests/alive2/abs.v3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 absv3srctgt:
   failed - UVALUE_Poison = Unknown intrinsic: llvm.abs.i8 on generated input (UVALUE_I8(5002))
@@ -80,7 +80,7 @@ absv3srctgt:
 
 ../tests/alive2/extractvalue-padding.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 extractvalue-paddingsrctgt:
   failed - EXP_Cstring not yet implemented = UVALUE_I8(111) on generated input ()
@@ -93,7 +93,7 @@ extractvalue-paddingsrctgt:
 
 ../tests/alive2/fabs-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 fabs-2srctgt:
   failed - Undefined Behaviour: Signed division by 0. = Uninterpreted Call on generated input ()
@@ -105,7 +105,7 @@ fabs-2srctgt:
 
 ../tests/alive2/fabs.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 fabssrctgt:
   failed - Undefined Behaviour: Signed division by 0. = Undefined Behaviour: Signed division by 0. on generated input ()
@@ -116,7 +116,7 @@ fabssrctgt:
 
 ../tests/alive2/ffs-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 ffs-2srctgt:
   failed - UVALUE_I32(4) = Uninterpreted Call on generated input ()
@@ -130,7 +130,7 @@ ffs-2srctgt:
 
 ../tests/alive2/ffs-3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 ffs-3srctgt:
   failed - Uninterpreted Call = UVALUE_I32(3) on generated input ()
@@ -144,7 +144,7 @@ ffs-3srctgt:
 
 ../tests/alive2/ffs-4.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 ffs-4srctgt:
   failed - Uninterpreted Call = UVALUE_I32(32) on generated input ()
@@ -158,7 +158,7 @@ ffs-4srctgt:
 
 ../tests/alive2/ffs.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 ffssrctgt:
   failed - UVALUE_I32(0) = Uninterpreted Call on generated input ()
@@ -172,7 +172,7 @@ ffssrctgt:
 
 ../tests/alive2/ffsll-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 ffsll-2srctgt:
   failed - UVALUE_I32(0) = Uninterpreted Call on generated input ()
@@ -186,7 +186,7 @@ ffsll-2srctgt:
 
 ../tests/alive2/freeze-undef.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 freeze-undefsrctgt:
   failed - UVALUE_I32(0) = UVALUE_Undef on generated input ()
@@ -201,7 +201,7 @@ freeze-undefsrctgt:
 
 ../tests/alive2/reduce_add.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_addsrctgt:
@@ -211,7 +211,7 @@ reduce_addsrctgt:
 
 ../tests/alive2/reduce_and.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_andsrctgt:
@@ -221,7 +221,7 @@ reduce_andsrctgt:
 
 ../tests/alive2/reduce_mul.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_mulsrctgt:
@@ -231,7 +231,7 @@ reduce_mulsrctgt:
 
 ../tests/alive2/reduce_or.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_orsrctgt:
@@ -241,7 +241,7 @@ reduce_orsrctgt:
 
 ../tests/alive2/reduce_smax.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_smaxsrctgt:
@@ -251,7 +251,7 @@ reduce_smaxsrctgt:
 
 ../tests/alive2/reduce_smin.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_sminsrctgt:
@@ -261,7 +261,7 @@ reduce_sminsrctgt:
 
 ../tests/alive2/reduce_umax.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_umaxsrctgt:
@@ -271,7 +271,7 @@ reduce_umaxsrctgt:
 
 ../tests/alive2/reduce_umin.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_uminsrctgt:
@@ -281,7 +281,7 @@ reduce_uminsrctgt:
 
 ../tests/alive2/reduce_xor.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 generating vector value
 
 reduce_xorsrctgt:
@@ -291,7 +291,7 @@ reduce_xorsrctgt:
 
 ../tests/alive2/sadd_overflow.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 sadd_overflowsrctgt:
   failed - Unknown intrinsic: llvm.sadd.with.overflow.i32 = TODO on generated input (UVALUE_I8(7762), UVALUE_I8(-2109))
@@ -302,7 +302,7 @@ sadd_overflowsrctgt:
 
 ../tests/alive2/sadd_overflow_vec.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 sadd_overflow_vecsrctgt:
   failed - Unknown intrinsic: llvm.sadd.with.overflow.v2i32 = UVALUE_Vector(UVALUE_I1(1), UVALUE_I1(1)) on generated input ()
@@ -313,7 +313,7 @@ sadd_overflow_vecsrctgt:
 
 ../tests/alive2/select-aggregate.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 select-aggregatesrctgt:
   failed - extractelement not implemented = UVALUE_I64(1) on generated input ()
@@ -326,7 +326,7 @@ select-aggregatesrctgt:
 
 ../tests/alive2/smax.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 smaxsrctgt:
   failed - UVALUE_I8(7726) = Unknown intrinsic: llvm.smax.i8 on generated input (UVALUE_I8(7726), UVALUE_I8(-8191))
@@ -337,7 +337,7 @@ smaxsrctgt:
 
 ../tests/alive2/smin.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 sminsrctgt:
   failed - UVALUE_I8(-8287) = Unknown intrinsic: llvm.smin.i8 on generated input (UVALUE_I8(9913), UVALUE_I8(-8287))
@@ -348,7 +348,7 @@ sminsrctgt:
 
 ../tests/alive2/sshl.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 sshlsrctgt:
   failed - UVALUE_I8(127) = Unknown intrinsic: llvm.sshl.sat.i8 on generated input (UVALUE_I8(5790), UVALUE_I8(-8237))
@@ -359,7 +359,7 @@ sshlsrctgt:
 
 ../tests/alive2/switch.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 switchsrctgt:
   failed - Unsupport itree terminator = Unsupport itree terminator on generated input (UVALUE_I32(6840))
@@ -370,7 +370,7 @@ switchsrctgt:
 
 ../tests/alive2/umax.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 umaxsrctgt:
   failed - UVALUE_I8(12) = Unknown intrinsic: llvm.umax.i8 on generated input (UVALUE_I8(12), UVALUE_I8(-5094))
@@ -381,7 +381,7 @@ umaxsrctgt:
 
 ../tests/alive2/umin.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 uminsrctgt:
   failed - UVALUE_I8(-7622) = Unknown intrinsic: llvm.umin.i8 on generated input (UVALUE_I8(2144), UVALUE_I8(-7622))
@@ -392,7 +392,7 @@ uminsrctgt:
 
 ../tests/alive2/ushl.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 
 ushlsrctgt:
   failed - UVALUE_I8(255) = Unknown intrinsic: llvm.ushl.sat.i8 on generated input (UVALUE_I8(3765), UVALUE_I8(-8272))
@@ -406,55 +406,55 @@ ushlsrctgt:
 
 ../tests/alive2/bigint.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Int64.of_string")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/easy-1.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 17, token ','")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/easy-2.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 1, column 19, token ','")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/easy-3.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 3, column 17, token ','")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/fabs-fmf.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Parsing error: line 4, column 13, token 'nnan'")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/ffsl.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Int64.of_string")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/ffsll.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Int64.of_string")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/printf.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("lexing: empty token")
 <<<<<<<<<<<<<<< 
 
 ../tests/alive2/umul_overflow.srctgt.ll:
 >>>>>>>>>>>>>>>>>>>> 
-(* -------- Vellvm Test Harness -------- *)
+(* -------- Vir Test Harness -------- *)
 Fatal error: exception Failure("Unknown or unsupported keyword: speculatable")
 <<<<<<<<<<<<<<< 
 

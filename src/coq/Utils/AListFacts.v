@@ -4,7 +4,7 @@ From ExtLib Require Import
      Data.Map.FMapAList
      Structures.Maps.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Utils.Util.
 

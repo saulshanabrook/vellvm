@@ -4,7 +4,7 @@ From ITree Require Import
      Events.StateFacts
      Eq.Eq.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Tactics
      Utils.Util
      Syntax.DynamicTypes
@@ -79,7 +79,7 @@ Section InterpreterCFG.
 
   (**
    Partial interpretations of the trees produced by the
-   denotation of cfg. They differ from the ones of Vellvm programs by
+   denotation of cfg. They differ from the ones of Vir programs by
    their event signature, as well as by the lack of a stack of local event.
    The intent is to allow us to only interpret as many layers as needed
    to perform the required semantic reasoning, and lift for free the

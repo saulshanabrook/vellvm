@@ -1,7 +1,7 @@
 (* -------------------------------------------------------------------------- *
- *                     Vellvm - the Verified LLVM project                     *
+ *                     Vir - the Verified LLVM project                     *
  *                                                                            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -13,7 +13,7 @@ From Coq Require Import
      ZArith.ZArith List
      String Omega.
 
-From Vellvm Require Import
+From Vir Require Import
      Utils.Util
      Utils.Tactics
      Syntax.LLVMAst.
@@ -26,7 +26,7 @@ Import ListNotations.
 
 Import EqvNotation.
 
-(* TODO: The show instances I added in Vellvm.Show, which are copied
+(* TODO: The show instances I added in Vir.Show, which are copied
    from here, segfault for some reason when extracted. Seems wrong to
    import QuickChick here, but it will work for now. *)
 Require Import QuickChick.Show.
@@ -620,7 +620,7 @@ Section hiding_notation.
              | FTrue => "ftrue"
              end)%string.
 
-  (* I need show_ZVellvm here because Ceres segfaults on extraction for
+  (* I need show_ZVir here because Ceres segfaults on extraction for
   showing integers for some reason *)
   Fixpoint serialize_typ' typ: sexp :=
     match typ with

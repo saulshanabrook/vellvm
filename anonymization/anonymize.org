@@ -1,10 +1,10 @@
-* [0/8] Anonymization Checklist
+* [5/9] Anonymization Checklist
 
-  - [ ] Remove names based on greplist
-  - [ ] Rename directories and files with certain names
-  - [ ] Clean up admits
-  - [ ] Clean up todos
-  - [ ] Remove deprecated directory
+  - [X] Remove names based on greplist
+  - [X] Rename directories and files with certain names
+  - [X] Clean up admits
+  - [X] Clean up todos
+  - [X] Remove deprecated directory
   - [ ] Remove .git directories (and include libraries directly --- submodules might not work without .git)
   - [ ] Remove .gitmodules
   - [ ] Remove .gitignore

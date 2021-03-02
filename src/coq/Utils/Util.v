@@ -2,7 +2,7 @@
  *                     Vir - the Verified LLVM project                     *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dmitri@sease.upenn.edu>            *
- *     Copyright (c) 2017 Steve Zdancewic <stevez@cis.upenn.edu>              *
+ *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *

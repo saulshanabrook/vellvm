@@ -96,6 +96,3 @@ In particular:
 - `src/vir -interpret tests/ll/factorial.ll` to run our interpreter on a given file.
 - `src/vir --test` to run the test suite against llc
 - `src/vir --test-file tests/ll/factorial.ll` to test a specific file against llc
-
-
-

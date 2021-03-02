@@ -342,7 +342,8 @@ Section Outputs.
       apply has_post_bind; intros ?.
       break_match_goal; try (apply raise_has_all_posts || apply raiseUB_has_all_posts).
       break_match_goal; apply eutt_Ret; cbn; eauto.
-  Admitted.
+    - apply raiseUB_has_all_posts.
+  Qed.
 
   Definition exits_in_outputs {t} ocfg : block_id * block_id + uvalue -> Prop :=
     sum_pred (fun fto => In (snd fto) (@outputs t ocfg)) TT.

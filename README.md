@@ -4,8 +4,9 @@ The development is organized as follows.
 
 ## Local libraries
 
-Stored in the `lib` folder. Currently the only dependency that needs to be installed locally is the itree one:
+Stored in the `lib` folder. Currently the only dependencies that need to be installed locally are the itree one and the QuickChick one:
 - `lib/InteractionTrees` contains the version of the ITrees library that we have used in our development. 
+- `lib/QuickChick` contains the version of QuickChick.
 
 The library will be built as the same time as the Vir development via the Makefile.
 
@@ -44,6 +45,9 @@ Theory, in `src/coq/Theory/`:
                           proof of soundness of the interpreter as described in Section 5
 - `DenotationTheory`      Equational theory to reason directly about the structure of vir programs;
                           in particular, reasoning principles about open control-flow-graphs.
+
+Transformations, in `src/coq/Transformations/`:
+- `BlockFusion.v` contains the block fusion optimization discussed in 5.4
 
 ## OCmal front-end and driver for execution and testing
 

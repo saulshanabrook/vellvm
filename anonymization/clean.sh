@@ -1,3 +1,4 @@
 #!/bin/sh
 
-find . -name "*.vio" -delete
+find .. -name "*vellvm*" -exec rename vellvm vir {} \;
+find .. -name "*Vellvm*" -exec rename Vellvm Vir {} \;

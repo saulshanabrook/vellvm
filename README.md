@@ -62,7 +62,8 @@ These unverified parts of the development live in the `src/ml` folder.
 
 Our current test-suite of LLVM programs for which we compare our semantics against llc is stored in `tests/`
 
-- `tests/` directory containing the test suite of LLVM IR programs discussed in Section 6
+- `tests/` directory containing the test suite of LLVM IR programs discussed in Section 7
+- `src/coq/QC` Contains the QuickChick generator and test framework discussed in Section 7
 
 # Installing / Compiling Vir
 

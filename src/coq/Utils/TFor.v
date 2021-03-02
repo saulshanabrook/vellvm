@@ -93,9 +93,6 @@ Section TFor.
   Qed.
 
   (* We can substitute bodies under a [tfor] assuming that they are equivalent at all points.
-     TODO: various stronger induction principles can be provided:
-     - obviously restricting the range of indexes to the one iterated over
-     - using a provided invariant constraining the accumulators.
    *)
   Lemma eutt_tfor: forall {E A} (body body' : nat -> A -> itree E A) i j a0,
       (forall k i, body i k ≈ body' i k) ->

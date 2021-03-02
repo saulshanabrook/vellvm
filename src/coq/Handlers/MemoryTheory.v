@@ -1176,32 +1176,8 @@ Section Memory_Stack_Theory.
         clear -H.
 
         rewrite Z.add_0_r.
-        (* hacky proof below. TODO: automate *)
         unfold Z.modulo.
         repeat break_let.
-
-        (*
-        repeat
-          match goal with
-          | [H: Z.div_eucl _ _ = _ |- _ ] => apply Z_div_mod' in H; try lia
-          end.
-        repeat match goal with
-        | [H: _ /\ _ |- _] => destruct H
-        end.
-        subst.
-
-        match goal with
-        | [H: context[(256 * _ + ?zz) / _] |- _] =>
-          idtac H;
-            idtac zz;
-            rewrite Z.add_comm in H;
-            rewrite Z.mul_comm in H;
-            rewrite Z_div_plus in H;
-            try rewrite Zdiv_small with (x:=zz) in H ; try lia;
-            try rewrite Z.add_0_l in H;
-            subst
-        end.
-         *)
 
         apply Z_div_mod' in Heqp.
         apply Z_div_mod' in Heqp0.
@@ -1924,9 +1900,6 @@ Section Memory_Stack_Theory.
       unfold deserialize_sbytes.
       intros τ. induction τ; intros SZ; try solve [reflexivity | cbn in SZ; inv SZ | rewrite all_not_sundef_init; auto].
     Qed.
-
-    (* CB TODO: Figure out where these predicates should live, or figure
-       out how to get rid of them. Currently not using some of these... *)
 
     (* Is a dtyp supported in the memory model?
 
@@ -3301,8 +3274,6 @@ Section PARAMS.
     (* Note : For the current version of subevents, [interp_memory] must
         have subevent clauses assumed in Context, or else the
         [handle_intrinsic] handler will not get properly invoked. *)
-    (* IY: This is specialized to DTYPE_Array for practical
-         purposes. We could conjure a more complete definition later. *)
     Lemma interp_memory_intrinsic_memcpy :
       forall (m : memory_stack) (dst src : Addr.addr) (sz : N)
         (dst_val src_val : uvalue) (dτ : dtyp) volatile align,

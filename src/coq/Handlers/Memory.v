@@ -1,7 +1,6 @@
 (* -------------------------------------------------------------------------- *
  *                     Vir                                                 *
  *                                                                            *
- *     Copyright (c) 2018 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -241,14 +240,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       end.
 
   End Map_Operations.
-
-  (* TODO SAZ: mem_block should keep track of its allocation size so
-    that operations can fail if they are out of range
-
-    CB: I think this might happen implicitly with make_empty_block --
-    it initializes the IntMap with only the valid indices. As long as the
-    lookup functions handle this properly, anyway.
-   *)
 
   Section Datatype_Definition.
 
@@ -797,8 +788,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
          this operation can never fail?  It doesn't return any status code...
        *)
 
-      (* TODO probably doesn't handle sizes correctly...
-       *)
       (** ** MemCopy
           Implementation of the [memcpy] intrinsics.
        *)
@@ -832,16 +821,11 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
                   | LBlock size bytes concrete_id => (size, bytes, concrete_id)
                   end in
 
-            (* IY: What happens if [src_block_size < mem_block_size]?
-               Since we have logical blocks, there isn't a way to get around
-               this, and SUndef is invoked. Is this desired behavior? *)
             let sdata := lookup_all_index src_o (Z.to_N (unsigned len)) src_bytes SUndef in
             let dst_bytes' := add_all_index sdata dst_o dst_bytes in
             let dst_block' := LBlock dst_sz dst_bytes' dst_cid in
             let m' := add_logical_block_mem dst_b dst_block' m in
             (ret m' : err memory)
-          (* IY: For now, we're returning a "failwith". Maybe it's more ideal
-             to return an "UNDEF" here? *)
           else failwith "memcpy has overlapping src and dst memory location"
         | _ => failwith "memcpy got incorrect arguments"
         end.
@@ -1025,8 +1009,6 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
 
     Record ext_memory (m1 : memory_stack) (a : addr) (τ : dtyp) (v : uvalue) (m2 : memory_stack) : Prop :=
       {
-      (* TODO: might want to extend this so if the size is 0 I know
-               what the value of read is... *)
       new_lu  : sizeof_dtyp τ <> 0%N -> read m2 a τ = inr v;
       old_lu  : forall a' τ', allocated a' m1 ->
                          no_overlap_dtyp a τ a' τ' ->

@@ -127,10 +127,6 @@ Proof.
               inversion X; subst; contradiction.
 Qed.
 
-(* What's a good way to prove this ? *)
-(* IY: This is not ideal, but here is an equivalent formulation with an ugly
-   if-else chain.. I feel like there must be some clean way to prove the
-   original lemma using boolean reflection. *)
 Lemma unsupported_cases : forall {X} (sz : N) (N : ~ IX_supported sz) (x64 x32 x8 x1 x : X),
     (if (sz =? 64) then x64
       else if (sz =? 32) then x32
@@ -880,13 +876,6 @@ Section DecidableEquality.
 
 End DecidableEquality.
 
-(* TODO: include Undefined values in this way? i.e. Undef is really a predicate on values
-   Note: this isn't correct because it won't allow for undef fields of a struct or elts of an array
-Inductive dvalue' : Set :=
-| DVALUE_Undef (p:dvalue -> bool) 
-| DVALUE_Val (d:dvalue).
-*)
-
 Definition is_DVALUE_I1 (d:dvalue) : bool :=
   match d with
   | DVALUE_I1 _ => true
@@ -1212,7 +1201,6 @@ Class VInt I : Type :=
      integers. This is a typeclass that wraps all of the integer
      operations that we use for integer types with different bitwidths.
 
-     SAZ: The "undef" here should refer to undefined behavior, not UVALUE_Undef, right?
      *)
     Definition eval_int_op {Int} `{VInt Int} (iop:ibinop) (x y: Int) : undef dvalue :=
       match iop with
@@ -1359,16 +1347,6 @@ Class VInt I : Type :=
   (* I split the definition between the vector and other evaluations because
      otherwise eval_iop should be recursive to allow for vector calculations,
      but coq can't find a fixpoint. *)
-  (* SAZ: Here is where we want to add the case distinction  for uvalues
-
-       - this should check for "determined" uvalues and then use eval_iop_integer_h
-         otherwise leave the op symbolic
-
-       - this should use the inclusion of dvalue into uvalue in the case that
-         eval_iop_integer_h is calle
-
-   *)
-
   Definition eval_iop iop v1 v2 : undef_or_err dvalue :=
     match v1, v2 with
     | (DVALUE_Vector elts1), (DVALUE_Vector elts2) =>
@@ -2049,20 +2027,5 @@ Class VInt I : Type :=
   .
 
   Definition concretize (uv: uvalue) (dv : dvalue) := concretize_u uv (ret dv).
-
-  
-  (*
-    YZ TODO: Not sure whether those can be uvalues, to figure out
-  | Concretize_Conversion     : pickU (UVALUE_Conversion       _) (DVALUE_Conversion       _)
-  | Concretize_GetElementPtr  : pickU (UVALUE_GetElementPtr    _) (DVALUE_GetElementPtr    _)
-  | Concretize_ExtractElement : pickU (UVALUE_ExtractElement   _) (DVALUE_ExtractElement   _)
-  | Concretize_InsertElement  : pickU (UVALUE_InsertElement    _) (DVALUE_InsertElement    _)
-  | Concretize_ShuffleVector  : pickU (UVALUE_ShuffleVector    _) (DVALUE_ShuffleVector    _)
-  | Concretize_ExtractValue   : pickU (UVALUE_ExtractValue     _) (DVALUE_ExtractValue     _)
-  | Concretize_InsertValue    : pickU (UVALUE_InsertValue      _) (DVALUE_InsertValue      _)
-  | Concretize_Select         : pickU (UVALUE_Select           _) (DVALUE_Select           _)
-  .
-   *)
-
 End DVALUE.
 

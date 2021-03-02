@@ -1,7 +1,6 @@
 (* -------------------------------------------------------------------------- *
  *                     Vir                                                 *
  *                                                                            *
- *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -92,7 +91,6 @@ let test_pp_dir dir =
   Printf.printf "%s\n" (outcome_to_string outcome);
   raise (Ran_tests (successful outcome))
 
-(* Ugly duplication. TODO: reuse more existing facility *)
 let ast_pp_file_inner path =
   let _ = Platform.verb @@ Printf.sprintf "* processing file: %s\n" path in
   let file, ext = Platform.path_to_basename_ext path in

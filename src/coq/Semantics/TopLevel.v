@@ -1,7 +1,6 @@
 (* -------------------------------------------------------------------------- *
  *                     Vir                                                 *
  *                                                                            *
- *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -168,9 +167,6 @@ Definition denote_vir
   denote_mcfg defns ret_typ (dvalue_to_uvalue addr) args.
 
 
-(* SAZ: main_args and denote_vir_main may not be needed anymore, but I'm keeping them 
-     For backwards compatibility.
- *)
 (* (for now) assume that [main (i64 argc, i8** argv)]
     pass in 0 and null as the arguments to main
     Note: this isn't compliant with standard C semantics

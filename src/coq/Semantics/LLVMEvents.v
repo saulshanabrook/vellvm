@@ -1,7 +1,6 @@
 (* -------------------------------------------------------------------------- *
  *                     Vir                                                 *
  *                                                                            *
- *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -168,10 +167,6 @@ Module Type LLVM_INTERACTIONS (ADDR : MemoryAddress.ADDRESS).
   Definition pickAll (p : uvalue -> PickE dvalue) := map_monad (fun uv => trigger (p uv)).
 
   (* The signatures for computations that we will use during the successive stages of the interpretation of LLVM programs *)
-  (* YZ TODO: The events and handlers are parameterized by the types of key and value.
-     It's weird for it to be the case if the events are concretely instantiated right here.
-     At least TODO: remove these prefixes that are inconsistent with other names.
-   *)
   Definition LLVMGEnvE := (GlobalE raw_id dvalue).
   Definition LLVMEnvE := (LocalE raw_id uvalue).
   Definition LLVMStackE := (StackE raw_id uvalue).

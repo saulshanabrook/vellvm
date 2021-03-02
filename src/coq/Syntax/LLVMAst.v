@@ -19,7 +19,6 @@
   * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.           *
    }}}                                                                       *)
 (*  ------------------------------------------------------------------------- *)
-(* Adapted for use in Vir by Steve Zdancewic (c) 2017                      *)
 (*  ------------------------------------------------------------------------- *)
 
 (* begin hide *)
@@ -229,8 +228,6 @@ Section TypedSyntax.
    - Float constants: these are always parsed as 64-bit representable floats
      using ocamls float_of_string function. The parser converts float literals
      to 32-bit values using the type information available in the syntax.
-
-     -- TODO: 128-bit, 16-bit, other float formats?
 
    - Hex constants: these are always parsed as 0x<16-digit> 64-bit exps and
      bit-converted to ocaml's 64-bit float representation.  If they are

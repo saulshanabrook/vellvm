@@ -36,10 +36,6 @@ Open Scope bool.
 Section Peephole.
 
   (* A peephole optimization is a program transformation substituting straight code for straight code *)
-  (* NOTE: I'm running the optimization _after_ conversion of dtypes so that I can avoid converting them at various level.
-     In the spirit of being able to emit valid IR source code, we should however do it before. That should just be more
-     tedious, TODO.
-   *)
   Definition peephole_optimization := code dtyp -> code dtyp.
 
   (* We lift this code-local transformation to a whole VIR program transformation *)
@@ -85,10 +81,6 @@ Section DeadCodeElim.
 
 End DeadCodeElim.
 
-(** Note : I'm toying with the concepts and trying to get familiar with everything.
-    Once things are a bit settled, we need to use a more efficient implementation of
-    sets ([MSetRBT.v] for instance)
- *)
 Import ListSet.
 
 Infix "+++" := (set_union raw_id_eq_dec) (right associativity, at level 60).

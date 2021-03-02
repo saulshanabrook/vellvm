@@ -310,9 +310,6 @@ Section PropMonad.
   (*             PA ta /\ tb ≈ bind ta k /\ *)
   (*             (forall a', Returns a' ta -> K a' (k a'))). *)
         (* (~ (exists a, Returns a ta)).  *)
-  (* SAZ: Here is the proof that the two version of bind are logically equivalent, so
-     it should not matter which one we use. Since bind_PropT has fewer cases, we should
-     use it.*)
   Lemma bind_PropT_bind_PropT' {E}:
     forall A B PA K (tb : itree E B), bind_PropT A B PA K tb <-> bind_PropT' A B PA K tb.
   Proof.
@@ -346,11 +343,6 @@ Section PropMonad.
 
 
   (*
-  (* SAZ: This definition isn't quite correct because it fails in the case of a 
-     vacuous h_spec (i.e. fun e t => False), since there can not exist such
-     a handler _but_ the iterpreter should still succeed on trees without
-     Vis events.
-  *)
   Definition interp_PropT {E F : Type -> Type} (h_spec : E ~> PropT F) :
     forall R (RR: relation R), itree E R -> PropT F R :=
     fun R RR (t : itree E R) s =>
@@ -493,10 +485,6 @@ Section PropMonad.
     | VisF e k => fmap (fun x => inl (k x)) (h _ e)
     end).
 
-
-  (* SAZ: This lemma proves that the definition of interp_prop_old given above
-  refines the more liberal one, which allows a different choice of handler for
-  each iteration. *)
   Lemma interp_PropT_OK : forall {E F} (h_spec : E ~> PropT F) R RR t u,
       interp_prop_old h_spec R RR t u -> interp_PropT' h_spec R RR t u.
   Proof.
@@ -1378,7 +1366,7 @@ Section PropMonad.
           apply HTA. unfold bind, Monad_itree.
           red. unfold Eq1_ITree. reflexivity.
           intros.
-          left. (* todo : interp_prop_bind_clo *)
+          left.
           eapply interp_prop_bind_clo.
           assumption.
           specialize (HK a H). pclearbot. apply HK.
@@ -1717,7 +1705,7 @@ Section IterLaws.
     (* ... For this direction, it seems necessary to index the loop body, since
      the unfolded iter case is strictly more expressive than the folded body.
 
-     Another idea suggestion, from Yannick: try expressing with (option itree),
+     Another idea suggestion: try expressing with (option itree),
      intuitively this makes a lot of sense since the empty predicate cannot
      be expressed by an itree, and there might be indices in the loop body
      that map to the empty predicate.

@@ -648,8 +648,6 @@ Section TypGenerators.
   Definition genN : G N
     := n <- arbitrary;; ret (N.of_nat n).
 
-  (* TODO: This should probably be mutually recursive with
-     gen_sized_typ since pointers of any type are considered sized *)
   Program Fixpoint gen_typ_size (sz : nat) {measure sz} : GenLLVM typ :=
     match sz with
     | 0%nat => gen_typ_0
@@ -784,10 +782,6 @@ Section ExpGenerators.
 
   
   (* This only returns what you expect on normalized typs *)
-  (* TODO: I don't think this does the right thing for pointers to
-           identified types... It should be conservative and say that
-           the types are *not* equal always, though.
-   *)
   Program Fixpoint normalized_typ_eq (a : typ) (b : typ) {measure (sizeof_typ a)} : bool
     := match a with
        | TYPE_I sz =>
@@ -915,8 +909,6 @@ Section ExpGenerators.
        | _ => lift failGen
        end.
 
-  (* TODO: should make it much more likely to pick an identifier for
-           better test cases *)
   Fixpoint gen_exp_size (sz : nat) (t : typ) {struct t} : GenLLVM (exp typ) :=
     match sz with
     | 0%nat =>
@@ -1118,10 +1110,6 @@ Section InstrGenerators.
 
   
   (* Make sure we can add these new ids to the context! *)
-
-  (* TODO: want to generate phi nodes, which might be a bit
-  complicated because we need to know that an id that occurs in a
-  later block is in context *)
 
   Definition add_id_to_instr (t_instr : typ * instr typ) : GenLLVM (instr_id * instr typ)
     :=

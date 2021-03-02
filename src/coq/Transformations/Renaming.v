@@ -110,29 +110,6 @@ Section Swap.
     reflexivity.
   Qed.
 
-  (*
-  (* Calvin broke this somehow by changing uvalue to not include
-     CallE. Yannick promises not to be mad later when fixing this. :) *)
-  Lemma interp2_map_monad: forall {X} (f: X -> itree _ (uvalue * D.function_denotation)) (g: endo X) (l: list X) s1 s2,
-      (forall x s1 s2, In x l -> eutt (Logic.eq × (Logic.eq × (refine_uvalue × (fun d1 d2 => forall x, eutt refine_uvalue (d1 x) (d2 x))))) (interp2 nil (f x) s1 s2) (interp2 nil (f (g x)) s1 s2)) ->
-      eutt function_rel (interp2 nil (map_monad f l) s1 s2) (interp2 nil (map_monad f (map g l)) s1 s2).
-  Proof.
-    induction l as [| x l IH]; simpl; intros; [reflexivity |].
-    rewrite 2 interp2_bind.
-    eapply eutt_clo_bind; eauto.
-    intros (? & ? & ? & ?) (? & ? & ? & ?) EQ.
-    repeat match goal with | h: prod_rel _ _ _ _ |- _ => inv h end.
-    rewrite 2 interp2_bind.
-    eapply eutt_clo_bind; eauto.
-    intros (? & ? & ?) (? & ? & ?) EQ.
-    inv EQ.
-    repeat match goal with | h: prod_rel _ _ _ _ |- _ => inv h end.
-    rewrite 2 interp2_ret.
-    apply eqit_Ret.
-    constructor; auto.
-  Qed.
-  *)
-
   Lemma swap_correct_L2:
     forall dt entry args intrinsics p, refine_mcfg_L2 dt entry args intrinsics p (swap_mcfg p).
   Proof.

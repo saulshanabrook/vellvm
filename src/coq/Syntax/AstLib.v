@@ -1,7 +1,6 @@
 (* -------------------------------------------------------------------------- *
  *                     Vir                                                 *
  *                                                                            *
- *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -26,9 +25,6 @@ Import ListNotations.
 
 Import EqvNotation.
 
-(* TODO: The show instances I added in Vir.Show, which are copied
-   from here, segfault for some reason when extracted. Seems wrong to
-   import QuickChick here, but it will work for now. *)
 Require Import QuickChick.Show.
 (* end hide *)
 
@@ -36,8 +32,6 @@ Require Import QuickChick.Show.
 Instance eq_dec_int : RelDec (@eq int) := Data.Z.RelDec_zeq.
 Instance eqv_int : Eqv int := (@eq int).
 
-(* SAZ : These should be moved to part of the standard library, or at least to
-   ExtLib *)
 Module AsciiOrd <: UsualOrderedType.
   Definition t := ascii.
   Definition eq := @eq t.

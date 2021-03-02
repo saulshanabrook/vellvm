@@ -44,17 +44,6 @@ let hex_digit (c : char) : int option  =
   else if 97 <= c && c <= 102 then Some (c - 97 + 10) (* a .. f *)
   else None
 
-
-(* 
-   SAZ: Despite their name, the so called "c string" literals in LLVM IR
-   really don't have anything to do with C strings.  They don't use any of
-   the same syntactic conventions for escape characters.
-
-   In LLVM the only form of escaped characters are \\ (slash) or
-   \hh where h is a hex number.
- *)
-
-
 (* Parses a sequence of characters following a \ to see if it is a legal LLVM IR
    escape sequence (excluding the leading \). 
    returns 

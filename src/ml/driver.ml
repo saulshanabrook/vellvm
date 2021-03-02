@@ -1,7 +1,6 @@
 (* -------------------------------------------------------------------------- *
  *                     Vir                                                 *
  *                                                                            *
- *     Anonymized              *
  *                                                                            *
  *   This file is distributed under the terms of the GNU General Public       *
  *   License as published by the Free Software Foundation, either version     *
@@ -42,8 +41,6 @@ let parse_file filename =
   |> Lexing.from_string
   |> Llvm_lexer.parse
 
-
-(* Todo add line count information *)
 let parse_tests filename =
   let assertions = ref [] in
   let channel = open_in filename in

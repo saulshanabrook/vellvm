@@ -1,4 +1,4 @@
-* [0/6] Anonymization Checklist
+* [0/8] Anonymization Checklist
 
   - [ ] Remove names based on greplist
   - [ ] Rename directories and files with certain names
@@ -6,4 +6,6 @@
   - [ ] Clean up todos
   - [ ] Remove deprecated directory
   - [ ] Remove .git directories (and include libraries directly --- submodules might not work without .git)
+  - [ ] Remove .gitmodules
+  - [ ] Remove .gitignore
   - [ ] Remove anonymization directory

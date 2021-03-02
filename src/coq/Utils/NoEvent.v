@@ -539,7 +539,7 @@ Qed.
  *)
 
 (*  ------------------------------------------------------------------------- *)
-(* TODO: Move these to the itrees library? *)
+
 
 Lemma translate_ret_inv : forall E F A (h : E ~> F) (t : itree E A) a,
     translate h t ≅ ret a -> t ≅ ret a.
@@ -665,7 +665,7 @@ Section eqit_closure.
 
   Context {E : Type -> Type} {R : Type}.
 
-  (* SAZ: My straightforward attempts at proving the next few lemmas fail. *)
+  
   Inductive eq_itree_clo  (r : itree E R -> Prop)
     : itree E R -> Prop :=
   | eq_itree_clo_intro t t' (EQVl: eq_itree eq t t') (REL: r t')

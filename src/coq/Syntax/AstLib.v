@@ -731,7 +731,7 @@ Section hiding_notation.
     Global Instance serialize_block : Serialize (block T) :=
       fun block =>
         [to_sexp (blk_id block) ; Atom ":\n" ;
-        (* TODO: add indentation *)
+        
         to_sexp (blk_code block); to_sexp (blk_term block)].
   End WithSerializeT.
 
@@ -743,7 +743,7 @@ Section hiding_notation.
           => let name  := defn.(df_prototype).(dc_name) in
              [Atom "define"; to_sexp ret_t; to_sexp name;
              Atom " {\n";
-             (* TODO: Add prefix for indentation? *)
+             
              to_sexp (df_instrs defn);
              Atom "}\n"]
         | _ => Atom "Invalid type on function"

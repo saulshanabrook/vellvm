@@ -162,7 +162,7 @@ Section LABELS_THEORY.
     intros ? []; reflexivity.
   Qed.
 
-  (* TODO: Show symmetric case *)
+  
   Lemma wf_ocfg_bid_app_not_in_l :
     forall id (bs bs' : ocfg T),
       In id (inputs bs) ->
@@ -191,7 +191,7 @@ Section LABELS_THEORY.
     red in H2. intro. eapply H2; eauto.
   Qed.
 
-  (* TODO: Show symmetric case *)
+  
   Lemma wf_ocfg_app_not_in_r :
     forall id (bs bs' : ocfg T),
       In id (inputs bs) ->

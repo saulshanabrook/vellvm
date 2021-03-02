@@ -8,7 +8,7 @@ From ITree Require Import
      KTreeFacts
      Eq.Eq.
 
-(* YZ TODO : Revisit the dependency w.r.t. Refinement *)
+
 From Vir Require Import
      Utils.Util
      Utils.AListFacts

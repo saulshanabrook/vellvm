@@ -608,7 +608,7 @@ Module RENAMING
     Definition swap_instr_id (id1 id2:raw_id) (i:instr_id) : instr_id :=
       match i with
       | IId id => IId (swap id1 id2 id)
-      | IVoid n => IVoid n  (* TODO: support renaming these too? *)
+      | IVoid n => IVoid n  
       end.
 
     Global Instance swap_of_instr_id : Swap instr_id := swap_instr_id.
@@ -1064,7 +1064,7 @@ Module RENAMING
       reflexivity.
     Qed.
 
-    (* TODO: turn into an instance *)
+    
     (* Weird to have to assume [SwapInvariant Y]. In particular, is there any case where
        we don't bind with X = Y?
      *)
@@ -1353,7 +1353,7 @@ End RENAMING.
 (* Scrap *)
 (*
     (*
-  (* TODO: Add to Coq Library *)
+  
   Lemma Empty_Equals : forall {X} (e:ENV.t X), ENV.Empty e -> ENV.Equal (ENV.empty X) e.
   Proof.
     intros.
@@ -1366,7 +1366,7 @@ End RENAMING.
     intros. contradiction.
   Qed.
 
-  (* TODO: Add to Coq Library *)
+  
   Lemma find_Empty_none : forall {X} (e:ENV.t X) (id:raw_id), ENV.Empty e -> ENV.find id e = None.
   Proof.
     intros.

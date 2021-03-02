@@ -39,9 +39,9 @@ Local Open Scope monad_scope.
 Local Open Scope cat_scope.
 
 
-(* TODO: Move to itrees library --------------------------------------------- *)
 
-(* SAZ: Some of these aren't actually needed for Vir's PropT *)
+
+
 Lemma eutt_iter'' {E I1 I2 R1 R2}
       (RI1 RI2 : I1 -> I2 -> Prop)
       (HSUB: RI2 <2= RI1)
@@ -457,7 +457,7 @@ Section PropMonad.
       rewrite (itree_eta t2). assumption.
   Qed.
 
-  (* SAZ: This is where the bad definition of interp_prop_old bites... *)
+  
   Lemma interp_prop_ret :
     forall R E F (h_spec : E ~> PropT F)
       (r : R)
@@ -473,8 +473,8 @@ Section PropMonad.
   Abort.        
 
   
-  (* SAZ: maybe define directly by coinduction  *)
-  (* SAZ: For some reason, if this definition is moved below case_prop_handler_correct, I get a universe inconsistency(!) *)
+  
+  
   (* This definition of monad_iter suffers from the same problem of vacous specs as the interp_prop_old above *)
   Definition MonadIter_Prop_itree' {E F} :=
     fun R (RR: relation R) (step : itree E R -> PropT F (itree E R + R)) i =>
@@ -850,7 +850,7 @@ Section PropMonad.
   Qed.
 
   (* Figure 8: interp Trigger law *)
-  (* SAZ : morally, we should only work with "proper" triggers everywhere *)
+  
   Lemma interp_prop_trigger :
     forall E F (h_spec : E ~> PropT F) R (e : E R)
       (HP : forall T, Proper (eq ==> Eq1_PropT T) (h_spec T))
@@ -993,7 +993,7 @@ Section PropMonad.
   
 (*  
   
-  (* SAZ: Not clear that this one is provable : *)
+  
   Lemma interp_prop_bind_inv_l :
     forall E F (h_spec : E ~> PropT F) R RR (HR: Reflexive RR) (HT : Transitive RR) S
       (HP : forall T, Proper (eq ==> Eq1_PropT T) (h_spec T))
@@ -1021,7 +1021,7 @@ Section PropMonad.
       punfold H. red in H. inv H; subst.
       pclearbot.
       assert (inhabited S \/ ~ inhabited S).
-      { admit. (* TODO: classical logic *) }
+      { admit.  }
       destruct H.
       * inv H. exists (ret X). (exists (fun _ => t)). exists (fun r1 r2 => True).
         split; [| split; [|split]].
@@ -1332,7 +1332,7 @@ Section PropMonad.
     intros.
     split; [|split].
     - intros; split; intro HQ.
-      + (* SAZ: Thiis direction is the impossible one *)
+      + 
         rewrite H in HQ. clear H.
         setoid_rewrite (itree_eta m) in HQ.
         repeat red.
@@ -1473,7 +1473,7 @@ Section PropMonad.
       repeat red. setoid_rewrite H. auto.
   Admitted.
 *)
-  (* SAZ: maybe define directly by coinduction  *)
+  
   (* Global Polymorphic Instance MonadIter_Prop {E} : MonadIter (PropT E) := *)
   (*   fun R I (step : I -> PropT E (I + R)) i => *)
   (*     fun (r : itree E R) => *)

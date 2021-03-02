@@ -121,7 +121,7 @@ Set Contextual Implicit.
       end
     end.
 
-(* SAZ: TODO: decouple these definitions from the instance of DVALUE and DTYP by using polymorphism not functors. *)
+
 Module Type LLVM_INTERACTIONS (ADDR : MemoryAddress.ADDRESS).
 
   Global Instance eq_dec_addr : RelDec (@eq ADDR.addr) := RelDec_from_dec _ ADDR.eq_dec.
@@ -132,11 +132,11 @@ Module Type LLVM_INTERACTIONS (ADDR : MemoryAddress.ADDRESS).
 
   (* Generic calls, refined by [denote_mcfg] *)
   Variant CallE : Type -> Type :=
-    (* TODO: not sure about uvalue for f here *)
+    
   | Call        : forall (t:dtyp) (f:uvalue) (args:list uvalue), CallE uvalue.
 
   Variant ExternalCallE : Type -> Type :=
-    (* TODO: is f a dvalue or a uvalue? *)
+    
   | ExternalCall        : forall (t:dtyp) (f:uvalue) (args:list dvalue), ExternalCallE dvalue.
 
   (* Call to an intrinsic whose implementation do not rely on the implementation of the memory model *)

@@ -613,7 +613,7 @@ Section Serialization_Theory.
         * rewrite Nnat.Nat2N.inj_succ. rewrite N.mul_succ_l. lia.
   Qed.
 
-  (* TODO: does this exist somewhere else? *)
+  
   Lemma app_prefix :
     forall {A} (a b c : list A),
       b = c -> a ++ b = a ++ c.
@@ -1019,7 +1019,7 @@ Section Memory_Stack_Theory.
     Unshelve. 3 : exact key. 2 : exact (m, s). cbn. reflexivity.
   Qed.
 
-  (* TODO: looks like this might be duplicated now *)
+  
   Lemma get_logical_block_of_add_logical_block_neq :
     forall (m : memory_stack) (key key' : Z) (lb : logical_block),
       key <> key' ->
@@ -1749,7 +1749,7 @@ Section Memory_Stack_Theory.
       rewrite read_in_mem_block_write_to_mem_block; eauto.
     Qed.
 
-    (* TODO: make this more general? I.e. write / read different types? *)
+    
     Lemma read_in_mem_block_write_to_mem_block_untouched :
       forall offset offset' bytes val τ,
         dvalue_has_dtyp val τ ->
@@ -1962,7 +1962,7 @@ Section Memory_Stack_Theory.
     Definition not_undef (v : uvalue) : Prop
       := forall τ, v <> UVALUE_Undef τ.
 
-    (* TODO: finish a less specialized version of this *)
+    
     Lemma read_array_not_pointer : forall mem a τ sz v dv,
         not_undef v ->
         read mem a (DTYPE_Array sz τ) = inr v ->
@@ -2295,7 +2295,7 @@ Section Memory_Stack_Theory.
       unfold dtyp_fits in FITS.
       destruct FITS as (sz & bytes & cid & LB & SIZE).
 
-      (* TODO: Make this part of the allocated / get_logical_block lemma *)
+      
       unfold get_logical_block, get_logical_block_mem in LB.
       destruct m as [[cm lm] f].
       cbn in LB.
@@ -3041,7 +3041,7 @@ Section PARAMS.
         + rewrite Z.gt_lt_iff in H2.
           rewrite <- Z.gtb_lt in H2.
           rewrite H2 in EQ3. inversion EQ3.
-          (* TODO: Write symmetric variants of Z.gtb_lt lemmas. *)
+          
     Qed.
 
     Lemma app_prefix_eq :
@@ -3161,7 +3161,7 @@ Section PARAMS.
     Qed.
 
 
-    (* TODO: move *)
+    
     Lemma Zlength_map:
       forall {A B} (f : A -> B) (l : list A),
         Zlength (map f l) = Zlength l.
@@ -3175,14 +3175,14 @@ Section PARAMS.
         reflexivity.
     Qed.
 
-    (* TODO: move *)
+    
     Lemma Zlength_app:
       forall {A} (l1 l2 : list A),
         Zlength (l1 ++ l2) = Zlength l1 + Zlength l2.
     Proof.
       intros A; induction l1; intros l2.
       - reflexivity.
-      - (* TODO: avoid this... *)
+      - 
         Opaque Zlength.
         cbn.
         rewrite 2 Zlength_cons.
@@ -3198,7 +3198,7 @@ Section PARAMS.
     Proof.
       induction sz; intros start.
       - reflexivity.
-      - (* TODO: avoid this... *)
+      - 
         Opaque Zlength.
         cbn.
         rewrite Zlength_cons.
@@ -3357,7 +3357,7 @@ Section PARAMS.
 
   End Structural_Lemmas.
 
-  (* TODO: move to appropriate place in this file *)
+  
   Lemma handle_gep_addr_array_same_block :
     forall ptr ptr_elem ix sz τ,
       handle_gep_addr (DTYPE_Array sz τ) ptr

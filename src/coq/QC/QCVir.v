@@ -15,7 +15,7 @@ From ITree Require Import
 Require Import ExtrOcamlBasic.
 Require Import ExtrOcamlString.
 
-(* TODO: Use the existing vir version of this? *)
+
 Inductive MlResult a e :=
 | MlOk : a -> MlResult a e
 | MlError : e -> MlResult a e.

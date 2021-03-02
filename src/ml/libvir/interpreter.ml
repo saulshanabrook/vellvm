@@ -17,7 +17,7 @@ open Handlers.LLVMEvents
 open Format
 open ITreeDefinition
 
-(* TODO: probably should be part of ADDRESS module interface*)
+
 let pp_addr : Format.formatter -> Memory.Addr.addr -> unit
   = fun ppf _ -> fprintf ppf "UVALUE_Addr(?)"
 
@@ -63,7 +63,7 @@ let rec step (m : ('a coq_L5, memory_stack * ((local_env * lstack) * (global_env
   (* Internal steps compute as nothing *)
   | TauF x -> step x
 
-  (* SAZ: Could inspect the memory or stack here too. *)
+  
   (* We finished the computation *)
   | RetF (_,(_,(_,v))) -> Ok v
 

@@ -1,4 +1,4 @@
-(* TODO: clean up imports *)
+
 From Coq Require Import List String Ascii ZArith.
 Import ListNotations.
 Open Scope string_scope.

@@ -11,7 +11,7 @@ let to_int = Camlcoq.Z.to_int
 let to_float = Camlcoq.camlfloat_of_coqfloat
 let to_float32 = Camlcoq.camlfloat_of_coqfloat32
 
-(* TODO: Use pp_option everywhere instead of inlined matching *)
+
 let pp_option ppf f o =
   match o with
   | None -> ()

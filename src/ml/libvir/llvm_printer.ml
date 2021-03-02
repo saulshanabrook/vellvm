@@ -6,7 +6,7 @@ open Format
 open LLVMAst
 open ParseUtil
 
-(* TODO: Use pp_option everywhere instead of inlined matching *)
+
 let pp_option ppf f o =
   match o with
   | None -> ()

@@ -15,7 +15,7 @@ type test =
   | SRCTGTTest of DynamicTypes.dtyp * (LLVMAst.typ * DV.uvalue) list
 
 (* UVALUE equality *)
-(* TODO: implement this in ASTLib and use extraction *)
+
 let rec eq_uvalue (l: DV.uvalue) (r: DV.uvalue) : bool =
   match l, r with
   | UVALUE_I1 l', UVALUE_I1 r' ->

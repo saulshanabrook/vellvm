@@ -70,8 +70,8 @@ Module Make(A:MemoryAddress.ADDRESS)(LLVMIO: LLVM_INTERACTIONS(A)).
            model: after Pick_handler:  {trigger UBE, ret (1/n) | n }  ==> 
                   after UBE_handler :  { all trees }    (including ret 1)
     *)
-    (* YZ: TODO: better UB error message *)
-    (* SAZ: For now, leaving the "C" parameter, but just ignoring it here *)
+    
+    
     
     
     Inductive Pick_handler {E} `{FE:FailureE -< E} `{FO:UBE -< E}: PickE ~> PropT E :=

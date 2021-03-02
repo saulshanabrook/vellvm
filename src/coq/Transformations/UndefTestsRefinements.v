@@ -285,7 +285,7 @@ Section block_replace.
     := f_endo.
 End block_replace.
 
-(* CB TODO: bad name *)
+
 Lemma blk_id_eq :
   forall T b bid,
     (if @blk_id T b ~=? bid then true else false) = true ->
@@ -315,7 +315,7 @@ Proof.
         eapply IHl; eauto.
 Qed.
 
-(* CB: TODO bad name *)
+
 Lemma blk_id_eq_if :
   forall T x y bid,
     blk_id x = blk_id y ->
@@ -328,7 +328,7 @@ Proof.
   destruct (blk_id y ~=? blk_id y); firstorder.
 Qed.
 
-(* CB: TODO bad name *)
+
 Lemma if_lift :
   forall A T (b0 b : block T) (x y : A),
     (if blk_id b0 ~=? blk_id b then x else y) = (if (if blk_id b0 ~=? blk_id b then true else false) then x else y).

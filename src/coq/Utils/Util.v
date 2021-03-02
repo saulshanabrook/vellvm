@@ -423,7 +423,7 @@ Set Implicit Arguments.
 
 
 (* Monads ------------------------------------------------------------------- *)
-(* TODO: Add to ExtLib *)
+
 
 Require Import ExtLib.Structures.Monads.
 Import MonadNotation.

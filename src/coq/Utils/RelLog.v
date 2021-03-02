@@ -84,7 +84,7 @@ Section State.
     apply (H2 _ _ PRE').
   Qed.
 
-  (* SAZ: Need a better name for this *)
+  
   Definition REL {A B} (Q : rel (σ1 * A) (σ2 * B)) (a:A) (b:B) : rel (σ1 * A) (σ2 * B) :=
     fun '(s1, a') '(s2, b') => a = a' /\ b = b' /\ Q (s1, a) (s2, b).
   

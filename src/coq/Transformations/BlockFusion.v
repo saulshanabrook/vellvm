@@ -164,7 +164,7 @@ Section BlockFusion.
     blk_phis       := b_s.(blk_phis);
     blk_code       := b_s.(blk_code) ++ b_t.(blk_code);
     blk_term       := b_t.(blk_term);
-    blk_comments   := None (* TODO: proper propagation of comments *)
+    blk_comments   := None 
     |}.
 
   Definition has_no_phi (b : block dtyp) : bool := match b.(blk_phis) with | [] => true | _ => false end.
@@ -183,7 +183,7 @@ Section BlockFusion.
     blk_phis       := map (fun '(x,φ) => (x,update_provenance_phi old new φ)) bk.(blk_phis);
     blk_code       := bk.(blk_code);
     blk_term       := bk.(blk_term);
-    blk_comments   := None (* TODO: proper propagation of comments *)
+    blk_comments   := None 
     |}.   
 
   Definition update_provenance_ocfg {T} (old new : block_id) (bks : ocfg T) : ocfg T :=

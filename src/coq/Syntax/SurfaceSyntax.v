@@ -287,8 +287,8 @@ Section SurfaceSyntaxTest.
    unfold mcfg_of_modul; cbn.
    unfold cfg_of_definition.
    cbn.
-   (* TODO: Can we display one instruction per line in code? *)
-   (* TODO: phi-nodes? *)
+   
+   
  Abort.
 
 

@@ -94,7 +94,7 @@ Definition refine_L3 : relation (itree L3 (memory_stack * (local_env * stack * (
   := eutt refine_res3.
 
 (* Refinement for after interpreting pick. *)
-(* SAZ: we still want the "bigger" set to be on the left so every thing in ts' should be found in ts, right? *)
+
 Definition refine_L4 : relation ((itree L4 (memory_stack * (local_env * stack * (global_env * uvalue)))) -> Prop)
   := fun ts ts' => forall t', ts' t' -> exists t, ts t /\ eutt refine_res3 t t'.
 

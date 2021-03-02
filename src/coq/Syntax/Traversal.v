@@ -730,8 +730,6 @@ Section Examples.
       If we print the definition of [swap_cfg] with implicits, we can see that the sub-term [Endo_cfg swap_cfg (...)].
       Since we have resolved the choice of instance at definition time, we can use this definition outside
       of this section without worrying about it anymore.
-  Set Printing Implicit.
-  Print swap_cfg.
      *)
 
     (* And we can do the same for a whole [mcfg] *)

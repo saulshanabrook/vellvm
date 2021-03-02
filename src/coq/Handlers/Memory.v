@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Copyright (c) 2018 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *
@@ -180,7 +180,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       := IM.map2 (fun mx my =>
                     match mx with | Some x => Some x | None => my end) m1 m2.
 
-    (* TODO : Move the three following functions *)
+    
     Fixpoint max_default (l:list Z) (x:Z) :=
       match l with
       | [] => x
@@ -372,7 +372,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       | DVALUE_Vector fields =>
         (* note the _right_ fold is necessary for byte ordering. *)
         fold_right (fun 'dv acc => ((serialize_dvalue dv) ++ acc) % list) [] fields
-      | _ => [] (* TODO add more dvalues as necessary *)
+      | _ => [] 
       end.
 
     (** ** Well defined block
@@ -399,13 +399,13 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       | DTYPE_Float        => 4
       | DTYPE_Double       => 8
       | DTYPE_Half         => 4
-      | DTYPE_X86_fp80     => 4 (* TODO: Unsupported, currently modeled by Float32 *)
-      | DTYPE_Fp128        => 4 (* TODO: Unsupported, currently modeled by Float32 *)
-      | DTYPE_Ppc_fp128    => 4 (* TODO: Unsupported, currently modeled by Float32 *)
+      | DTYPE_X86_fp80     => 4 
+      | DTYPE_Fp128        => 4 
+      | DTYPE_Ppc_fp128    => 4 
       | DTYPE_Metadata     => 0
-      | DTYPE_X86_mmx      => 0 (* TODO: Unsupported *)
-      | DTYPE_Opaque       => 0 (* TODO: Unsupported *)
-      | _                  => 0 (* TODO: add support for more types as necessary *)
+      | DTYPE_X86_mmx      => 0 
+      | DTYPE_Opaque       => 0 
+      | _                  => 0 
       end.
 
     (** ** Deserialization of a list of sbytes
@@ -468,7 +468,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
                 :: struct_parse tl (skipn size_ty bytes)
             end in
         UVALUE_Packed_struct (struct_parse fields bytes)
-      | _ => UVALUE_None (* TODO add more as serialization support increases *)
+      | _ => UVALUE_None 
       end.
 
     (* Returns undef if _any_ sbyte is undef.
@@ -558,7 +558,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Definition handle_gep_addr (t:dtyp) (a:addr) (vs:list dvalue) : err addr :=
       let '(b, o) := a in
       match vs with
-      | DVALUE_I32 i :: vs' => (* TODO: Handle non i32 / i64 indices *)
+      | DVALUE_I32 i :: vs' => 
         off <- handle_gep_h t (o + Z.of_N (sizeof_dtyp t) * (unsigned i)) vs' ;;
         ret (b, off)
       | DVALUE_I64 i :: vs' =>
@@ -642,7 +642,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
       map_monad (fun i => get_array_cell_mem_block bk bk_offset i size t) (seq from len).
 
 
-    (* TODO: Move this? *)
+    
     Fixpoint foldM {a b} {M} `{Monad M} (f : b -> a -> M b ) (acc : b) (l : list a) : M b
       := match l with
          | [] => ret acc
@@ -679,7 +679,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
     Definition concrete_next_key (m : concrete_memory) : Z :=
       let keys         := List.map fst (IM.elements m) in
       let max          := max_default keys 0 in
-      let offset       := 1 in (* TODO: This should be "random" *)
+      let offset       := 1 in 
       match lookup max m with
       | None => offset
       | Some (CBlock sz _) => max + (Z.of_N sz) + offset
@@ -720,7 +720,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         end.
 
     (* Check if the block for an address is allocated *)
-    (* TODO: should this check if everything is in range...? *)
+    
     Definition allocated (a : addr) (m : memory_stack) : Prop :=
       let '((_,lm),_) := m in member (fst a) lm.
 
@@ -764,7 +764,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
        *)
       Definition concretize_block_mem (b:Z) (m:memory) : Z * memory :=
         match get_logical_block_mem b m with
-        | None => (b, m) (* TODO: Not sure this makes sense??? *)
+        | None => (b, m) 
         | Some (LBlock sz bytes (Some cid)) => (cid, m)
         | Some (LBlock sz bytes None) =>
           (* Allocates a concrete block for this one *)
@@ -991,7 +991,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         ret (add_to_frame m key, (key,0))
       end.
 
-    (* TODO: very similar to overlaps *)
+    
     Definition dtyp_fits (m : memory_stack) (a : addr) (τ : dtyp) :=
       exists sz bytes cid,
         get_logical_block m (fst a) = Some (LBlock sz bytes cid) /\
@@ -1126,7 +1126,7 @@ Module Make(LLVMEvents: LLVM_INTERACTIONS(Addr)).
         | _            => raise "Non integer passed to ItoP"
         end
 
-      (* TODO take integer size into account *)
+      
       | PtoI t a =>
         match a, t with
         | DVALUE_Addr ptr, DTYPE_I sz =>

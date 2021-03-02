@@ -39,21 +39,21 @@ Definition mem_step {X} (e:IO X) (m:memory) : (IO X) + (list dvalue * X) :=
     inr (
         match a with
         | DVALUE_Addr (Ptr n) => replace m n v
-        | _ => m   (* TODO: should fail! *)
+        | _ => m   
         end,
         ())
 
-  | GEP t a vs => inl (GEP t a vs) (* TODO: GEP semantics *)
+  | GEP t a vs => inl (GEP t a vs) 
 
-  | ItoP t i => inl (ItoP t i) (* TODO: ItoP semantics *)
+  | ItoP t i => inl (ItoP t i) 
 
-  | PtoI t a => inl (PtoI t a) (* TODO: ItoP semantics *)                     
+  | PtoI t a => inl (PtoI t a)                      
                        
   | Call t f args  => inl (Call t f args)
 
                          
   | DeclareFun f =>
-    (* TODO: should check for re-declarations and maintain that state in the memory *)
+    
     inr (m,
          DVALUE_FunPtr f)
   end.

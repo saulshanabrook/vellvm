@@ -414,7 +414,7 @@ Section ExpPure.
 
   Import ITreeNotations.
 
-  (* TODO MOVE *)
+  
   Definition state_cfg : Type := memory_stack * (local_env * global_env).
 
   Definition state_cfg_T (T:Type): Type

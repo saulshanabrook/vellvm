@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Anonymized              *
  *                                                                            *
@@ -172,7 +172,7 @@ Section hiding_notation.
       => [Atom "packed{" ; to_sexp (List.map (fun x => [serialize_dtyp' x ; Atom ","]) fields) ; Atom "}"]
     | DTYPE_Opaque => Atom "opaque"
     | DTYPE_Vector sz t
-      => [Atom ("<" ++ to_string sz) ; Atom "x" ; serialize_dtyp' t ; Atom ">"]%string  (* TODO: right notation? *)
+      => [Atom ("<" ++ to_string sz) ; Atom "x" ; serialize_dtyp' t ; Atom ">"]%string  
     end.
 
   Global Instance serialize_dtyp : Serialize dtyp := serialize_dtyp'.

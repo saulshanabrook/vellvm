@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Anonymized              *
  *                                                                            *
@@ -17,10 +17,10 @@ Import ListNotations.
 Set Implicit Arguments.
 Set Contextual Implicit.
 
-(* TODO: THIS FILE IS NOW DEPRECATED *)
 
 
-(* TODO: Add other memory effects, such as synchronization operations *)
+
+
 (* Notes: 
    - To allow the memory model to correctly model stack alloca deallocation,
      we would also have to expose the "Ret" instruction. 

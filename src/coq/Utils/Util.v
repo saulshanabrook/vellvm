@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Copyright (c) 2017 Dmitri Garbuzov <dmitri@sease.upenn.edu>            *
  *     Anonymized              *
@@ -423,7 +423,7 @@ Set Implicit Arguments.
 
 
 (* Monads ------------------------------------------------------------------- *)
-(* TODO: Add to ExtLib *)
+
 
 Require Import ExtLib.Structures.Monads.
 Import MonadNotation.

@@ -34,7 +34,7 @@ Open Scope itree_scope.
 Import ITreeNotations.
 Import SemNotations.
 
-(* TODO: Move this *)
+
 Lemma interp_cfg3_concretize_or_pick_concrete :
   forall (uv : uvalue) (dv : dvalue) P g l m,
     is_concrete uv ->
@@ -51,7 +51,7 @@ Proof.
   reflexivity.
 Qed.
 
-(* TODO: Move this *)
+
 Lemma uvalue_to_dvalue_list :
   forall fields,
     (forall u : uvalue,
@@ -89,7 +89,7 @@ Proof.
     reflexivity.
 Qed.
 
-(* TODO: Move this *)
+
 Lemma is_concrete_uvalue_to_dvalue :
   forall uv,
     is_concrete uv ->
@@ -116,7 +116,7 @@ Proof.
     reflexivity.
 Qed.
 
-(* TODO: Move this *)
+
 Lemma interp_cfg3_concretize_or_pick_concrete_exists :
   forall (uv : uvalue) P g l m,
     is_concrete uv ->
@@ -129,7 +129,7 @@ Proof.
   apply interp_cfg3_concretize_or_pick_concrete; auto.
 Qed.
 
-(* TODO; Move this *)
+
 Lemma interp_cfg3_concretize_or_pick_not_concrete :
   forall (uv : uvalue) (dv : dvalue) P g l m,
     is_concrete uv = false ->

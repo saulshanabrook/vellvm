@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Copyright (c) 2018 Steve Zdancewic <stevez@cis.upenn.edu>              *
  *                                                                            *

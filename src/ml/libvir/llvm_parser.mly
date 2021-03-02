@@ -413,10 +413,10 @@ df_post_attr:
    * Shifting to [a1;a2] is the good solution and it is how menhir
    * will handle this conflict. *)
   | s=section                            { OPT_section s     }
-                                         (* TODO: comdat *)
+                                         
   | a=align                              { OPT_align a       }
   | KW_GC a=STRING                       { OPT_gc a          }
-                                         (* TODO: prefix *)
+                                         
 external_linkage:
   | KW_EXTERN_WEAK                  { LINKAGE_Extern_weak                  }
   | KW_EXTERNAL                     { LINKAGE_External                     }

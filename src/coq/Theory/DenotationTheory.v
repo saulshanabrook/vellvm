@@ -150,7 +150,7 @@ Proof.
 Qed.
 
 (** [denote_phi] *)
-(* TODO: make a choice about it and move *)
+
 Opaque assoc.
 Lemma denote_phi_hd : forall bid e id τ tl,
     ⟦ (id, Phi τ ((bid,e)::tl)) ⟧Φ bid ≈ uv <- ⟦ e at τ ⟧e;; Ret (id,uv).

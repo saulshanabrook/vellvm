@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Anonymized              *
  *                                                                            *
@@ -49,7 +49,7 @@ Set Contextual Implicit.
 Open Scope N_scope.
 (* end hide *)
 
-(* YZ TODO: better documentation of this file *)
+
 
 (** * Dynamic values
     Definition of the dynamic values manipulated by VIR.
@@ -104,7 +104,7 @@ Inductive IX_supported : N -> Prop :=
 | I64_Supported : IX_supported 64
 .
 
-(* TODO: This probably should live somewhere else... *)
+
 Program Instance Decidable_eq_N : forall (x y : N), Decidable (eq x y) := {
   Decidable_witness := N.eqb x y
 }.
@@ -274,7 +274,7 @@ Inductive uvalue : Set :=
 | UVALUE_FBinop           (fop:fbinop) (fm:list fast_math) (v1:uvalue) (v2:uvalue)
 | UVALUE_FCmp             (cmp:fcmp)   (v1:uvalue) (v2:uvalue)
 | UVALUE_Conversion       (conv:conversion_type) (v:uvalue) (t_to:dtyp)
-| UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue)) (* TODO: do we ever need this? GEP raises an event? *)
+| UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue)) 
 | UVALUE_ExtractElement   (vec: uvalue) (idx: uvalue)
 | UVALUE_InsertElement    (vec: uvalue) (elt:uvalue) (idx:uvalue)
 | UVALUE_ShuffleVector    (vec1:uvalue) (vec2:uvalue) (idxmask:uvalue)
@@ -409,7 +409,7 @@ Fixpoint uvalue_to_dvalue (uv : uvalue) : err dvalue :=
                     1: We only call [uvalue_to_dvalue] on concrete [uvalue]s
                     2: That concrete [uvalue] do not contain any operators, i.e. are already fully reduced
                   *)
-                 (* TODO: recursively convert dvalue to uvalue with evaluation*)
+                 
   (*
   | UVALUE_IBinop iop v1 v2                => ret (DVALUE_IBinop iop v1 v2)
   | UVALUE_ICmp cmp v1 v2                  => ret (DVALUE_ICmp cmp v1 v2)
@@ -541,14 +541,14 @@ Definition uvalue_to_dvalue_uop {A : Type}
      | inr a => a
      end.
 
-(* TODO: define [refines : uvalue -> dvalue -> Prop] which characterizes the nondeterminism of undef values *)
+
 
 Section hiding_notation.
   Local Open Scope sexp_scope.
 
   Fixpoint serialize_dvalue' (dv:dvalue): sexp :=
     match dv with
-    | DVALUE_Addr a => Atom "address" (* TODO: insist that memory models can print addresses? *)
+    | DVALUE_Addr a => Atom "address" 
     | DVALUE_I1 x => Atom "dvalue(i1)"
     | DVALUE_I8 x => Atom "dvalue(i8)"
     | DVALUE_I32 x => Atom "dvalue(i32)"
@@ -571,7 +571,7 @@ Section hiding_notation.
 
   Fixpoint serialize_uvalue' (pre post: string) (uv:uvalue): sexp :=
     match uv with
-    | UVALUE_Addr a => Atom (pre ++ "address" ++ post)%string (* TODO: insist that memory models can print addresses? *)
+    | UVALUE_Addr a => Atom (pre ++ "address" ++ post)%string 
     | UVALUE_I1 x => Atom (pre ++ "uvalue(i1)" ++ post)%string
     | UVALUE_I8 x => Atom (pre ++ "uvalue(i8)" ++ post)%string
     | UVALUE_I32 x => Atom (pre ++ "uvalue(i32)" ++ post)%string
@@ -594,7 +594,7 @@ Section hiding_notation.
     | UVALUE_FBinop fop _ v1 v2 => [serialize_uvalue' "(" "" v1; to_sexp fop; serialize_uvalue' "" ")" v2]
     | UVALUE_FCmp cmp v1 v2 => [serialize_uvalue' "(" "" v1; to_sexp cmp; serialize_uvalue' "" ")" v2]
     (* | UVALUE_Conversion       (conv:conversion_type) (v:uvalue) (t_to:dtyp) *)
-    (* | UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue)) (* TODO: do we ever need this? GEP raises an event? *) *)
+    (* | UVALUE_GetElementPtr    (t:dtyp) (ptrval:uvalue) (idxs:list (uvalue))  *)
     (* | UVALUE_ExtractElement   (vec: uvalue) (idx: uvalue) *)
     (* | UVALUE_InsertElement    (vec: uvalue) (elt:uvalue) (idx:uvalue) *)
     (* | UVALUE_ShuffleVector    (vec1:uvalue) (vec2:uvalue) (idxmask:uvalue) *)
@@ -883,7 +883,7 @@ End DecidableEquality.
 (* TODO: include Undefined values in this way? i.e. Undef is really a predicate on values
    Note: this isn't correct because it won't allow for undef fields of a struct or elts of an array
 Inductive dvalue' : Set :=
-| DVALUE_Undef (p:dvalue -> bool) (* TODO: used to include type information. is it necessary? (t:dtyp)  *)
+| DVALUE_Undef (p:dvalue -> bool) 
 | DVALUE_Val (d:dvalue).
 *)
 
@@ -1635,7 +1635,7 @@ Class VInt I : Type :=
         dvalue_has_dtyp (DVALUE_Packed_struct fields) (DTYPE_Packed_struct dts) ->
         dvalue_has_dtyp (DVALUE_Packed_struct (f :: fields)) (DTYPE_Packed_struct (dt :: dts))
 
-  (* CB TODO: Do we have to exclude mmx? "There are no arrays, vectors or constants of this type" *)
+  
   | DVALUE_Array_typ :
       forall xs sz dt,
         Forall (fun x => dvalue_has_dtyp x dt) xs ->
@@ -1683,7 +1683,7 @@ Class VInt I : Type :=
         uvalue_has_dtyp (UVALUE_Packed_struct fields) (DTYPE_Packed_struct dts) ->
         uvalue_has_dtyp (UVALUE_Packed_struct (f :: fields)) (DTYPE_Packed_struct (dt :: dts))
 
-  (* CB TODO: Do we have to exclude mmx? "There are no arrays, vectors or constants of this type" *)
+  
   | UVALUE_Array_typ :
       forall xs sz dt,
         Forall (fun x => uvalue_has_dtyp x dt) xs ->
@@ -1762,7 +1762,7 @@ Class VInt I : Type :=
         uvalue_has_dtyp value (DTYPE_Vector n (DTYPE_I from_sz)) ->
         uvalue_has_dtyp (UVALUE_Conversion Sext value (DTYPE_Vector n (DTYPE_I to_sz))) (DTYPE_Vector n (DTYPE_I to_sz))
 
-  (* TODO: fill in the rest of the conversions *)
+  
   | UVALUE_GetElementPtr_typ :
       forall dt uv idxs,
         uvalue_has_dtyp (UVALUE_GetElementPtr dt uv idxs) DTYPE_Pointer

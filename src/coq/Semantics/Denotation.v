@@ -1,5 +1,5 @@
 (* -------------------------------------------------------------------------- *
- *                     Vir - the Verified LLVM project                     *
+ *                     Vir                                                 *
  *                                                                            *
  *     Anonymized              *
  *                                                                            *
@@ -465,7 +465,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
           | Some t => ret (UVALUE_Undef t)
           end
 
-        (* YZ TODO : Unsure what this means. Expand on it *)
+        
         (* Question: should we do any typechecking for aggregate types here? *)
         (* Option 1: do no typechecking: *)
         | EXP_Struct es =>
@@ -558,7 +558,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
                              (fmap dvalue_to_uvalue (eval_conv conv dt1 v t2)))
             v
 
-        (* CB TODO: Do we actually need to pick here? GEP doesn't do any derefs. Does it make sense to leave it as a UVALUE? *)
+        
         (* CB TODO: This is probably not what we want in the long term!
 
            There are a couple of points here:
@@ -624,19 +624,19 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | OP_ExtractElement vecop idx =>
           (*  'vec <- monad_app_snd (denote_exp e) vecop;
               'vidx <- monad_app_snd (denote_exp e) idx;  *)
-          raise "extractelement not implemented" (* TODO: Extract Element *)
+          raise "extractelement not implemented" 
 
         | OP_InsertElement vecop eltop idx =>
           (*  'vec <- monad_app_snd (denote_exp e) vecop;
               'v <- monad_app_snd (denote_exp e) eltop;
               'vidx <- monad_app_snd (denote_exp e) idx; *)
-          raise "insertelement not implemented" (* TODO *)
+          raise "insertelement not implemented" 
 
         | OP_ShuffleVector vecop1 vecop2 idxmask =>
           (*  'vec1 <- monad_app_snd (denote_exp e) vecop1;
               'vec2 <- monad_app_snd (denote_exp e) vecop2;
               'vidx <- monad_app_snd (denote_exp e) idxmask; *)
-          raise "shufflevector not implemented" (* TODO *)
+          raise "shufflevector not implemented" 
 
         | OP_ExtractValue (dt, str) idxs =>
           str <- denote_exp (Some dt) str;;
@@ -892,7 +892,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
         | inr uv  => ret uv
         end.
 
-      (* TODO : Move this somewhere else *)
+      
       Fixpoint combine_lists_err {A B:Type} (l1:list A) (l2:list B) : err (list (A * B)) :=
         match l1, l2 with
         | [], [] => ret []
@@ -953,7 +953,7 @@ Module Denotation(A:MemoryAddress.ADDRESS)(LLVMEvents:LLVM_INTERACTIONS(A)).
               (fun T call =>
                  match call with
                  | Call dt fv args =>
-                   dfv <- concretize_or_pick fv True ;; (* TODO, should this be unique? *)
+                   dfv <- concretize_or_pick fv True ;; 
                    match (lookup_defn dfv fundefs) with
                    | Some f_den => (* If the call is internal *)
                      f_den args

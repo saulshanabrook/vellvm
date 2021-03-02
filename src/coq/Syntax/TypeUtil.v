@@ -779,7 +779,7 @@ Lemma normalize_type_equation : forall env t,
   | TYPE_Identified id =>
     let opt := find (fun a => Ident.eq_dec id (fst a)) env in
     match opt with
-    | None => TYPE_Identified id   (* TODO: should this be None? *)
+    | None => TYPE_Identified id   
     | Some (_, t) => normalize_type (remove_key Ident.eq_dec id env) t
     end
 
